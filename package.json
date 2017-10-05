@@ -1,0 +1,51 @@
+{
+  "name": "craft-ai-kit-energy",
+  "version": "0.0.1",
+  "description": "craft ai energy prediction kit",
+  "author": {
+    "name": "craft ai",
+    "email": "contact@craft.ai",
+    "url": "http://craft.ai/"
+  },
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/craft-ai/craft-ai-kit-energy/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/craft-ai/craft-ai-kit-energy.git"
+  },
+  "homepage": "https://github.com/craft-ai/craft-ai-kit-energy#readme",
+  "main": "src/index.js",
+  "scripts": {
+    "unit_test": "mocha",
+    "test": "npm run unit_test && npm run lint",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix ."
+  },
+  "engines": {
+    "node": ">=6.9 <9"
+  },
+  "dependencies": {
+    "@most/create": "2.0.1",
+    "craft-ai": "1.9.0",
+    "date-easter": "0.2.2",
+    "debug": "3.1.0",
+    "fast-csv": "2.4.1",
+    "fast-xml-parser": "2.7.4",
+    "lodash": "4.17.4",
+    "lru-cache": "4.1.1",
+    "moment-timezone": "0.5.13",
+    "most": "1.7.2",
+    "most-nth": "0.0.10",
+    "node-fetch": "1.7.3"
+  },
+  "devDependencies": {
+    "chai": "4.1.2",
+    "chai-as-promised": "7.1.1",
+    "dotenv": "4.0.0",
+    "eslint": "4.8.0",
+    "eslint-config-craft-ai": "2.3.0",
+    "mocha": "4.0.1"
+  }
+}
