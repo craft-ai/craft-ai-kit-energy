@@ -74,14 +74,16 @@ function retrieveAgent(craftaiClient, { id }) {
 
 function retrieveOrCreateAgent(craftaiClient, { id }) {
   return retrieveAgent(craftaiClient, { id })
-    .catch(() => craftaiClient
-      .createAgent(AGENT_CONFIGURATION, `energy-${_.kebabCase(id)}`)
-      .then((agent) => ({
-        id,
-        agentId: agent.id,
-        lastTimestamp: undefined
-      }))
-    );
+    .catch(() => {
+      debug(`Unable to retrieve the energy agent for '${id}', creating it...`);
+      return craftaiClient
+        .createAgent(AGENT_CONFIGURATION, `energy-${_.kebabCase(id)}`)
+        .then((agent) => ({
+          id,
+          agentId: agent.id,
+          lastTimestamp: undefined
+        }));
+    });
 }
 
 function keepTryingIfTimeout(operation, timeBetweenTriesMs, retriesLeft) {
@@ -121,7 +123,7 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
     },
     clients,
     terminate: () => {
-      // No thing to do for now
+      // Nothing to do for now
       return Promise.resolve();
     },
     getLastDataTimestamp: (user) => {
@@ -140,10 +142,10 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
     update: (user = {}, data = [], computeWeather = true) => {
       debug(`Enriching data for user ${user.id}`);
       // 1 - Let's retrieve the matching craft ai agent and the location
-      return Promise.all([
-        retrieveOrCreateAgent(clients.craftai, user),
-        clients.geolocation.locate(user.location)
-      ])
+      const agentPromise = retrieveOrCreateAgent(clients.craftai, user);
+      const locationPromise = clients.geolocation.locate(user.location);
+      // Not a Promise.all() here, because we want to wait for the stateful agent creation in every cases.
+      return agentPromise.then((user) => locationPromise.then((location) => [user, location]))
         .then(([{ agentId, id, lastTimestamp }, location]) => _.reduce(data, (enrichedDataPromise, dataPoint) => {
           if (_.isUndefined(dataPoint.timestamp)) {
             throw new Error(`Invalid data provided for user ${user.id}: missing property 'timestamp'`);
