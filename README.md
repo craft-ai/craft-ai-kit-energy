@@ -2,6 +2,8 @@
 
 > :construction: Under construction
 
+[![Version](https://img.shields.io/npm/v/craft-ai-kit-energy.svg?style=flat-square)](https://npmjs.org/package/craft-ai-kit-energy) [![Build](https://img.shields.io/travis/craft-ai/craft-ai-kit-energy/master.svg?style=flat-square)](https://travis-ci.org/craft-ai/craft-ai-kit-energy) [![License](https://img.shields.io/badge/license-BSD--3--Clause-42358A.svg?style=flat-square)](LICENSE) [![Dependencies](https://img.shields.io/david/craft-ai/craft-ai-kit-energy.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-kit-energy) [![Dev Dependencies](https://img.shields.io/david/dev/craft-ai/craft-ai-kit-energy.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-kit-energy#info=devDependencies)
+
 > :warning: this repository rely on [git LFS](https://git-lfs.github.com)
 
 ## Attribution ##
