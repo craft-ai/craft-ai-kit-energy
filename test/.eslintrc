@@ -5,6 +5,7 @@
   "globals": {
     "debug": true,
     "expect": true,
-    "weatherCache": true
+    "weatherCache": true,
+    "RUN_ID": true
   }
 }

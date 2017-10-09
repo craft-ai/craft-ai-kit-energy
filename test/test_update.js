@@ -1,14 +1,14 @@
 const createEnergyKit = require('../src');
 
 const TEST_USER = {
-  id: 'test_update_user',
+  id: `test_update_user_${RUN_ID}`,
   location: {
     postalCode: '75013'
   }
 };
 const TEST_USER_DATA = require('./data/test.data.json');
 
-const TEST_USER_EXPECTED_AGENT_ID = 'energy-test-update-user';
+const TEST_USER_EXPECTED_AGENT_ID = `energy-test-update-user-${RUN_ID}`;
 const TEST_USER_EXPECTED_LAT = '48.82827065';
 const TEST_USER_EXPECTED_LON = '2.362358986';
 
@@ -25,7 +25,7 @@ describe('update(user, data)', function() {
     return kit.clients.craftai.deleteAgent(TEST_USER_EXPECTED_AGENT_ID);
   });
   afterEach(function() {
-    kit.terminate();
+    return kit.terminate();
   });
   it('fails when no user is provided', function() {
     return expect(kit.update(undefined, TEST_USER_DATA)).to.be.rejected;
