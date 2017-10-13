@@ -1,12 +1,12 @@
 const _ = require('lodash');
-const { createClient, decide } = require('craft-ai');
+const { createClient, decide, Time } = require('craft-ai');
 const createGeolocationClient = require('./geolocation');
 const createHolidays = require('./holidays');
 const createWeatherClient = require('./weather');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
 
-const debug = require('debug')('craft-ai:kit-energy');
+const debug = require('debug')('craft-ai:kit-load');
 
 const TIME_QUANTUM = 30 * 60; // 30 minutes
 const SIGMA_FACTOR_THRESHOLD = 2;
@@ -43,7 +43,7 @@ const AGENT_CONFIGURATION = {
     pressure: {
       type: 'continuous'
     },
-    energy: {
+    load: {
       type: 'continuous'
     },
     holiday: {
@@ -51,7 +51,7 @@ const AGENT_CONFIGURATION = {
     }
   },
   output: [
-    'energy'
+    'load'
   ],
   operations_as_events: true,
   time_quantum: TIME_QUANTUM,
@@ -147,11 +147,11 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
       // Not a Promise.all() here, because we want to wait for the stateful agent creation in every cases.
       return agentPromise.then((user) => locationPromise.then((location) => [user, location]))
         .then(([{ agentId, id, lastTimestamp }, location]) => _.reduce(data, (enrichedDataPromise, dataPoint) => {
-          if (_.isUndefined(dataPoint.timestamp)) {
-            throw new Error(`Invalid data provided for user ${user.id}: missing property 'timestamp'`);
+          if (_.isUndefined(dataPoint.date)) {
+            throw new Error(`Invalid data provided for user ${user.id}: missing property 'date'`);
           }
-          if (_.isUndefined(dataPoint.energy)) {
-            throw new Error(`Invalid data provided for user ${user.id}: missing property 'energy'`);
+          if (_.isUndefined(dataPoint.load)) {
+            throw new Error(`Invalid data provided for user ${user.id}: missing property 'load'`);
           }
           if (!computeWeather) {
             if (_.isUndefined(dataPoint.tempMin)) {
@@ -166,18 +166,18 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
           }
           return enrichedDataPromise
             .then((enrichedData) => {
-              const timestamp = dataPoint.timestamp;
-              const timezone = computeTimezone(timestamp);
+              const time = Time(dataPoint.date);
+              const timezone = computeTimezone(time.timestamp);
               const weatherPromise = computeWeather ? clients.weather.computeDailyWeather({
                 lat: location.lat,
                 lon: location.lon,
-                timestamp: timestamp,
+                timestamp: time.timestamp,
                 timezone: timezone
               })
                 : Promise.resolve(undefined);
               return Promise.all([
                 weatherPromise,
-                clients.holidays.isHoliday(timestamp, location.postalCode)
+                clients.holidays.isHoliday(time.timestamp, location.postalCode)
               ])
                 .then(([weather, holiday]) => {
                   if (!_.isUndefined(weather)) {
@@ -202,10 +202,10 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
                   enrichedData.push(_.merge(
                     { context: enrichedContext },
                     {
-                      timestamp,
+                      timestamp: time.timestamp,
                       context: {
                         timezone,
-                        energy: dataPoint.energy
+                        load: dataPoint.load
                       }
                     }
                   ));
@@ -300,11 +300,11 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
                     return {
                       from: sample.timestamp,
                       to: sample.timestamp + minStep - 1,
-                      actualEnergy: sample.sample.energy,
-                      expectedEnergy: decision.output.energy.predicted_value,
-                      standard_deviation: decision.output.energy.standard_deviation,
-                      confidence: decision.output.energy.confidence,
-                      decision_rules: decision.output.energy.decision_rules
+                      actualLoad: sample.sample.load,
+                      expectedLoad: decision.output.load.predicted_value,
+                      standard_deviation: decision.output.load.standard_deviation,
+                      confidence: decision.output.load.confidence,
+                      decision_rules: decision.output.load.decision_rules
                     };
                   });
                 });
@@ -312,7 +312,7 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
             .then((potentialAnomalies) => {
               const detectedAnomalies = _.filter(potentialAnomalies, (a) =>
                 (a.confidence > CONFIDENCE_THRESHOLD) &&
-            (Math.abs(a.actualEnergy - a.expectedEnergy) > SIGMA_FACTOR_THRESHOLD * a.standard_deviation));
+            (Math.abs(a.actualLoad - a.expectedLoad) > SIGMA_FACTOR_THRESHOLD * a.standard_deviation));
               debug(`Identified ${detectedAnomalies.length} anomalies for user ${id}, or ${Math.round((detectedAnomalies.length / potentialAnomalies.length) * 100)}% of considered data`);
               return { anomalies: detectedAnomalies, anomalyRatio: (detectedAnomalies.length / potentialAnomalies.length) };
             });

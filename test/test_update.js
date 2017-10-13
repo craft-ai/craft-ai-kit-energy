@@ -1,4 +1,5 @@
 const createEnergyKit = require('../src');
+const { Time } = require('craft-ai');
 
 const TEST_USER = {
   id: `test_update_user_${RUN_ID}`,
@@ -7,11 +8,12 @@ const TEST_USER = {
   }
 };
 const TEST_USER_DATA = require('./data/test.data.json');
+const TEST_USER_DATA_TO = Time(TEST_USER_DATA[TEST_USER_DATA.length - 1].date);
+
 
 const TEST_USER_EXPECTED_AGENT_ID = `energy-test-update-user-${RUN_ID}`;
 const TEST_USER_EXPECTED_LAT = '48.82827065';
 const TEST_USER_EXPECTED_LON = '2.362358986';
-
 
 describe('update(user, data)', function() {
   let kit;
@@ -58,6 +60,7 @@ describe('update(user, data)', function() {
     return expect(kit.update(invalidPostalCodeUser)).to.be.rejected;
   });
   it('succeeds when data is provided', function() {
+    this.timeout(20000);
     return kit.update(TEST_USER, TEST_USER_DATA)
       .then((user) => {
         expect(user).to.be.deep.equal({
@@ -68,7 +71,7 @@ describe('update(user, data)', function() {
             lat: TEST_USER_EXPECTED_LAT,
             lon: TEST_USER_EXPECTED_LON
           },
-          lastTimestamp: TEST_USER_DATA[TEST_USER_DATA.length - 1].timestamp
+          lastTimestamp: TEST_USER_DATA_TO.timestamp
         });
 
         // Check that the agent actually exists.
