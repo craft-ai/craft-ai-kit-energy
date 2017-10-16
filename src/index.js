@@ -37,12 +37,6 @@ const AGENT_CONFIGURATION = {
     tempMax: {
       type: 'continuous'
     },
-    cloudCover: {
-      type: 'continuous'
-    },
-    pressure: {
-      type: 'continuous'
-    },
     load: {
       type: 'continuous'
     },
@@ -107,7 +101,7 @@ function keepTryingIfTimeout(operation, timeBetweenTriesMs, retriesLeft) {
 function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
   const clients = {
     craftai: createClient(token),
-    weather: createWeatherClient({
+    weather: darkSkySecretKey && createWeatherClient({
       cache: weatherCache,
       darkSkySecretKey: darkSkySecretKey
     }),
@@ -118,8 +112,8 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
   return {
     cfg: {
       token: clients.craftai.cfg.token,
-      weatherCache: clients.weather.cache,
-      darkSkySecretKey: clients.weather.darkSkySecretKey
+      weatherCache: clients.weather && clients.weather.cache,
+      darkSkySecretKey: clients.weather && clients.weather.darkSkySecretKey
     },
     clients,
     terminate: () => {
@@ -139,7 +133,7 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
           () => user
         );
     },
-    update: (user = {}, data = [], computeWeather = true) => {
+    update: (user = {}, data = []) => {
       debug(`Enriching data for user ${user.id}`);
       // 1 - Let's retrieve the matching craft ai agent and the location
       const agentPromise = retrieveOrCreateAgent(clients.craftai, user);
@@ -153,22 +147,11 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
           if (_.isUndefined(dataPoint.load)) {
             throw new Error(`Invalid data provided for user ${user.id}: missing property 'load'`);
           }
-          if (!computeWeather) {
-            if (_.isUndefined(dataPoint.tempMin)) {
-              throw new Error(`Invalid data provided for user ${user.id}: missing property 'tempMin' although the weather is not set to be computed`);
-            }
-            if (_.isUndefined(dataPoint.tempMax)) {
-              throw new Error(`Invalid data provided for user ${user.id}: missing property 'tempMax' although the weather is not set to be computed`);
-            }
-            if (_.isUndefined(dataPoint.tempMean)) {
-              throw new Error(`Invalid data provided for user ${user.id}: missing property 'tempMean' although the weather is not set to be computed`);
-            }
-          }
           return enrichedDataPromise
             .then((enrichedData) => {
               const time = Time(dataPoint.date);
               const timezone = computeTimezone(time.timestamp);
-              const weatherPromise = computeWeather ? clients.weather.computeDailyWeather({
+              const weatherPromise = clients.weather ? clients.weather.computeDailyWeather({
                 lat: location.lat,
                 lon: location.lon,
                 timestamp: time.timestamp,
@@ -184,17 +167,14 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
                     return {
                       holiday: holiday ? 'YES' : 'NO',
                       tempMin: weather.temperatureMin,
-                      tempMax: weather.temperatureMax,
-                      cloudCover: weather.cloudCover,
-                      pressure: weather.pressure
+                      tempMax: weather.temperatureMax
                     };
                   }
                   else {
                     return {
                       holiday: holiday ? 'YES' : 'NO',
                       tempMin: dataPoint.tempMin,
-                      tempMax: dataPoint.tempMax,
-                      tempMean: dataPoint.tempMean
+                      tempMax: dataPoint.tempMax
                     };
                   }
                 })

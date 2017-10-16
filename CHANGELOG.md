@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased (https://github.com/craft-ai/craft-ai-client-js/compare/v0.0.1...HEAD) ##
 
+### Added ###
+
+- Ability to provide data for the weather instead of retrieving it from DarkSky.
+
+  When no `DARK_SKY_SECRET_KEY` is provided, weather data are expected to be provided in the data points as `tempMin` and `tempMax`, respectively the minimal and maximum temperature of the day.
+
 ### Changed ###
 
 - Data points type is now:
@@ -16,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     load: /* electrical load in kW ,as a number */
   }
   ```
+
+
 
 ## 0.0.1 - 2017-10-09 ##
 
