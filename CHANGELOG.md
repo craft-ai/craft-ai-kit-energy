@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
   When no `DARK_SKY_SECRET_KEY` is provided, weather data are expected to be provided in the data points as `tempMin` and `tempMax`, respectively the minimal and maximum temperature of the day.
 
+- The kit now relies on [craft ai JavaScript client v1.11.1](https://www.npmjs.com/package/craft-ai
+  especially on `client.getAgentStateHistory`.
+
 ### Changed ###
 
 - Data points type is now:
@@ -22,8 +25,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     load: /* electrical load in kW ,as a number */
   }
   ```
-
-
 
 ## 0.0.1 - 2017-10-09 ##
 

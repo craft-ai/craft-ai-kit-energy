@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { createClient, decide, Time } = require('craft-ai');
+const { createClient, interpreter, Time } = require('craft-ai');
 const createGeolocationClient = require('./geolocation');
 const createHolidays = require('./holidays');
 const createWeatherClient = require('./weather');
@@ -206,88 +206,34 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
           })
         );
     },
-    computeAnomalies: ({ id }, cfg) => {
+    computeAnomalies: ({ id } = {}, { from, minStep = TIME_QUANTUM, to } = {}) => {
       debug(`Computing anomalies for user ${id}`);
-      const { from, minStep = TIME_QUANTUM, to } = cfg;
-      // 1 - Retrieve the agent
+      if (_.isUndefined(from) || _.isUndefined(to)) {
+        return Promise.reject(new Error('`cfg.from` and `cfg.to` are needed.'));
+      }
+
       return retrieveAgent(clients.craftai, { id })
-      // 1 - Let's retrieve the decision tree at 'from' and the operations between
         .then(({ agentId }) => {
           function treeGetOperation() { return clients.craftai.getAgentDecisionTree(agentId, from); }
           debug(`Getting consumption decision tree for user ${id}`);
-          return keepTryingIfTimeout(treeGetOperation, TIME_TO_RETRY_AFTER_TREE_TIMEOUT_MS, 2)
-            .then((tree) => {
-              const requestNextSamplePages = (samples, nextPageUrl) => {
-                if (!nextPageUrl) {
-                  return Promise.resolve(samples);
-                }
-                return fetch(nextPageUrl, {
-                  method: 'GET',
-                  headers: {
-                    'Authorization': `Bearer ${clients.craftai.cfg.token}`,
-                    'Content-Type': 'application/json; charset=utf-8',
-                    'Accept': 'application/json'
-                  }
-                })
-                  .catch((err) => {
-                    throw new Error(`Network error when calling ${nextPageUrl}: ${err.message}`);
-                  })
-                  .then((res) => {
-                    if (res.status >= 400) {
-                      return res.json()
-                        .catch((err) => {
-                          throw new Error(`Error ${res.status} when calling ${nextPageUrl}, invalid json returned: ${err}`);
-                        })
-                        .then((json) => {
-                          throw new Error(`Error ${res.status} when calling ${nextPageUrl}: ${json.message}`);
-                        });
-                    }
-                    else {
-                      return res.json();
-                    }
-                  })
-                  .then((body) => {
-                    const newSamples = samples.concat(body.samples);
-                    const nextStart = body.next;
-                    if (_.isUndefined(nextStart)) {
-                      return newSamples;
-                    }
-                    else {
-                      const nextPageUrl = `${clients.craftai.cfg.url}/api/private/${clients.craftai.cfg.owner}/${clients.craftai.cfg.project}/samples/agents/${agentId}?t=${to}&start=${nextStart}`;
-                      return requestNextSamplePages(newSamples, nextPageUrl);
-                    }
-                  });
-              };
-              const firstPageUrl = `${clients.craftai.cfg.url}/api/private/${clients.craftai.cfg.owner}/${clients.craftai.cfg.project}/samples/agents/${agentId}?t=${to}&start=${from}`;
-              return requestNextSamplePages([], firstPageUrl)
-                .then((samples) => {
-                  // Don't keep everything
-                  const { keptSamples } = _.reduce(samples, ({ keptSamples, previousKeptTimestamp }, operation) => {
-                    if (operation.timestamp >= previousKeptTimestamp + minStep) {
-                      keptSamples.push(operation);
-                      return { keptSamples, previousKeptTimestamp: operation.timestamp };
-                    }
-                    else {
-                      return { keptSamples, previousKeptTimestamp };
-                    }
-                  }, { keptSamples: [], previousKeptTimestamp: -minStep - 1 });
-                  return keptSamples;
-                })
-                .then((samples) => {
-                  debug(`Looking for anomalies for ${samples.length} steps between ${from} and ${to} for user ${id}`);
-                  return _.map(samples, (sample) => {
-                    const decision = decide(tree, sample.sample);
-                    return {
-                      from: sample.timestamp,
-                      to: sample.timestamp + minStep - 1,
-                      actualLoad: sample.sample.load,
-                      expectedLoad: decision.output.load.predicted_value,
-                      standard_deviation: decision.output.load.standard_deviation,
-                      confidence: decision.output.load.confidence,
-                      decision_rules: decision.output.load.decision_rules
-                    };
-                  });
-                });
+          return Promise.all([
+            keepTryingIfTimeout(treeGetOperation, TIME_TO_RETRY_AFTER_TREE_TIMEOUT_MS, 2),
+            clients.craftai.getAgentStateHistory(agentId, from, to)
+          ])
+            .then(([tree, samples]) => {
+              debug(`Looking for anomalies for ${samples.length} steps between ${from} and ${to} for user ${id}`);
+              return _.map(samples, (sample) => {
+                const decision = interpreter.decide(tree, sample.sample);
+                return {
+                  from: sample.timestamp,
+                  to: sample.timestamp + minStep - 1,
+                  actualLoad: sample.sample.load,
+                  expectedLoad: decision.output.load.predicted_value,
+                  standard_deviation: decision.output.load.standard_deviation,
+                  confidence: decision.output.load.confidence,
+                  decision_rules: decision.output.load.decision_rules
+                };
+              });
             })
             .then((potentialAnomalies) => {
               const detectedAnomalies = _.filter(potentialAnomalies, (a) =>
