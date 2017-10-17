@@ -7,10 +7,14 @@ describe('createEnergyKit(cfg)', function() {
       darkSkySecretKey: process.env.DARK_SKY_SECRET_KEY
     })).to.throw();
   });
-  it('fails when no DarkSky secret key token is provided', function() {
-    expect(() => createEnergyKit({
+  it('succeeds when no DarkSky secret key token is provided', function() {
+    const kit = createEnergyKit({
       token: process.env.CRAFT_TOKEN
-    })).to.throw();
+    });
+    expect(kit).to.be.ok;
+    expect(kit.cfg.token).to.be.equal(process.env.CRAFT_TOKEN);
+    expect(kit.cfg.weatherCache).to.be.undefined;
+    return kit.terminate();
   });
   it('succeeds when a valid configuration is provided', function() {
     const kit = createEnergyKit({

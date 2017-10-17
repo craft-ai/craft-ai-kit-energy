@@ -1,12 +1,12 @@
 const _ = require('lodash');
-const { createClient, decide } = require('craft-ai');
+const { createClient, decide, Time } = require('craft-ai');
 const createGeolocationClient = require('./geolocation');
 const createHolidays = require('./holidays');
 const createWeatherClient = require('./weather');
 const fetch = require('node-fetch');
 const moment = require('moment-timezone');
 
-const debug = require('debug')('craft-ai:kit-energy');
+const debug = require('debug')('craft-ai:kit-load');
 
 const TIME_QUANTUM = 30 * 60; // 30 minutes
 const SIGMA_FACTOR_THRESHOLD = 2;
@@ -37,13 +37,7 @@ const AGENT_CONFIGURATION = {
     tempMax: {
       type: 'continuous'
     },
-    cloudCover: {
-      type: 'continuous'
-    },
-    pressure: {
-      type: 'continuous'
-    },
-    energy: {
+    load: {
       type: 'continuous'
     },
     holiday: {
@@ -51,7 +45,7 @@ const AGENT_CONFIGURATION = {
     }
   },
   output: [
-    'energy'
+    'load'
   ],
   operations_as_events: true,
   time_quantum: TIME_QUANTUM,
@@ -107,7 +101,7 @@ function keepTryingIfTimeout(operation, timeBetweenTriesMs, retriesLeft) {
 function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
   const clients = {
     craftai: createClient(token),
-    weather: createWeatherClient({
+    weather: darkSkySecretKey && createWeatherClient({
       cache: weatherCache,
       darkSkySecretKey: darkSkySecretKey
     }),
@@ -118,8 +112,8 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
   return {
     cfg: {
       token: clients.craftai.cfg.token,
-      weatherCache: clients.weather.cache,
-      darkSkySecretKey: clients.weather.darkSkySecretKey
+      weatherCache: clients.weather && clients.weather.cache,
+      darkSkySecretKey: clients.weather && clients.weather.darkSkySecretKey
     },
     clients,
     terminate: () => {
@@ -139,7 +133,7 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
           () => user
         );
     },
-    update: (user = {}, data = [], computeWeather = true) => {
+    update: (user = {}, data = []) => {
       debug(`Enriching data for user ${user.id}`);
       // 1 - Let's retrieve the matching craft ai agent and the location
       const agentPromise = retrieveOrCreateAgent(clients.craftai, user);
@@ -147,54 +141,40 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
       // Not a Promise.all() here, because we want to wait for the stateful agent creation in every cases.
       return agentPromise.then((user) => locationPromise.then((location) => [user, location]))
         .then(([{ agentId, id, lastTimestamp }, location]) => _.reduce(data, (enrichedDataPromise, dataPoint) => {
-          if (_.isUndefined(dataPoint.timestamp)) {
-            throw new Error(`Invalid data provided for user ${user.id}: missing property 'timestamp'`);
+          if (_.isUndefined(dataPoint.date)) {
+            throw new Error(`Invalid data provided for user ${user.id}: missing property 'date'`);
           }
-          if (_.isUndefined(dataPoint.energy)) {
-            throw new Error(`Invalid data provided for user ${user.id}: missing property 'energy'`);
-          }
-          if (!computeWeather) {
-            if (_.isUndefined(dataPoint.tempMin)) {
-              throw new Error(`Invalid data provided for user ${user.id}: missing property 'tempMin' although the weather is not set to be computed`);
-            }
-            if (_.isUndefined(dataPoint.tempMax)) {
-              throw new Error(`Invalid data provided for user ${user.id}: missing property 'tempMax' although the weather is not set to be computed`);
-            }
-            if (_.isUndefined(dataPoint.tempMean)) {
-              throw new Error(`Invalid data provided for user ${user.id}: missing property 'tempMean' although the weather is not set to be computed`);
-            }
+          if (_.isUndefined(dataPoint.load)) {
+            throw new Error(`Invalid data provided for user ${user.id}: missing property 'load'`);
           }
           return enrichedDataPromise
             .then((enrichedData) => {
-              const timestamp = dataPoint.timestamp;
-              const timezone = computeTimezone(timestamp);
-              const weatherPromise = computeWeather ? clients.weather.computeDailyWeather({
+              const time = Time(dataPoint.date);
+              const timezone = computeTimezone(time.timestamp);
+              const weatherPromise = clients.weather ? clients.weather.computeDailyWeather({
                 lat: location.lat,
                 lon: location.lon,
-                timestamp: timestamp,
+                timestamp: time.timestamp,
                 timezone: timezone
               })
                 : Promise.resolve(undefined);
               return Promise.all([
                 weatherPromise,
-                clients.holidays.isHoliday(timestamp, location.postalCode)
+                clients.holidays.isHoliday(time.timestamp, location.postalCode)
               ])
                 .then(([weather, holiday]) => {
                   if (!_.isUndefined(weather)) {
                     return {
                       holiday: holiday ? 'YES' : 'NO',
                       tempMin: weather.temperatureMin,
-                      tempMax: weather.temperatureMax,
-                      cloudCover: weather.cloudCover,
-                      pressure: weather.pressure
+                      tempMax: weather.temperatureMax
                     };
                   }
                   else {
                     return {
                       holiday: holiday ? 'YES' : 'NO',
                       tempMin: dataPoint.tempMin,
-                      tempMax: dataPoint.tempMax,
-                      tempMean: dataPoint.tempMean
+                      tempMax: dataPoint.tempMax
                     };
                   }
                 })
@@ -202,10 +182,10 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
                   enrichedData.push(_.merge(
                     { context: enrichedContext },
                     {
-                      timestamp,
+                      timestamp: time.timestamp,
                       context: {
                         timezone,
-                        energy: dataPoint.energy
+                        load: dataPoint.load
                       }
                     }
                   ));
@@ -300,11 +280,11 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
                     return {
                       from: sample.timestamp,
                       to: sample.timestamp + minStep - 1,
-                      actualEnergy: sample.sample.energy,
-                      expectedEnergy: decision.output.energy.predicted_value,
-                      standard_deviation: decision.output.energy.standard_deviation,
-                      confidence: decision.output.energy.confidence,
-                      decision_rules: decision.output.energy.decision_rules
+                      actualLoad: sample.sample.load,
+                      expectedLoad: decision.output.load.predicted_value,
+                      standard_deviation: decision.output.load.standard_deviation,
+                      confidence: decision.output.load.confidence,
+                      decision_rules: decision.output.load.decision_rules
                     };
                   });
                 });
@@ -312,7 +292,7 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
             .then((potentialAnomalies) => {
               const detectedAnomalies = _.filter(potentialAnomalies, (a) =>
                 (a.confidence > CONFIDENCE_THRESHOLD) &&
-            (Math.abs(a.actualEnergy - a.expectedEnergy) > SIGMA_FACTOR_THRESHOLD * a.standard_deviation));
+            (Math.abs(a.actualLoad - a.expectedLoad) > SIGMA_FACTOR_THRESHOLD * a.standard_deviation));
               debug(`Identified ${detectedAnomalies.length} anomalies for user ${id}, or ${Math.round((detectedAnomalies.length / potentialAnomalies.length) * 100)}% of considered data`);
               return { anomalies: detectedAnomalies, anomalyRatio: (detectedAnomalies.length / potentialAnomalies.length) };
             });
