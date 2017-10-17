@@ -3,7 +3,6 @@ const { createClient, interpreter, Time } = require('craft-ai');
 const createGeolocationClient = require('./geolocation');
 const createHolidays = require('./holidays');
 const createWeatherClient = require('./weather');
-const fetch = require('node-fetch');
 const moment = require('moment-timezone');
 
 const debug = require('debug')('craft-ai:kit-load');
