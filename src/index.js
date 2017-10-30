@@ -10,7 +10,6 @@ const debug = require('debug')('craft-ai:kit-load');
 const TIME_QUANTUM = 30 * 60; // 30 minutes
 const SIGMA_FACTOR_THRESHOLD = 2;
 const CONFIDENCE_THRESHOLD = 0.4;
-const TIME_TO_RETRY_AFTER_TREE_TIMEOUT_MS = 10000;
 
 function computeTimezone(timestamp){
   return moment.tz(timestamp, 'Europe/Paris').format('Z');
@@ -76,24 +75,6 @@ function retrieveOrCreateAgent(craftaiClient, { id }) {
           agentId: agent.id,
           lastTimestamp: undefined
         }));
-    });
-}
-
-function keepTryingIfTimeout(operation, timeBetweenTriesMs, retriesLeft) {
-  if (retriesLeft <= 1) {
-    return operation();
-  }
-  return operation()
-    .catch((error) => {
-      if (error.status == 504 || error.status == 202) {
-      // Try again in a bit
-        debug(`Operation timed out, trying again in ${timeBetweenTriesMs}ms`);
-        return new Promise((resolve) => setTimeout(resolve, timeBetweenTriesMs))
-          .then(() => keepTryingIfTimeout(operation, TIME_TO_RETRY_AFTER_TREE_TIMEOUT_MS, retriesLeft - 1));
-      }
-      else {
-        return Promise.reject(error);
-      }
     });
 }
 
@@ -211,36 +192,34 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
         return Promise.reject(new Error('`cfg.from` and `cfg.to` are needed.'));
       }
 
+      debug(`Getting consumption decision tree for user ${id}`);
+
       return retrieveAgent(clients.craftai, { id })
-        .then(({ agentId }) => {
-          function treeGetOperation() { return clients.craftai.getAgentDecisionTree(agentId, from); }
-          debug(`Getting consumption decision tree for user ${id}`);
-          return Promise.all([
-            keepTryingIfTimeout(treeGetOperation, TIME_TO_RETRY_AFTER_TREE_TIMEOUT_MS, 2),
-            clients.craftai.getAgentStateHistory(agentId, from, to)
-          ])
-            .then(([tree, samples]) => {
-              debug(`Looking for anomalies for ${samples.length} steps between ${from} and ${to} for user ${id}`);
-              return _.map(samples, (sample) => {
-                const decision = interpreter.decide(tree, sample.sample);
-                return {
-                  from: sample.timestamp,
-                  to: sample.timestamp + minStep - 1,
-                  actualLoad: sample.sample.load,
-                  expectedLoad: decision.output.load.predicted_value,
-                  standard_deviation: decision.output.load.standard_deviation,
-                  confidence: decision.output.load.confidence,
-                  decision_rules: decision.output.load.decision_rules
-                };
-              });
-            })
-            .then((potentialAnomalies) => {
-              const detectedAnomalies = _.filter(potentialAnomalies, (a) =>
-                (a.confidence > CONFIDENCE_THRESHOLD) &&
-            (Math.abs(a.actualLoad - a.expectedLoad) > SIGMA_FACTOR_THRESHOLD * a.standard_deviation));
-              debug(`Identified ${detectedAnomalies.length} anomalies for user ${id}, or ${Math.round((detectedAnomalies.length / potentialAnomalies.length) * 100)}% of considered data`);
-              return { anomalies: detectedAnomalies, anomalyRatio: (detectedAnomalies.length / potentialAnomalies.length) };
-            });
+        .then(({ agentId }) => Promise.all([
+          clients.craftai.getAgentDecisionTree(agentId, from),
+          clients.craftai.getAgentStateHistory(agentId, from, to)
+        ]))
+        .then(([tree, samples]) => {
+          debug(`Looking for anomalies for ${samples.length} steps between ${from} and ${to} for user ${id}`);
+          return _.map(samples, (sample) => {
+            const decision = interpreter.decide(tree, sample.sample);
+            return {
+              from: sample.timestamp,
+              to: sample.timestamp + minStep - 1,
+              actualLoad: sample.sample.load,
+              expectedLoad: decision.output.load.predicted_value,
+              standard_deviation: decision.output.load.standard_deviation,
+              confidence: decision.output.load.confidence,
+              decision_rules: decision.output.load.decision_rules
+            };
+          });
+        })
+        .then((potentialAnomalies) => {
+          const detectedAnomalies = _.filter(potentialAnomalies, (a) =>
+            (a.confidence > CONFIDENCE_THRESHOLD) &&
+        (Math.abs(a.actualLoad - a.expectedLoad) > SIGMA_FACTOR_THRESHOLD * a.standard_deviation));
+          debug(`Identified ${detectedAnomalies.length} anomalies for user ${id}, or ${Math.round((detectedAnomalies.length / potentialAnomalies.length) * 100)}% of considered data`);
+          return { anomalies: detectedAnomalies, anomalyRatio: (detectedAnomalies.length / potentialAnomalies.length) };
         });
     }
   };
