@@ -37,6 +37,7 @@
     "lru-cache": "4.1.1",
     "moment-timezone": "0.5.13",
     "most": "1.7.2",
+    "most-buffer": "0.0.10",
     "most-nth": "0.0.10",
     "node-fetch": "1.7.3"
   },

@@ -1,5 +1,6 @@
-const createEnergyKit = require('../src');
 const { Time } = require('craft-ai');
+const createEnergyKit = require('../src');
+const most = require('most');
 
 const TEST_USER = {
   id: `test_update_user_${RUN_ID}`,
@@ -94,9 +95,9 @@ describe('update(user, data) /NO WEATHER ACCESS/', function() {
   afterEach(function() {
     return kit.terminate();
   });
-  it('succeeds when data is provided', function() {
+  it('succeeds when data is provided as a stream', function() {
     this.timeout(20000);
-    return kit.update(TEST_USER, TEST_DATA_WITH_WEATHER)
+    return kit.update(TEST_USER, most.from(TEST_DATA_WITH_WEATHER))
       .then((user) => {
         expect(user).to.be.deep.equal({
           id: TEST_USER.id,
