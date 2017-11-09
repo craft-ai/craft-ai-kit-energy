@@ -81,6 +81,50 @@ function retrieveOrCreateAgent(craftaiClient, { id }) {
     });
 }
 
+function operationFromDatapoint(user) {
+  return (dataPoint) => {
+    if (_.isUndefined(dataPoint.date)) {
+      throw new Error(`Invalid data provided for user ${user.id}: missing property 'date'`);
+    }
+    if (_.isUndefined(dataPoint.load)) {
+      throw new Error(`Invalid data provided for user ${user.id}: missing property 'load'`);
+    }
+
+    const time = Time(dataPoint.date);
+    const timezone = computeTimezone(time.timestamp);
+    return {
+      timestamp: time.timestamp,
+      context: Object.assign({}, _.omit(dataPoint, 'date'), { timezone })
+    };
+  };
+}
+
+function enrichWithWeather(client, user) {
+  return (operation) => most.fromPromise(
+    client.computeDailyWeather({
+      lat: user.location.lat,
+      lon: user.location.lon,
+      timestamp: operation.timestamp,
+      timezone: operation.context.timezone
+    })
+      .then((weather) => Object.assign({}, operation, {
+        context: Object.assign({}, operation.context, {
+          tempMin: weather.temperatureMin,
+          tempMax: weather.temperatureMax
+        })
+      })));
+}
+
+function enrichWithHolidays(client, user) {
+  return (operation) => most.fromPromise(
+    client.isHoliday(operation.timestamp, user.location.postalCode)
+      .then((holiday) => Object.assign({}, operation, {
+        context: Object.assign({}, operation.context, {
+          holiday: holiday ? 'YES' : 'NO'
+        })
+      })));
+}
+
 function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
   const clients = {
     craftai: createClient(token),
@@ -124,49 +168,14 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
       // Not a Promise.all() here, because we want to wait for the stateful agent creation in every cases.
       return agentPromise.then((user) => locationPromise.then((location) => [user, location]))
         .then(([{ agentId, id, lastTimestamp }, location]) => {
+          user = Object.assign(user, {
+            location: Object.assign(user.location, location)
+          });
           return most
             .from(data)
-            // Checks + time enrichment.
-            .map((dataPoint) => {
-              if (_.isUndefined(dataPoint.date)) {
-                throw new Error(`Invalid data provided for user ${user.id}: missing property 'date'`);
-              }
-              if (_.isUndefined(dataPoint.load)) {
-                throw new Error(`Invalid data provided for user ${user.id}: missing property 'load'`);
-              }
-              const time = Time(dataPoint.date);
-              const timezone = computeTimezone(time.timestamp);
-              return {
-                timestamp: time.timestamp,
-                context: Object.assign({}, _.omit(dataPoint, 'date'), { timezone })
-              };
-            })
-            // Weather enrichment
-            .concatMap(clients.weather
-              ? (operation) => most.fromPromise(
-                clients.weather.computeDailyWeather({
-                  lat: location.lat,
-                  lon: location.lon,
-                  timestamp: operation.timestamp,
-                  timezone: operation.context.timezone
-                })
-                  .then((weather) => Object.assign({}, operation, {
-                    context: Object.assign({}, operation.context, {
-                      tempMin: weather.temperatureMin,
-                      tempMax: weather.temperatureMax
-                    })
-                  })))
-              : (operation) => most.of(operation))
-            // Holiday enrichment
-            .concatMap((operation) => most.fromPromise(
-              clients.holidays.isHoliday(operation.timestamp, location.postalCode)
-                .then((holiday) => Object.assign({}, operation, {
-                  context: Object.assign({}, operation.context, {
-                    holiday: holiday ? 'YES' : 'NO'
-                  })
-                })))
-            )
-            // Pushing the data to craft ai
+            .map(operationFromDatapoint(user))
+            .concatMap(clients.weather ? enrichWithWeather(clients.weather, user) : most.of)
+            .concatMap(enrichWithHolidays(clients.holidays, user))
             .thru(buffer(clients.craftai.cfg.operationsChunksSize))
             .concatMap((operationsChunk) => {
               debug(`Posting enriched data to agent for user ${user.id}`);
@@ -177,8 +186,7 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
                   location,
                   lastTimestamp: operationsChunk.length ? _.last(operationsChunk).timestamp : lastTimestamp
                 })));
-            }
-            )
+            })
             // The last computed user data structure is the right one
             .thru(last);
         });
