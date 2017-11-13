@@ -9,7 +9,7 @@ const createWeatherClient = require('./weather');
 const moment = require('moment-timezone');
 const most = require('most');
 
-const debug = require('debug')('craft-ai:kit-load');
+const debug = require('debug')('craft-ai:kit-energy');
 
 const TIME_QUANTUM = 30 * 60; // 30 minutes
 
@@ -20,13 +20,16 @@ function computeTimezone(timestamp){
 const AGENT_CONFIGURATION = {
   context: {
     time: {
-      type: 'time_of_day'
+      type: 'time_of_day',
+      is_generated: true
     },
     day: {
-      type: 'day_of_week'
+      type: 'day_of_week',
+      is_generated: true
     },
     month: {
-      type: 'month_of_year'
+      type: 'month_of_year',
+      is_generated: true
     },
     timezone: {
       type: 'timezone'
@@ -53,6 +56,11 @@ const AGENT_CONFIGURATION = {
   tree_max_operations: 50000,
   tree_max_depth: 6
 };
+
+const NON_GENERATED_PROPERTIES = _(AGENT_CONFIGURATION.context)
+  .keys()
+  .filter((property) => !AGENT_CONFIGURATION.context[property].is_generated)
+  .value();
 
 function retrieveAgent(craftaiClient, { id }) {
   if (!id) {
@@ -105,6 +113,12 @@ function isNewOperation(lastTimestamp) {
   else {
     return ({ timestamp }) => timestamp > lastTimestamp;
   }
+}
+
+function skipPartialOperations() {
+  return (stream) => stream.skipWhile(
+    (operation) => _.difference(NON_GENERATED_PROPERTIES, _.keys(operation.context)).length > 0
+  );
 }
 
 function enrichWithWeather(client, user) {
@@ -189,6 +203,7 @@ function createKit(cfg = {}) {
             .filter(isNewOperation(lastTimestamp))
             .concatMap(clients.weather ? enrichWithWeather(clients.weather, user) : most.of)
             .concatMap(enrichWithHolidays(clients.holidays, user))
+            .thru(lastTimestamp ? (stream) => stream : skipPartialOperations())
             .thru(buffer(clients.craftai.cfg.operationsChunksSize))
             .concatMap((operationsChunk) => {
               debug(`Posting enriched data to agent for user ${user.id}`);
