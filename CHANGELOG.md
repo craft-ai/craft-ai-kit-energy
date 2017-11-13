@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed ###
 
 - `kit.update` now uses streams internally and supports any `Iterable` or `Observable` for its data argument.
+- `kit.update` now automatically skips the data points that are anterior to data previously sent.
 
 ### Added ###
 

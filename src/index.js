@@ -98,6 +98,15 @@ function operationFromDatapoint(user) {
   };
 }
 
+function isNewOperation(lastTimestamp) {
+  if (!lastTimestamp) {
+    return () => true;
+  }
+  else {
+    return ({ timestamp }) => timestamp > lastTimestamp;
+  }
+}
+
 function enrichWithWeather(client, user) {
   return (operation) => most.fromPromise(
     client.computeDailyWeather({
@@ -177,6 +186,7 @@ function createKit(cfg = {}) {
           return most
             .from(data)
             .map(operationFromDatapoint(user))
+            .filter(isNewOperation(lastTimestamp))
             .concatMap(clients.weather ? enrichWithWeather(clients.weather, user) : most.of)
             .concatMap(enrichWithHolidays(clients.holidays, user))
             .thru(buffer(clients.craftai.cfg.operationsChunksSize))
