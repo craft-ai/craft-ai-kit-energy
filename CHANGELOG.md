@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `kit.update` now uses streams internally and supports any `Iterable` or `Observable` for its data argument.
 
+### Added ###
+
+- Introducing `sigmaFactorThreshold` and `confidenceThreshold` to the kit
+configuration. `sigmaFactorThreshold` is the difference threshold, in amount of
+standard deviations, for a data point to be considered an anomaly, its default
+value is `2`. `confidenceThreshold` is the confidence threshold over which a
+prediction is considered to be accurate, its default value is `O.4`.
+
 ## [0.0.3](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.2...v0.0.3) - 2017-11-06 ##
 
 ### Changed ###

@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { createClient, interpreter, Time } = require('craft-ai');
+const { checkConfiguration, DEFAULT_CONFIGURATION } = require('./configuration');
 const { last } = require('most-nth');
 const buffer = require('most-buffer');
 const createGeolocationClient = require('./geolocation');
@@ -11,8 +12,6 @@ const most = require('most');
 const debug = require('debug')('craft-ai:kit-load');
 
 const TIME_QUANTUM = 30 * 60; // 30 minutes
-const SIGMA_FACTOR_THRESHOLD = 2;
-const CONFIDENCE_THRESHOLD = 0.4;
 
 function computeTimezone(timestamp){
   return moment.tz(timestamp, 'Europe/Paris').format('Z');
@@ -125,7 +124,12 @@ function enrichWithHolidays(client, user) {
       })));
 }
 
-function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
+function createKit(cfg = {}) {
+  cfg = Object.assign({}, DEFAULT_CONFIGURATION, cfg);
+
+  checkConfiguration(cfg);
+
+  const { darkSkySecretKey, token, weatherCache } = cfg;
   const clients = {
     craftai: createClient(token),
     weather: darkSkySecretKey && createWeatherClient({
@@ -136,12 +140,11 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
     holidays: createHolidays()
   };
 
+  cfg.weatherCache = clients.weather && clients.weather.cache;
+  cfg.darkSkySecretKey = clients.weather && clients.weather.darkSkySecretKey;
+
   return {
-    cfg: {
-      token: clients.craftai.cfg.token,
-      weatherCache: clients.weather && clients.weather.cache,
-      darkSkySecretKey: clients.weather && clients.weather.darkSkySecretKey
-    },
+    cfg: cfg,
     clients,
     terminate: () => {
       // Nothing to do for now
@@ -221,8 +224,8 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
         })
         .then((potentialAnomalies) => {
           const detectedAnomalies = _.filter(potentialAnomalies, (a) =>
-            (a.confidence > CONFIDENCE_THRESHOLD) &&
-        (Math.abs(a.actualLoad - a.expectedLoad) > SIGMA_FACTOR_THRESHOLD * a.standard_deviation));
+            (a.confidence > cfg.confidenceThreshold) &&
+        (Math.abs(a.actualLoad - a.expectedLoad) > cfg.sigmaFactorThreshold * a.standard_deviation));
           debug(`Identified ${detectedAnomalies.length} anomalies for user ${id}, or ${Math.round((detectedAnomalies.length / potentialAnomalies.length) * 100)}% of considered data`);
           return { anomalies: detectedAnomalies, anomalyRatio: (detectedAnomalies.length / potentialAnomalies.length) };
         });
