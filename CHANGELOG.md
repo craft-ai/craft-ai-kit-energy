@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.3...HEAD) ##
 
+### Changed ###
+
+- `kit.update` now uses streams internally and supports any `Iterable` or `Observable` for its data argument.
+
 ## [0.0.3](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.2...v0.0.3) - 2017-11-06 ##
 
 ### Changed ###
