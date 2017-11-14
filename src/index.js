@@ -116,9 +116,26 @@ function isNewOperation(lastTimestamp) {
 }
 
 function skipPartialOperations() {
-  return (stream) => stream.skipWhile(
-    (operation) => _.difference(NON_GENERATED_PROPERTIES, _.keys(operation.context)).length > 0
-  );
+  return (stream) => {
+    let counter = 0;
+    return stream
+      .skipWhile(
+        (operation) => {
+          if (_.difference(NON_GENERATED_PROPERTIES, _.keys(operation.context)).length > 0) {
+            ++counter;
+            return true;
+          }
+          return false;
+        }
+      )
+      .continueWith(() => {
+      // End of the stream reached
+        if (counter > 0) {
+          debug(`${counter} initial data points were skipped because a complete state wasn't reached`);
+        }
+        return most.empty();
+      });
+  };
 }
 
 function enrichWithWeather(client, user) {
@@ -191,6 +208,7 @@ function createKit(cfg = {}) {
       // 1 - Let's retrieve the matching craft ai agent and the location
       const agentPromise = retrieveOrCreateAgent(clients.craftai, user);
       const locationPromise = clients.geolocation.locate(user.location);
+      let count = 0;
       // Not a Promise.all() here, because we want to wait for the stateful agent creation in every cases.
       return agentPromise.then((user) => locationPromise.then((location) => [user, location]))
         .then(([{ agentId, id, lastTimestamp }, location]) => {
@@ -204,9 +222,9 @@ function createKit(cfg = {}) {
             .concatMap(clients.weather ? enrichWithWeather(clients.weather, user) : most.of)
             .concatMap(enrichWithHolidays(clients.holidays, user))
             .thru(lastTimestamp ? (stream) => stream : skipPartialOperations())
+            .tap(() => count++)
             .thru(buffer(clients.craftai.cfg.operationsChunksSize))
             .concatMap((operationsChunk) => {
-              debug(`Posting enriched data to agent for user ${user.id}`);
               return most.fromPromise(clients.craftai.addAgentContextOperations(agentId, operationsChunk)
                 .then(() => ({
                   id,
@@ -217,6 +235,10 @@ function createKit(cfg = {}) {
             })
             // The last computed user data structure is the right one
             .thru(last);
+        })
+        .then((user) => {
+          debug(`${count} data points successfully posted for user '${user.id}'.`);
+          return user;
         });
     },
     computeAnomalies: ({ id } = {}, { from, minStep = TIME_QUANTUM, to } = {}) => {
