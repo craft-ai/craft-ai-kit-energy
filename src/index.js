@@ -1,7 +1,6 @@
 const _ = require('lodash');
 const { createClient, interpreter, Time } = require('craft-ai');
 const { checkConfiguration, DEFAULT_CONFIGURATION } = require('./configuration');
-const { last } = require('most-nth');
 const buffer = require('most-buffer');
 const createGeolocationClient = require('./geolocation');
 const createHolidays = require('./holidays');
@@ -70,6 +69,7 @@ function retrieveAgent(craftaiClient, { id }) {
     .then((agent) => ({
       id,
       agentId: agent.id,
+      firstTimestamp: agent.firstTimestamp,
       lastTimestamp: agent.lastTimestamp
     }));
 }
@@ -83,6 +83,7 @@ function retrieveOrCreateAgent(craftaiClient, { id }) {
         .then((agent) => ({
           id,
           agentId: agent.id,
+          firstTimestamp: undefined,
           lastTimestamp: undefined
         }));
     });
@@ -211,7 +212,7 @@ function createKit(cfg = {}) {
       let count = 0;
       // Not a Promise.all() here, because we want to wait for the stateful agent creation in every cases.
       return agentPromise.then((user) => locationPromise.then((location) => [user, location]))
-        .then(([{ agentId, id, lastTimestamp }, location]) => {
+        .then(([{ agentId, id, firstTimestamp, lastTimestamp }, location]) => {
           user = Object.assign(user, {
             location: Object.assign(user.location, location)
           });
@@ -224,17 +225,28 @@ function createKit(cfg = {}) {
             .thru(lastTimestamp ? (stream) => stream : skipPartialOperations())
             .tap(() => count++)
             .thru(buffer(clients.craftai.cfg.operationsChunksSize))
+            .filter((operationsChunk) => operationsChunk.length > 0)
             .concatMap((operationsChunk) => {
               return most.fromPromise(clients.craftai.addAgentContextOperations(agentId, operationsChunk)
                 .then(() => ({
-                  id,
-                  agentId,
-                  location,
-                  lastTimestamp: operationsChunk.length ? _.last(operationsChunk).timestamp : lastTimestamp
+                  firstTimestamp: _.first(operationsChunk).timestamp,
+                  lastTimestamp: _.last(operationsChunk).timestamp
                 })));
             })
             // The last computed user data structure is the right one
-            .thru(last);
+            .reduce(
+              (user, { firstTimestamp, lastTimestamp }) => Object.assign(user, ({
+                firstTimestamp: user.firstTimestamp ? Math.min(user.firstTimestamp, firstTimestamp) : firstTimestamp,
+                lastTimestamp: lastTimestamp,
+              })),
+              {
+                id,
+                agentId,
+                location,
+                firstTimestamp,
+                lastTimestamp
+              }
+            );
         })
         .then((user) => {
           debug(`${count} data points successfully posted for user '${user.id}'.`);
