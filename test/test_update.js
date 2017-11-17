@@ -9,10 +9,8 @@ const TEST_USER = {
   }
 };
 const TEST_DATA = require('./data/test.data.json');
-const TEST_DATA_TO = Time(TEST_DATA[TEST_DATA.length - 1].date);
 
 const TEST_DATA_WITH_WEATHER = require('./data/test_weather.data.json');
-const TEST_DATA_WITH_WEATHER_TO = Time(TEST_DATA_WITH_WEATHER[TEST_DATA_WITH_WEATHER.length - 1].date);
 
 const TEST_USER_EXPECTED_AGENT_ID = `energy-test-update-user-${RUN_ID}`;
 const TEST_USER_EXPECTED_LAT = '48.82827065';
@@ -46,6 +44,7 @@ describe('update(user, data)', function() {
             lat: TEST_USER_EXPECTED_LAT,
             lon: TEST_USER_EXPECTED_LON
           },
+          firstTimestamp: undefined,
           lastTimestamp: undefined
         });
 
@@ -74,7 +73,8 @@ describe('update(user, data)', function() {
             lat: TEST_USER_EXPECTED_LAT,
             lon: TEST_USER_EXPECTED_LON
           },
-          lastTimestamp: TEST_DATA_TO.timestamp
+          firstTimestamp: Time(TEST_DATA[0].date).timestamp,
+          lastTimestamp: Time(TEST_DATA[TEST_DATA.length - 1].date).timestamp
         });
 
         // Check that the agent actually exists.
@@ -107,7 +107,49 @@ describe('update(user, data) /NO WEATHER ACCESS/', function() {
             lat: TEST_USER_EXPECTED_LAT,
             lon: TEST_USER_EXPECTED_LON
           },
-          lastTimestamp: TEST_DATA_WITH_WEATHER_TO.timestamp
+          firstTimestamp: Time(TEST_DATA_WITH_WEATHER[0].date).timestamp,
+          lastTimestamp: Time(TEST_DATA_WITH_WEATHER[TEST_DATA_WITH_WEATHER.length - 1].date).timestamp
+        });
+
+        // Check that the agent actually exists.
+        return expect(kit.clients.craftai.getAgent(user.agentId)).to.be.fulfilled;
+      });
+  });
+  it('succeeds when data some is provided twice', function() {
+    this.timeout(20000);
+    return kit.update(TEST_USER, most.from(TEST_DATA_WITH_WEATHER).take(30))
+      .then(() => kit.update(TEST_USER, most.from(TEST_DATA_WITH_WEATHER).skip(20)))
+      .then((user) => {
+        expect(user).to.be.deep.equal({
+          id: TEST_USER.id,
+          agentId: TEST_USER_EXPECTED_AGENT_ID,
+          location: {
+            postalCode: TEST_USER.location.postalCode,
+            lat: TEST_USER_EXPECTED_LAT,
+            lon: TEST_USER_EXPECTED_LON
+          },
+          firstTimestamp: Time(TEST_DATA_WITH_WEATHER[0].date).timestamp,
+          lastTimestamp: Time(TEST_DATA_WITH_WEATHER[TEST_DATA_WITH_WEATHER.length - 1].date).timestamp
+        });
+
+        // Check that the agent actually exists.
+        return expect(kit.clients.craftai.getAgent(user.agentId)).to.be.fulfilled;
+      });
+  });
+  it('succeeds when initial data are not complete', function() {
+    this.timeout(20000);
+    return kit.update(TEST_USER, most.from(TEST_DATA_WITH_WEATHER).skip(1))
+      .then((user) => {
+        expect(user).to.be.deep.equal({
+          id: TEST_USER.id,
+          agentId: TEST_USER_EXPECTED_AGENT_ID,
+          location: {
+            postalCode: TEST_USER.location.postalCode,
+            lat: TEST_USER_EXPECTED_LAT,
+            lon: TEST_USER_EXPECTED_LON
+          },
+          firstTimestamp: Time('2017-07-30T22:00:00.000Z').timestamp,
+          lastTimestamp: Time(TEST_DATA_WITH_WEATHER[TEST_DATA_WITH_WEATHER.length - 1].date).timestamp
         });
 
         // Check that the agent actually exists.

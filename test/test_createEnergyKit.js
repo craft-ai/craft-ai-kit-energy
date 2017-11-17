@@ -7,6 +7,30 @@ describe('createEnergyKit(cfg)', function() {
       darkSkySecretKey: process.env.DARK_SKY_SECRET_KEY
     })).to.throw();
   });
+  it('fails when a bad sigma factor threshold is provided', function() {
+    expect(() => createEnergyKit({
+      token: process.env.CRAFT_TOKEN,
+      darkSkySecretKey: process.env.DARK_SKY_SECRET_KEY,
+      sigmaFactorThreshold: 'blop'
+    })).to.throw();
+    expect(() => createEnergyKit({
+      token: process.env.CRAFT_TOKEN,
+      darkSkySecretKey: process.env.DARK_SKY_SECRET_KEY,
+      sigmaFactorThreshold: -2
+    })).to.throw();
+  });
+  it('fails when a bad confidence threshold is provided', function() {
+    expect(() => createEnergyKit({
+      token: process.env.CRAFT_TOKEN,
+      darkSkySecretKey: process.env.DARK_SKY_SECRET_KEY,
+      confidenceThreshold: 'foobar'
+    })).to.throw();
+    expect(() => createEnergyKit({
+      token: process.env.CRAFT_TOKEN,
+      darkSkySecretKey: process.env.DARK_SKY_SECRET_KEY,
+      confidenceThreshold: 1
+    })).to.throw();
+  });
   it('succeeds when no DarkSky secret key token is provided', function() {
     const kit = createEnergyKit({
       token: process.env.CRAFT_TOKEN
@@ -25,6 +49,24 @@ describe('createEnergyKit(cfg)', function() {
     expect(kit).to.be.ok;
     expect(kit.cfg.token).to.be.equal(process.env.CRAFT_TOKEN);
     expect(kit.cfg.weatherCache).to.be.equal(weatherCache);
+    expect(kit.cfg.sigmaFactorThreshold).to.be.equal(2);
+    expect(kit.cfg.confidenceThreshold).to.be.equal(0.4);
+    return kit.terminate();
+  });
+
+  it('succeeds when provided with valid non-default values', function() {
+    const kit = createEnergyKit({
+      token: process.env.CRAFT_TOKEN,
+      darkSkySecretKey: process.env.DARK_SKY_SECRET_KEY,
+      weatherCache: weatherCache,
+      sigmaFactorThreshold: 1.3,
+      confidenceThreshold: 0.4
+    });
+    expect(kit).to.be.ok;
+    expect(kit.cfg.token).to.be.equal(process.env.CRAFT_TOKEN);
+    expect(kit.cfg.weatherCache).to.be.equal(weatherCache);
+    expect(kit.cfg.sigmaFactorThreshold).to.be.equal(1.3);
+    expect(kit.cfg.confidenceThreshold).to.be.equal(0.4);
     return kit.terminate();
   });
 });

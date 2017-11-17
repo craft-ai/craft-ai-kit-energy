@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const { createClient, interpreter, Time } = require('craft-ai');
-const { last } = require('most-nth');
+const { checkConfiguration, DEFAULT_CONFIGURATION } = require('./configuration');
 const buffer = require('most-buffer');
 const createGeolocationClient = require('./geolocation');
 const createHolidays = require('./holidays');
@@ -8,11 +8,9 @@ const createWeatherClient = require('./weather');
 const moment = require('moment-timezone');
 const most = require('most');
 
-const debug = require('debug')('craft-ai:kit-load');
+const debug = require('debug')('craft-ai:kit-energy');
 
 const TIME_QUANTUM = 30 * 60; // 30 minutes
-const SIGMA_FACTOR_THRESHOLD = 2;
-const CONFIDENCE_THRESHOLD = 0.4;
 
 function computeTimezone(timestamp){
   return moment.tz(timestamp, 'Europe/Paris').format('Z');
@@ -21,13 +19,16 @@ function computeTimezone(timestamp){
 const AGENT_CONFIGURATION = {
   context: {
     time: {
-      type: 'time_of_day'
+      type: 'time_of_day',
+      is_generated: true
     },
     day: {
-      type: 'day_of_week'
+      type: 'day_of_week',
+      is_generated: true
     },
     month: {
-      type: 'month_of_year'
+      type: 'month_of_year',
+      is_generated: true
     },
     timezone: {
       type: 'timezone'
@@ -55,6 +56,11 @@ const AGENT_CONFIGURATION = {
   tree_max_depth: 6
 };
 
+const NON_GENERATED_PROPERTIES = _(AGENT_CONFIGURATION.context)
+  .keys()
+  .filter((property) => !AGENT_CONFIGURATION.context[property].is_generated)
+  .value();
+
 function retrieveAgent(craftaiClient, { id }) {
   if (!id) {
     return Promise.reject(new Error('No given user id.'));
@@ -63,6 +69,7 @@ function retrieveAgent(craftaiClient, { id }) {
     .then((agent) => ({
       id,
       agentId: agent.id,
+      firstTimestamp: agent.firstTimestamp,
       lastTimestamp: agent.lastTimestamp
     }));
 }
@@ -76,6 +83,7 @@ function retrieveOrCreateAgent(craftaiClient, { id }) {
         .then((agent) => ({
           id,
           agentId: agent.id,
+          firstTimestamp: undefined,
           lastTimestamp: undefined
         }));
     });
@@ -96,6 +104,38 @@ function operationFromDatapoint(user) {
       timestamp: time.timestamp,
       context: Object.assign({}, _.omit(dataPoint, 'date'), { timezone })
     };
+  };
+}
+
+function isNewOperation(lastTimestamp) {
+  if (!lastTimestamp) {
+    return () => true;
+  }
+  else {
+    return ({ timestamp }) => timestamp > lastTimestamp;
+  }
+}
+
+function skipPartialOperations() {
+  return (stream) => {
+    let counter = 0;
+    return stream
+      .skipWhile(
+        (operation) => {
+          if (_.difference(NON_GENERATED_PROPERTIES, _.keys(operation.context)).length > 0) {
+            ++counter;
+            return true;
+          }
+          return false;
+        }
+      )
+      .continueWith(() => {
+      // End of the stream reached
+        if (counter > 0) {
+          debug(`${counter} initial data points were skipped because a complete state wasn't reached`);
+        }
+        return most.empty();
+      });
   };
 }
 
@@ -125,7 +165,12 @@ function enrichWithHolidays(client, user) {
       })));
 }
 
-function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
+function createKit(cfg = {}) {
+  cfg = Object.assign({}, DEFAULT_CONFIGURATION, cfg);
+
+  checkConfiguration(cfg);
+
+  const { darkSkySecretKey, token, weatherCache } = cfg;
   const clients = {
     craftai: createClient(token),
     weather: darkSkySecretKey && createWeatherClient({
@@ -136,12 +181,11 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
     holidays: createHolidays()
   };
 
+  cfg.weatherCache = clients.weather && clients.weather.cache;
+  cfg.darkSkySecretKey = clients.weather && clients.weather.darkSkySecretKey;
+
   return {
-    cfg: {
-      token: clients.craftai.cfg.token,
-      weatherCache: clients.weather && clients.weather.cache,
-      darkSkySecretKey: clients.weather && clients.weather.darkSkySecretKey
-    },
+    cfg: cfg,
     clients,
     terminate: () => {
       // Nothing to do for now
@@ -165,30 +209,48 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
       // 1 - Let's retrieve the matching craft ai agent and the location
       const agentPromise = retrieveOrCreateAgent(clients.craftai, user);
       const locationPromise = clients.geolocation.locate(user.location);
+      let count = 0;
       // Not a Promise.all() here, because we want to wait for the stateful agent creation in every cases.
       return agentPromise.then((user) => locationPromise.then((location) => [user, location]))
-        .then(([{ agentId, id, lastTimestamp }, location]) => {
+        .then(([{ agentId, id, firstTimestamp, lastTimestamp }, location]) => {
           user = Object.assign(user, {
             location: Object.assign(user.location, location)
           });
           return most
             .from(data)
             .map(operationFromDatapoint(user))
+            .filter(isNewOperation(lastTimestamp))
             .concatMap(clients.weather ? enrichWithWeather(clients.weather, user) : most.of)
             .concatMap(enrichWithHolidays(clients.holidays, user))
+            .thru(lastTimestamp ? (stream) => stream : skipPartialOperations())
+            .tap(() => count++)
             .thru(buffer(clients.craftai.cfg.operationsChunksSize))
+            .filter((operationsChunk) => operationsChunk.length > 0)
             .concatMap((operationsChunk) => {
-              debug(`Posting enriched data to agent for user ${user.id}`);
               return most.fromPromise(clients.craftai.addAgentContextOperations(agentId, operationsChunk)
                 .then(() => ({
-                  id,
-                  agentId,
-                  location,
-                  lastTimestamp: operationsChunk.length ? _.last(operationsChunk).timestamp : lastTimestamp
+                  firstTimestamp: _.first(operationsChunk).timestamp,
+                  lastTimestamp: _.last(operationsChunk).timestamp
                 })));
             })
             // The last computed user data structure is the right one
-            .thru(last);
+            .reduce(
+              (user, { firstTimestamp, lastTimestamp }) => Object.assign(user, ({
+                firstTimestamp: user.firstTimestamp ? Math.min(user.firstTimestamp, firstTimestamp) : firstTimestamp,
+                lastTimestamp: lastTimestamp,
+              })),
+              {
+                id,
+                agentId,
+                location,
+                firstTimestamp,
+                lastTimestamp
+              }
+            );
+        })
+        .then((user) => {
+          debug(`${count} data points successfully posted for user '${user.id}'.`);
+          return user;
         });
     },
     computeAnomalies: ({ id } = {}, { from, minStep = TIME_QUANTUM, to } = {}) => {
@@ -221,8 +283,8 @@ function createKit({ darkSkySecretKey, token, weatherCache } = {}) {
         })
         .then((potentialAnomalies) => {
           const detectedAnomalies = _.filter(potentialAnomalies, (a) =>
-            (a.confidence > CONFIDENCE_THRESHOLD) &&
-        (Math.abs(a.actualLoad - a.expectedLoad) > SIGMA_FACTOR_THRESHOLD * a.standard_deviation));
+            (a.confidence > cfg.confidenceThreshold) &&
+        (Math.abs(a.actualLoad - a.expectedLoad) > cfg.sigmaFactorThreshold * a.standard_deviation));
           debug(`Identified ${detectedAnomalies.length} anomalies for user ${id}, or ${Math.round((detectedAnomalies.length / potentialAnomalies.length) * 100)}% of considered data`);
           return { anomalies: detectedAnomalies, anomalyRatio: (detectedAnomalies.length / potentialAnomalies.length) };
         });

@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed ###
 
 - `kit.update` now uses streams internally and supports any `Iterable` or `Observable` for its data argument.
+- `kit.update` now automatically skips the data points that are anterior to data previously sent.
+- `kit.update` now automatically skips initial incomplete data points, i.e. it only start sending data to craft ai once a first complete state is reached.
+- `user` data structures (returned by `kit.update`) now also includes the data `firstTimestamp` in addition of the `lastTimestamp`.
+
+### Added ###
+
+- Introducing `sigmaFactorThreshold` and `confidenceThreshold` to the kit
+configuration. `sigmaFactorThreshold` is the difference threshold, in amount of
+standard deviations, for a data point to be considered an anomaly, its default
+value is `2`. `confidenceThreshold` is the confidence threshold over which a
+prediction is considered to be accurate, its default value is `O.4`.
 
 ## [0.0.3](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.2...v0.0.3) - 2017-11-06 ##
 
