@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed ###
 
 - _Tarn-et-Garonne_ holidays are now properly retrieved; the retrieval now works on every french departement.
+- Postal Code starting with a 0 (e.g. Menton's `06500`) are now properly handled.
 
 ## [0.0.4](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.3...v0.0.4) - 2017-11-17 ##
 
