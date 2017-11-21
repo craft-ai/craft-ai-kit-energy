@@ -14,12 +14,21 @@ describe('holidays.isHoliday(timestamp, location)', function() {
     const t = moment.tz('2014-01-01 12:00', 'Europe/Paris');
     return expect(holidays.isHoliday(t.unix(), { postalCode: '35000' })).to.be.eventually.true;
   });
-  it('knows that 2017-02-23 is a holiday in Cherbourg and Lyon but not in Versailles', function() {
+  it('knows that 2017-02-23 is a holiday in Cherbourg and Lyon but not in Versailles, Toulouse', function() {
     const t = moment.tz('2017-02-23 12:00', 'Europe/Paris');
     return Promise.all([
       expect(holidays.isHoliday(t.unix(), { postalCode: '69000' })).to.be.eventually.true,
       expect(holidays.isHoliday(t.unix(), { postalCode: '50100' })).to.be.eventually.true,
       expect(holidays.isHoliday(t.unix(), { postalCode: '78000' })).to.be.eventually.false,
+      expect(holidays.isHoliday(t.unix(), { postalCode: '31000' })).to.be.eventually.false,
+      expect(holidays.isHoliday(t.unix(), { postalCode: '82000' })).to.be.eventually.rejected
+    ]);
+  });
+  it.skip('knows that 2017-02-15 is a holiday in Toulouse and Montauban', function() {
+    const t = moment.tz('2017-02-15 12:00', 'Europe/Paris');
+    return Promise.all([
+      expect(holidays.isHoliday(t.unix(), { postalCode: '31000' })).to.be.eventually.true,
+      expect(holidays.isHoliday(t.unix(), { postalCode: '82000' })).to.be.eventually.true
     ]);
   });
   it('knows that 2018-08-20 is a holiday in Perpignan and Point-à-Pitre but not in Saint-Denis (La Réunion)', function() {

@@ -9,6 +9,7 @@ const moment = require('moment-timezone');
 const most = require('most');
 
 const debug = require('debug')('craft-ai:kit-energy');
+const debugOnce = _.memoize(debug);
 
 const TIME_QUANTUM = 30 * 60; // 30 minutes
 
@@ -156,13 +157,22 @@ function enrichWithWeather(client, user) {
 }
 
 function enrichWithHolidays(client, user) {
+  const postalCode = user.location.postalCode;
   return (operation) => most.fromPromise(
-    client.isHoliday(operation.timestamp, { postalCode: user.location.postalCode })
+    client.isHoliday(operation.timestamp, { postalCode })
       .then((holiday) => Object.assign({}, operation, {
         context: Object.assign({}, operation.context, {
           holiday: holiday ? 'YES' : 'NO'
         })
-      })));
+      }))
+      .catch(() => {
+        debugOnce(`Unable to retrieve holidays for client at postal code '${postalCode}'.`);
+        return Object.assign({}, operation, {
+          context: Object.assign({}, operation.context, {
+            holiday: 'UNKNOWN'
+          })
+        });
+      }));
 }
 
 function createKit(cfg = {}) {
