@@ -7,6 +7,8 @@ const xml = require('fast-xml-parser');
 
 const DATE_FORMAT = 'YYYY/MM/DD';
 
+const ADDITIONAL_DEPARTMENT_T_ZONE = require('../data/french_holiday_zone_additional_mapping.json');
+
 const computeFrenchPublicHolidays = _.memoize((year) => {
   debug(`Retrieving French public holidays for ${year}...`);
   // Postal code is ignored, we don't take into account local specificities yet.
@@ -72,16 +74,37 @@ function fetchFrenchSchoolHolidays() {
 
 function createHolidays() {
   const frenchSchoolHolidaysPromise = fetchFrenchSchoolHolidays();
+
+  const retrieveZone = _.memoize((postalCode) => {
+    // First potential department
+    const d1 = postalCode.slice(0, 2);
+    // Second potential department
+    const d2 = postalCode.slice(0, 3);
+
+    let zone = ADDITIONAL_DEPARTMENT_T_ZONE[d1] || ADDITIONAL_DEPARTMENT_T_ZONE[d2];
+    if (zone) {
+      return Promise.resolve(zone);
+    }
+    else {
+      return frenchSchoolHolidaysPromise
+        .then(([departmentToZone, _]) => {
+          const zone = departmentToZone[d1] || departmentToZone[d2];
+
+          if (!zone) {
+            return Promise.reject(Error(`Cannot find school holiday zone for postal code ${postalCode}`));
+          }
+
+          return zone;
+        });
+    }
+  });
+
   const retrieveHolidays = _.memoize((year, postalCode) => {
-    return frenchSchoolHolidaysPromise
-      .then(([departmentToZone, zoneToCalendar]) => {
-      // Checks for 2 digits department number first and if not found checks 3 digits ones
-        const zone = departmentToZone[postalCode.slice(0, 2)] || departmentToZone[postalCode.slice(0, 3)];
-
-        if (!zone) {
-          return Promise.reject(Error(`Cannot find school holiday zone for postal code ${postalCode}`));
-        }
-
+    return Promise.all([
+      retrieveZone(postalCode),
+      frenchSchoolHolidaysPromise.then(([_, zoneToCalendar]) => zoneToCalendar)
+    ])
+      .then(([zone, zoneToCalendar]) => {
         const schoolHolidays = _.filter(zoneToCalendar[zone], ([from, to]) => from.year() === year || to.year() === year);
         const publicHolidays = _.map(computeFrenchPublicHolidays(year, postalCode), (day) => ([day.startOf('day'), day.endOf('day')]));
         const holidays = schoolHolidays.concat(publicHolidays);
@@ -90,7 +113,7 @@ function createHolidays() {
   },
   (year, postalCode) => `${year}-${postalCode}`);
   return {
-    isHoliday: (timestamp, postalCode) => {
+    isHoliday: (timestamp, { postalCode }) => {
       const year = moment.unix(timestamp).tz('Europe/Paris').year();
       return retrieveHolidays(year, postalCode)
         .then((holidays) =>
