@@ -13,8 +13,8 @@ const TEST_DATA = require('./data/test.data.json');
 const TEST_DATA_WITH_WEATHER = require('./data/test_weather.data.json');
 
 const TEST_USER_EXPECTED_AGENT_ID = `energy-test-update-user-${RUN_ID}`;
-const TEST_USER_EXPECTED_LAT = '48.82827065';
-const TEST_USER_EXPECTED_LON = '2.362358986';
+const TEST_USER_EXPECTED_LAT = 48.82827065;
+const TEST_USER_EXPECTED_LON = 2.362358986;
 
 describe('update(user, data)', function() {
   let kit;

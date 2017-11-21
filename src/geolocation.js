@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const csv = require('fast-csv');
 const fs = require('fs');
 const path = require('path');
@@ -17,12 +18,17 @@ function readCsvStream(dataset) {
   });
 }
 
+function toPostalCode(postalCode) {
+  return _.padStart(_.toString(postalCode), 5, '0');
+}
+
 function createGeolocationClient(cache) {
   cache = cache || createDefaultGeolocationCache();
 
   return {
     cache,
     locate: ({ postalCode } = {}) => {
+      postalCode = toPostalCode(postalCode);
       if (!postalCode) {
         return Promise.reject(new Error('Unable to perform the geolocation when no postalCode is provided.'));
       }
@@ -33,6 +39,11 @@ function createGeolocationClient(cache) {
           }
           else {
             return readCsvStream(DATAFILE_PATH)
+              .map(({ postalCode, lat, lon }) => ({
+                postalCode: toPostalCode(postalCode),
+                lat: _.toNumber(lat),
+                lon: _.toNumber(lon)
+              }))
             // Along the way, keep in the memory cache
               .tap((entry) => cache.set({ postalCode: entry.postalCode }, entry))
             // Filter the matching entries
