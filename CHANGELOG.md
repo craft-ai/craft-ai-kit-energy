@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.4...HEAD) ##
 
+### Changed ###
+
+- When holidays retrieval fails, the craft ai properties is now set to `UNKNOWN` instead of raising an error.
+
+### Fixed ###
+
+- _Tarn-et-Garonne_ holidays are now properly retrieved.
+
 ## [0.0.4](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.3...v0.0.4) - 2017-11-17 ##
 
 ### Changed ###
