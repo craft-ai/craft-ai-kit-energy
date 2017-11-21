@@ -157,7 +157,7 @@ function enrichWithWeather(client, user) {
 
 function enrichWithHolidays(client, user) {
   return (operation) => most.fromPromise(
-    client.isHoliday(operation.timestamp, user.location.postalCode)
+    client.isHoliday(operation.timestamp, { postalCode: user.location.postalCode })
       .then((holiday) => Object.assign({}, operation, {
         context: Object.assign({}, operation.context, {
           holiday: holiday ? 'YES' : 'NO'

@@ -90,7 +90,7 @@ function createHolidays() {
   },
   (year, postalCode) => `${year}-${postalCode}`);
   return {
-    isHoliday: (timestamp, postalCode) => {
+    isHoliday: (timestamp, { postalCode }) => {
       const year = moment.unix(timestamp).tz('Europe/Paris').year();
       return retrieveHolidays(year, postalCode)
         .then((holidays) =>
