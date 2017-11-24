@@ -62,27 +62,31 @@ const NON_GENERATED_PROPERTIES = _(AGENT_CONFIGURATION.context)
   .filter((property) => !AGENT_CONFIGURATION.context[property].is_generated)
   .value();
 
-function retrieveAgent(craftaiClient, { id }) {
-  if (!id) {
+function getEnergyAgentId({ agentId, id }) {
+  return agentId || `energy-${_.kebabCase(id)}`;
+}
+
+function retrieveAgent(craftaiClient, user) {
+  if (!user.id) {
     return Promise.reject(new Error('No given user id.'));
   }
-  return craftaiClient.getAgent(`energy-${_.kebabCase(id)}`)
+  return craftaiClient.getAgent(getEnergyAgentId(user))
     .then((agent) => ({
-      id,
+      id: user.id,
       agentId: agent.id,
       firstTimestamp: agent.firstTimestamp,
       lastTimestamp: agent.lastTimestamp
     }));
 }
 
-function retrieveOrCreateAgent(craftaiClient, { id }) {
-  return retrieveAgent(craftaiClient, { id })
+function retrieveOrCreateAgent(craftaiClient, user) {
+  return retrieveAgent(craftaiClient, user)
     .catch(() => {
-      debug(`Unable to retrieve the energy agent for '${id}', creating it...`);
+      debug(`Unable to retrieve the energy agent for '${user.id}', creating it...`);
       return craftaiClient
-        .createAgent(AGENT_CONFIGURATION, `energy-${_.kebabCase(id)}`)
+        .createAgent(AGENT_CONFIGURATION, getEnergyAgentId(user))
         .then((agent) => ({
-          id,
+          id: user.id,
           agentId: agent.id,
           firstTimestamp: undefined,
           lastTimestamp: undefined
@@ -263,7 +267,8 @@ function createKit(cfg = {}) {
           return user;
         });
     },
-    computeAnomalies: ({ id } = {}, { from, minStep = TIME_QUANTUM, to } = {}) => {
+    computeAnomalies: (user = {}, { from, minStep = TIME_QUANTUM, to } = {}) => {
+      const { id } = user;
       debug(`Computing anomalies for user ${id}`);
       if (_.isUndefined(from) || _.isUndefined(to)) {
         return Promise.reject(new Error('`cfg.from` and `cfg.to` are needed.'));

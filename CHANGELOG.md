@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.5...HEAD) ##
 
+### Changed ###
+
+- `kit.update` can now use the given `user.agentId` instead of generating it.
+
 ## [0.0.5](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.4...v0.0.5) - 2017-11-21 ##
 
 ### Changed ###
