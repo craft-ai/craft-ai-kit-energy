@@ -68,7 +68,8 @@ describe('update(user, data)', function() {
         });
 
         // Check that the agent actually exists.
-        return expect(kit.clients.craftai.getAgent(user.agentId)).to.be.fulfilled;
+        return expect(kit.clients.craftai.getAgent(user.agentId)).to.be.fulfilled
+          .then(() => kit.clients.craftai.deleteAgent(user.agentId));
       });
   });
   it('fails when the user postal code is unknown', function() {
