@@ -62,27 +62,31 @@ const NON_GENERATED_PROPERTIES = _(AGENT_CONFIGURATION.context)
   .filter((property) => !AGENT_CONFIGURATION.context[property].is_generated)
   .value();
 
-function retrieveAgent(craftaiClient, { id }) {
-  if (!id) {
+function getEnergyAgentId({ agentId, id }) {
+  return agentId || `energy-${_.kebabCase(id)}`;
+}
+
+function retrieveAgent(craftaiClient, user) {
+  if (!user.id) {
     return Promise.reject(new Error('No given user id.'));
   }
-  return craftaiClient.getAgent(`energy-${_.kebabCase(id)}`)
+  return craftaiClient.getAgent(getEnergyAgentId(user))
     .then((agent) => ({
-      id,
+      id: user.id,
       agentId: agent.id,
       firstTimestamp: agent.firstTimestamp,
       lastTimestamp: agent.lastTimestamp
     }));
 }
 
-function retrieveOrCreateAgent(craftaiClient, { id }) {
-  return retrieveAgent(craftaiClient, { id })
+function retrieveOrCreateAgent(craftaiClient, user) {
+  return retrieveAgent(craftaiClient, user)
     .catch(() => {
-      debug(`Unable to retrieve the energy agent for '${id}', creating it...`);
+      debug(`Unable to retrieve the energy agent for '${user.id}', creating it...`);
       return craftaiClient
-        .createAgent(AGENT_CONFIGURATION, `energy-${_.kebabCase(id)}`)
+        .createAgent(AGENT_CONFIGURATION, getEnergyAgentId(user))
         .then((agent) => ({
-          id,
+          id: user.id,
           agentId: agent.id,
           firstTimestamp: undefined,
           lastTimestamp: undefined
@@ -263,22 +267,26 @@ function createKit(cfg = {}) {
           return user;
         });
     },
-    computeAnomalies: ({ id } = {}, { from, minStep = TIME_QUANTUM, to } = {}) => {
-      debug(`Computing anomalies for user ${id}`);
-      if (_.isUndefined(from) || _.isUndefined(to)) {
-        return Promise.reject(new Error('`cfg.from` and `cfg.to` are needed.'));
-      }
+    computeAnomalies: (user = {}, { from, minStep = TIME_QUANTUM, to } = {}) => {
+      return retrieveAgent(clients.craftai, user)
+        .then((user) => {
+          const { agentId, id } = user;
+          debug(`Computing anomalies for user ${id}`);
+          if (_.isUndefined(from) || _.isUndefined(to)) {
+            return Promise.reject(new Error('`cfg.from` and `cfg.to` are needed.'));
+          }
 
-      debug(`Getting consumption decision tree for user ${id}`);
+          debug(`Getting consumption decision tree for user ${id}`);
 
-      return retrieveAgent(clients.craftai, { id })
-        .then(({ agentId }) => Promise.all([
-          clients.craftai.getAgentDecisionTree(agentId, from),
-          clients.craftai.getAgentStateHistory(agentId, from, to)
-        ]))
-        .then(([tree, samples]) => {
-          debug(`Looking for anomalies for ${samples.length} steps between ${from} and ${to} for user ${id}`);
-          return _.map(samples, (sample) => {
+          return Promise.all([
+            user,
+            clients.craftai.getAgentDecisionTree(agentId, from),
+            clients.craftai.getAgentStateHistory(agentId, from, to)
+          ]);
+        })
+        .then(([user, tree, samples]) => {
+          debug(`Looking for anomalies for ${samples.length} steps between ${from} and ${to} for user ${user.id}`);
+          const potentialAnomalies = _.map(samples, (sample) => {
             const decision = interpreter.decide(tree, sample.sample);
             return {
               from: sample.timestamp,
@@ -290,12 +298,10 @@ function createKit(cfg = {}) {
               decision_rules: decision.output.load.decision_rules
             };
           });
-        })
-        .then((potentialAnomalies) => {
           const detectedAnomalies = _.filter(potentialAnomalies, (a) =>
             (a.confidence > cfg.confidenceThreshold) &&
-        (Math.abs(a.actualLoad - a.expectedLoad) > cfg.sigmaFactorThreshold * a.standard_deviation));
-          debug(`Identified ${detectedAnomalies.length} anomalies for user ${id}, or ${Math.round((detectedAnomalies.length / potentialAnomalies.length) * 100)}% of considered data`);
+            (Math.abs(a.actualLoad - a.expectedLoad) > cfg.sigmaFactorThreshold * a.standard_deviation));
+          debug(`Identified ${detectedAnomalies.length} anomalies for user ${user.id}, or ${Math.round((detectedAnomalies.length / potentialAnomalies.length) * 100)}% of considered data`);
           return { anomalies: detectedAnomalies, anomalyRatio: (detectedAnomalies.length / potentialAnomalies.length) };
         });
     }

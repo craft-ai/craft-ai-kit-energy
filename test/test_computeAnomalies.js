@@ -37,4 +37,14 @@ describe('computeAnomalies(user, cfg)', function() {
         expect(anomalyRatio).to.be.within(0.16, 0.17);
       });
   });
+  it('succeeds when a cfg is provided (also a specific agent id)', function() {
+    return kit.computeAnomalies({ id: 'foo', agentId: TEST_USER_AGENT_ID }, {
+      to: TEST_DATA_TO.timestamp,
+      from: TEST_DATA_TO.timestamp - 24 * 60 * 60
+    })
+      .then(({ anomalies, anomalyRatio }) => {
+        expect(anomalies).to.have.lengthOf(8);
+        expect(anomalyRatio).to.be.within(0.16, 0.17);
+      });
+  });
 });

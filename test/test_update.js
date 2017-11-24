@@ -52,6 +52,26 @@ describe('update(user, data)', function() {
         return expect(kit.clients.craftai.getAgent(user.agentId)).to.be.fulfilled;
       });
   });
+  it('succeeds when no data is provided and an agent id is provided', function() {
+    return kit.update(Object.assign({}, TEST_USER, { agentId: 'my-test-agent' }))
+      .then((user) => {
+        expect(user).to.be.deep.equal({
+          id: TEST_USER.id,
+          agentId: 'my-test-agent',
+          location: {
+            postalCode: TEST_USER.location.postalCode,
+            lat: TEST_USER_EXPECTED_LAT,
+            lon: TEST_USER_EXPECTED_LON
+          },
+          firstTimestamp: undefined,
+          lastTimestamp: undefined
+        });
+
+        // Check that the agent actually exists.
+        return expect(kit.clients.craftai.getAgent(user.agentId)).to.be.fulfilled
+          .then(() => kit.clients.craftai.deleteAgent(user.agentId));
+      });
+  });
   it('fails when the user postal code is unknown', function() {
     const invalidPostalCodeUser = {
       id: TEST_USER.id,
