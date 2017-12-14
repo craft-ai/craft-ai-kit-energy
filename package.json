@@ -18,8 +18,8 @@
   "homepage": "https://github.com/craft-ai/craft-ai-kit-energy#readme",
   "main": "src/index.js",
   "scripts": {
-    "unit_test": "mocha",
-    "test": "npm run unit_test && npm run lint",
+    "test:unit": "mocha",
+    "test": "npm run test:unit && npm run lint",
     "lint": "eslint .",
     "lint:fix": "eslint --fix ."
   },

@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const { createClient, interpreter, Time } = require('craft-ai');
 const { checkConfiguration, DEFAULT_CONFIGURATION } = require('./configuration');
+const { AGENT_CONFIGURATION, retrieveAgent, retrieveOrCreateAgent } = require('./agent');
 const buffer = require('most-buffer');
 const createGeolocationClient = require('./geolocation');
 const createHolidays = require('./holidays');
@@ -11,87 +12,13 @@ const most = require('most');
 const debug = require('debug')('craft-ai:kit-energy');
 const debugOnce = _.memoize(debug);
 
-const TIME_QUANTUM = 30 * 60; // 30 minutes
-
-function computeTimezone(timestamp){
-  return moment.tz(timestamp, 'Europe/Paris').format('Z');
-}
-
-const AGENT_CONFIGURATION = {
-  context: {
-    time: {
-      type: 'time_of_day',
-      is_generated: true
-    },
-    day: {
-      type: 'day_of_week',
-      is_generated: true
-    },
-    month: {
-      type: 'month_of_year',
-      is_generated: true
-    },
-    timezone: {
-      type: 'timezone'
-    },
-    tempMin: {
-      type: 'continuous'
-    },
-    tempMax: {
-      type: 'continuous'
-    },
-    load: {
-      type: 'continuous'
-    },
-    holiday: {
-      type: 'enum'
-    }
-  },
-  output: [
-    'load'
-  ],
-  operations_as_events: true,
-  time_quantum: TIME_QUANTUM,
-  learning_period: 365 * 24 * 60 * 60, // One year
-  tree_max_operations: 50000,
-  tree_max_depth: 6
-};
-
 const NON_GENERATED_PROPERTIES = _(AGENT_CONFIGURATION.context)
   .keys()
   .filter((property) => !AGENT_CONFIGURATION.context[property].is_generated)
   .value();
 
-function getEnergyAgentId({ agentId, id }) {
-  return agentId || `energy-${_.kebabCase(id)}`;
-}
-
-function retrieveAgent(craftaiClient, user) {
-  if (!user.id) {
-    return Promise.reject(new Error('No given user id.'));
-  }
-  return craftaiClient.getAgent(getEnergyAgentId(user))
-    .then((agent) => ({
-      id: user.id,
-      agentId: agent.id,
-      firstTimestamp: agent.firstTimestamp,
-      lastTimestamp: agent.lastTimestamp
-    }));
-}
-
-function retrieveOrCreateAgent(craftaiClient, user) {
-  return retrieveAgent(craftaiClient, user)
-    .catch(() => {
-      debug(`Unable to retrieve the energy agent for '${user.id}', creating it...`);
-      return craftaiClient
-        .createAgent(AGENT_CONFIGURATION, getEnergyAgentId(user))
-        .then((agent) => ({
-          id: user.id,
-          agentId: agent.id,
-          firstTimestamp: undefined,
-          lastTimestamp: undefined
-        }));
-    });
+function computeTimezone(timestamp){
+  return moment.tz(timestamp, 'Europe/Paris').format('Z');
 }
 
 function operationFromDatapoint(user) {
@@ -267,7 +194,7 @@ function createKit(cfg = {}) {
           return user;
         });
     },
-    computeAnomalies: (user = {}, { from, minStep = TIME_QUANTUM, to } = {}) => {
+    computeAnomalies: (user = {}, { from, minStep = AGENT_CONFIGURATION.time_quantum, to } = {}) => {
       return retrieveAgent(clients.craftai, user)
         .then((user) => {
           const { agentId, id } = user;
