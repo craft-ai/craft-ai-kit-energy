@@ -47,11 +47,11 @@ function getEnergyAgentId({ agentId, id }) {
   return agentId || `energy-${_.kebabCase(id)}`;
 }
 
-function retrieveAgent(craftaiClient, user) {
+function retrieveAgent({ clients }, user) {
   if (!user.id) {
     return Promise.reject(new Error('No given user id.'));
   }
-  return craftaiClient.getAgent(getEnergyAgentId(user))
+  return clients.craftai.getAgent(getEnergyAgentId(user))
     .then((agent) => ({
       id: user.id,
       agentId: agent.id,
@@ -60,11 +60,11 @@ function retrieveAgent(craftaiClient, user) {
     }));
 }
 
-function retrieveOrCreateAgent(craftaiClient, user) {
-  return retrieveAgent(craftaiClient, user)
+function retrieveOrCreateAgent({ clients }, user) {
+  return retrieveAgent({ clients }, user)
     .catch(() => {
       debug(`Unable to retrieve the energy agent for '${user.id}', creating it...`);
-      return craftaiClient
+      return clients.craftai
         .createAgent(AGENT_CONFIGURATION, getEnergyAgentId(user))
         .then((agent) => ({
           id: user.id,
