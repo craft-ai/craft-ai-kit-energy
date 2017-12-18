@@ -11,7 +11,7 @@ const TEST_USER_AGENT_ID = `energy-test-update-user-${RUN_ID}`;
 const TEST_DATA = require('./data/test_weather.data.json');
 const TEST_DATA_TO = Time(TEST_DATA[TEST_DATA.length - 1].date);
 
-describe('computeAnomalies(user, cfg)', function() {
+describe('computeAnomalies(user, {from, to})', function() {
   let kit;
   before(function() {
     kit = createEnergyKit({
@@ -24,10 +24,10 @@ describe('computeAnomalies(user, cfg)', function() {
   after(function() {
     return kit.terminate();
   });
-  it('fails when no cfg is provided', function() {
+  it('fails when no {from, to} is provided', function() {
     return expect(kit.computeAnomalies(TEST_USER, undefined)).to.be.rejected;
   });
-  it('succeeds when a cfg is provided', function() {
+  it('succeeds when a {from, to} is provided', function() {
     return kit.computeAnomalies(TEST_USER, {
       to: TEST_DATA_TO.timestamp,
       from: TEST_DATA_TO.timestamp - 24 * 60 * 60
@@ -37,7 +37,7 @@ describe('computeAnomalies(user, cfg)', function() {
         expect(anomalyRatio).to.be.within(0.16, 0.17);
       });
   });
-  it('succeeds when a cfg is provided (also a specific agent id)', function() {
+  it('succeeds when a {from, to} is provided (also a specific agent id)', function() {
     return kit.computeAnomalies({ id: 'foo', agentId: TEST_USER_AGENT_ID }, {
       to: TEST_DATA_TO.timestamp,
       from: TEST_DATA_TO.timestamp - 24 * 60 * 60

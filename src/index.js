@@ -1,9 +1,9 @@
-const _ = require('lodash');
 const { AGENT_CONFIGURATION, retrieveAgent } = require('./agent');
 const { checkConfiguration, DEFAULT_CONFIGURATION } = require('./configuration');
 const { computeAnomalies } = require('./computeAnomalies');
 const { createClient } = require('craft-ai');
 const { update } = require('./update');
+const { predict, PREDICTION_STATUS } = require('./predict');
 const createGeolocationClient = require('./geolocation');
 const createHolidays = require('./holidays');
 const createWeatherClient = require('./weather');
@@ -30,6 +30,7 @@ function createKit(cfg = {}) {
   cfg.darkSkySecretKey = clients.weather && clients.weather.darkSkySecretKey;
 
   return {
+    PREDICTION_STATUS,
     cfg: cfg,
     clients,
     terminate: () => {
@@ -51,6 +52,8 @@ function createKit(cfg = {}) {
     },
     update: (user = {}, data = []) =>
       update({ clients }, user, data),
+    predict: (user = {}, { from, minStep = AGENT_CONFIGURATION.time_quantum, to } = {}) =>
+      predict({ cfg, clients }, user, { from, to }),
     computeAnomalies: (user = {}, { from, minStep = AGENT_CONFIGURATION.time_quantum, to } = {}) =>
       computeAnomalies({ cfg, clients }, user, { from, minStep, to })
   };
