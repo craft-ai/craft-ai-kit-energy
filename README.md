@@ -30,13 +30,22 @@ const kit = createEnergyKit({
   token: '{craft-ai-token}',
   // Mandatory, the DarkSky secret key used to retrieve weather information, ou can retrieve your key at <https://darksky.net/dev/account>.
   darkSkySecretKey: '{DarkSky-secret-key}',
-  // Optional
+  // **Optional**
   // Cache to avoid duplicate calls to Dark Sky, a default in-memory cache
   // is used when none is provided.
   weatherCache: {
     set: // (lat, lon, timestamp, weather) -> Promise()
     get: // (lat, lon, timestamp) -> Promise(weather)
-  }
+  },
+  // The confidence threshold under which predictions are not considered.
+  // Its default value is 0.4
+  confidenceThreshold: '{prediction-confidence-threshold}',
+  // The maximum relative deviation to the predicted load for a prediction to be considered 'valid'
+  // This number is expressed in amount of standard deviations, its default value is 2.
+  relativeDeviationThreshold: '{relative-deviation-threshold}',
+  // The maximum deviation to the predicted load for a prediction to be considered 'valid', in Watts.
+  // By default, this threshold is not set.
+  absoluteDeviationThreshold: '{absolute-deviation-threshold}'
 });
 ```
 
@@ -48,7 +57,7 @@ const kit = createEnergyKit({
 > Take a look at `main.js` to get a working example of the kit.
 
 
-#### `user` datastructure ####
+#### `User` datastructure ####
 
 To identify and retrieve metadata for a user the kit uses the following `user` data structure:
 
@@ -61,22 +70,46 @@ To identify and retrieve metadata for a user the kit uses the following `user` d
     lon: '...'
   },
   agentId: '...', // The unique craft ai agent id, set by the kit.update(...) function
+  firstTimestamp, ... // The unix timestamp of the first sent data.
   lastTimestamp: ... // The unix timestamp of the last sent data.
 }
 ```
 
-### `kit.update` ###
+#### `DataPoint` datastructure ####
+
+The data given to the kit follows the given format:
+
+```js
+{
+  date: '2017-09-21T12:00+02:00', // The date, as a string, a JavaScript Date or a Unix Timestamp.
+  load: 1234, // The load, in Watts
+  tempMin: 123, // Mandatory if no `cfg.darkSkySecretKey` is provided, the minimum temperature in Degree Celsius
+  tempMax: 345, // Mandatory if no `cfg.darkSkySecretKey` is provided, the maximum temperature in Degree Celsius
+}
+```
+
+### `kit.update(user: User, data: Array<DataPoint>)` ###
 
 Update the `user` with new data, this creates craft ai agents as needed.
 
-### `kit.delete` ###
+### `kit.delete(user: User)` ###
 
 Deletes the given `user`.
 
-### `kit.computeAnomalies` ###
+### `kit.computeAnomalies(user: User, { from: Date, to: Date })` ###
 
 Computes the 'abnormal' energy consumption for the given `user` during the given timeframe.
 
-### `kit.terminate` ###
+### `kit.validate(user: User, { window: DurationInSeconds, windowsCount: Integer })` ###
+
+Validate the prediction model for a given `user` following the given window size, over the last `windowsCount` windows.
+
+The default value for `window` is one week, the default value for `windowsCount` is -1 which means enough window to fill the lifetime of the user.
+
+### `kit.predict(user: User, { from: Date, to: Date })` ###
+
+Compute load predictions for the given `user` during the given timeframe.
+
+### `kit.terminate()` ###
 
 Should be called at the end of the work.

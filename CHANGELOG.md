@@ -9,9 +9,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added ###
 
-- Introducing `kit.validate` a method running a validation of the craft ai agents of a given user over their lifetime, it outputs its validation metrics over time.
-- Introducing `kit.predict` a method able to run a bunch of predictions for a given user.
+- Introducing `kit.validate`, a method running a validation of the craft ai agents of a given user over their lifetime, it outputs its validation metrics over time.
+- Introducing `kit.predict`, a method able to run a bunch of predictions for a given user.
+- Introducing `cfg.absoluteDeviationThreshold`, the maximum deviation to the predicted load for a prediction to be considered 'valid', expressed in Watts, disabled by default.
 
+## Changed ##
+
+- Renaming `cfg.sigmaFactorThreshold` to `cfg.relativeDeviationThreshold`.
 
 ## [0.0.6](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.5...v0.0.6) - 2017-11-24 ##
 
