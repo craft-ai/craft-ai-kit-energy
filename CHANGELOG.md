@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.6...HEAD) ##
 
+### Added ###
+
+- Introducing `kit.validate` a method running a validation of the craft ai agents of a given user over their lifetime, it outputs its validation metrics over time.
+- Introducing `kit.predict` a method able to run a bunch of predictions for a given user.
+
+
 ## [0.0.6](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.5...v0.0.6) - 2017-11-24 ##
 
 ### Changed ###

@@ -17,14 +17,14 @@ function predict({ cfg, clients }, user = {}, { from, to } = {}) {
   return retrieveAgent({ clients }, user)
     .then((user) => {
       const fromTimestamp = Time(from).timestamp;
-      const toTimestamp = to ? Time(to).timestamp : user.toTimestamp;
+      const toTimestamp = to ? Time(to).timestamp : user.lastTimestamp;
 
-      if (fromTimestamp <= user.fromTimestamp || fromTimestamp >= user.toTimestamp) {
-        return Promise.reject(new Error(`Argument \`cfg.from\` must belong to (${fromTimestamp}, ${toTimestamp}), the range of timestamp for which we have data for user \`${user.id}\`.`));
+      if (fromTimestamp <= user.firstTimestamp || fromTimestamp > user.lastTimestamp) {
+        return Promise.reject(new Error(`Argument \`cfg.from\` must belong to (${fromTimestamp}, ${toTimestamp}], the range of timestamp for which we have data for user \`${user.id}\`.`));
       }
 
-      if (toTimestamp <= fromTimestamp || toTimestamp >= user.toTimestamp) {
-        return Promise.reject(new Error(`Argument \`cfg.to\` must after the given \`cfg.from\` (${from}) and belong to (${from}, ${toTimestamp}), the range of timestamp for which we have data for user \`${user.id}\`.`));
+      if (toTimestamp <= fromTimestamp || toTimestamp > user.lastTimestamp) {
+        return Promise.reject(new Error(`Argument \`cfg.to\` must after the given \`cfg.from\` (${from}) and belong to (${from}, ${toTimestamp}], the range of timestamp for which we have data for user \`${user.id}\`.`));
       }
 
       return Promise.all([
@@ -49,8 +49,8 @@ function predict({ cfg, clients }, user = {}, { from, to } = {}) {
         })
         .map(({ from, to, actual, expected, standardDeviation, confidence, decisionRules }) => {
           const loadDeviation = Math.min(standardDeviation * cfg.relativeDeviationThreshold, cfg.absoluteDeviationThreshold);
-          const expectedRange = [Math.max(expected - loadDeviation, 0), expected + loadDeviation];
-          const valid = expectedRange[0] <= actual && actual <= expectedRange[1];
+          const predictedRange = [Math.max(expected - loadDeviation, 0), expected + loadDeviation];
+          const valid = predictedRange[0] <= actual && actual <= predictedRange[1];
           if (confidence < cfg.confidenceThreshold) {
             return {
               from, to, actual, decisionRules,
@@ -59,19 +59,19 @@ function predict({ cfg, clients }, user = {}, { from, to } = {}) {
           }
           else if (valid) {
             return {
-              from, to, actual, expectedRange, decisionRules,
+              from, to, actual, predictedRange, decisionRules,
               status: PREDICTION_STATUS.VALID
             };
           }
-          else if (actual > expectedRange[1]) {
+          else if (actual > predictedRange[1]) {
             return {
-              from, to, actual, expectedRange, decisionRules,
+              from, to, actual, predictedRange, decisionRules,
               status: PREDICTION_STATUS.OVERESTIMATED
             };
           }
           else {
             return {
-              from, to, actual, expectedRange, decisionRules,
+              from, to, actual, predictedRange, decisionRules,
               status: PREDICTION_STATUS.UNDERESTIMATED
             };
           }

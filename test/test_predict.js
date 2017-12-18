@@ -1,12 +1,12 @@
 const createEnergyKit = require('../src');
 
 const TEST_USER = {
-  id: `test_update_user_${RUN_ID}`,
+  id: `test_predict_user_${RUN_ID}`,
   location: {
     postalCode: '75013'
   }
 };
-const TEST_USER_AGENT_ID = `energy-test-update-user-${RUN_ID}`;
+const TEST_USER_AGENT_ID = `energy-test-predict-user-${RUN_ID}`;
 const TEST_DATA = require('./data/test_weather.data.json');
 
 describe('predict(user, {from, to})', function() {

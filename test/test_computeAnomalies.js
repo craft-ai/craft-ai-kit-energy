@@ -2,12 +2,12 @@ const createEnergyKit = require('../src');
 const { Time } = require('craft-ai');
 
 const TEST_USER = {
-  id: `test_update_user_${RUN_ID}`,
+  id: `test_anomalies_user_${RUN_ID}`,
   location: {
     postalCode: '75013'
   }
 };
-const TEST_USER_AGENT_ID = `energy-test-update-user-${RUN_ID}`;
+const TEST_USER_AGENT_ID = `energy-test-anomalies-user-${RUN_ID}`;
 const TEST_DATA = require('./data/test_weather.data.json');
 const TEST_DATA_TO = Time(TEST_DATA[TEST_DATA.length - 1].date);
 

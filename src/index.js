@@ -1,9 +1,10 @@
-const { AGENT_CONFIGURATION, retrieveAgent } = require('./agent');
+const { retrieveAgent } = require('./agent');
 const { checkConfiguration, DEFAULT_CONFIGURATION } = require('./configuration');
 const { computeAnomalies } = require('./computeAnomalies');
 const { createClient } = require('craft-ai');
 const { update } = require('./update');
 const { predict, PREDICTION_STATUS } = require('./predict');
+const { validate } = require('./validate');
 const createGeolocationClient = require('./geolocation');
 const createHolidays = require('./holidays');
 const createWeatherClient = require('./weather');
@@ -50,12 +51,14 @@ function createKit(cfg = {}) {
           () => user
         );
     },
-    update: (user = {}, data = []) =>
+    update: (user, data) =>
       update({ clients }, user, data),
-    predict: (user = {}, { from, minStep = AGENT_CONFIGURATION.time_quantum, to } = {}) =>
-      predict({ cfg, clients }, user, { from, to }),
-    computeAnomalies: (user = {}, { from, minStep = AGENT_CONFIGURATION.time_quantum, to } = {}) =>
-      computeAnomalies({ cfg, clients }, user, { from, minStep, to })
+    predict: (user, predictCfg) =>
+      predict({ cfg, clients }, user, predictCfg),
+    computeAnomalies: (user, computeAnomaliesCfg) =>
+      computeAnomalies({ cfg, clients }, user, computeAnomaliesCfg),
+    validate: (user, validateCfg) =>
+      validate({ cfg, clients }, user, validateCfg),
   };
 }
 
