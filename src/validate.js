@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { AGENT_CONFIGURATION, retrieveAgent } = require('./agent');
+const { retrieveAgent } = require('./agent');
 const { predict, PREDICTION_STATUS } = require('./predict');
 const range = require('most-range');
 const most = require('most');

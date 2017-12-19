@@ -5,7 +5,7 @@ const DEFAULT_CONFIGURATION = {
   weatherCache: undefined,
   darkSkySecretKey: undefined,
   confidenceThreshold: 0.4,
-  relativeDeviationThreshold: 2,
+  sigmaDeviationThreshold: 2,
   absoluteDeviationThreshold: Number.MAX_VALUE
 };
 
@@ -22,7 +22,7 @@ const CHECK_CONFIGURATION = {
     }
     return true;
   },
-  relativeDeviationThreshold: (value) => {
+  sigmaDeviationThreshold: (value) => {
     if (!_.isNumber(value)) {
       throw new Error(`'${value}' is not a valid relative deviation threshold, it should be a number.`);
     }

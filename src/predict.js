@@ -48,7 +48,7 @@ function predict({ cfg, clients }, user = {}, { from, to } = {}) {
           };
         })
         .map(({ from, to, actual, expected, standardDeviation, confidence, decisionRules }) => {
-          const loadDeviation = Math.min(standardDeviation * cfg.relativeDeviationThreshold, cfg.absoluteDeviationThreshold);
+          const loadDeviation = Math.min(standardDeviation * cfg.sigmaDeviationThreshold, cfg.absoluteDeviationThreshold);
           const predictedRange = [Math.max(expected - loadDeviation, 0), expected + loadDeviation];
           const valid = predictedRange[0] <= actual && actual <= predictedRange[1];
           if (confidence < cfg.confidenceThreshold) {

@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Changed ##
 
-- Renaming `cfg.sigmaFactorThreshold` to `cfg.relativeDeviationThreshold`.
+- Renaming `cfg.sigmaFactorThreshold` to `cfg.sigmaDeviationThreshold`.
 
 ## [0.0.6](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.5...v0.0.6) - 2017-11-24 ##
 

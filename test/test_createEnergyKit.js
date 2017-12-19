@@ -11,12 +11,12 @@ describe('createEnergyKit(cfg)', function() {
     expect(() => createEnergyKit({
       token: process.env.CRAFT_TOKEN,
       darkSkySecretKey: process.env.DARK_SKY_SECRET_KEY,
-      relativeDeviationThreshold: 'blop'
+      sigmaDeviationThreshold: 'blop'
     })).to.throw();
     expect(() => createEnergyKit({
       token: process.env.CRAFT_TOKEN,
       darkSkySecretKey: process.env.DARK_SKY_SECRET_KEY,
-      relativeDeviationThreshold: -2
+      sigmaDeviationThreshold: -2
     })).to.throw();
   });
   it('fails when a bad confidence threshold is provided', function() {
@@ -49,7 +49,7 @@ describe('createEnergyKit(cfg)', function() {
     expect(kit).to.be.ok;
     expect(kit.cfg.token).to.be.equal(process.env.CRAFT_TOKEN);
     expect(kit.cfg.weatherCache).to.be.equal(weatherCache);
-    expect(kit.cfg.relativeDeviationThreshold).to.be.equal(2);
+    expect(kit.cfg.sigmaDeviationThreshold).to.be.equal(2);
     expect(kit.cfg.confidenceThreshold).to.be.equal(0.4);
     return kit.terminate();
   });
@@ -59,13 +59,13 @@ describe('createEnergyKit(cfg)', function() {
       token: process.env.CRAFT_TOKEN,
       darkSkySecretKey: process.env.DARK_SKY_SECRET_KEY,
       weatherCache: weatherCache,
-      relativeDeviationThreshold: 1.3,
+      sigmaDeviationThreshold: 1.3,
       confidenceThreshold: 0.4
     });
     expect(kit).to.be.ok;
     expect(kit.cfg.token).to.be.equal(process.env.CRAFT_TOKEN);
     expect(kit.cfg.weatherCache).to.be.equal(weatherCache);
-    expect(kit.cfg.relativeDeviationThreshold).to.be.equal(1.3);
+    expect(kit.cfg.sigmaDeviationThreshold).to.be.equal(1.3);
     expect(kit.cfg.confidenceThreshold).to.be.equal(0.4);
     return kit.terminate();
   });

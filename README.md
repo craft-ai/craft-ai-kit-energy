@@ -42,7 +42,7 @@ const kit = createEnergyKit({
   confidenceThreshold: '{prediction-confidence-threshold}',
   // The maximum relative deviation to the predicted load for a prediction to be considered 'valid'
   // This number is expressed in amount of standard deviations, its default value is 2.
-  relativeDeviationThreshold: '{relative-deviation-threshold}',
+  sigmaDeviationThreshold: '{sigma-deviation-threshold}',
   // The maximum deviation to the predicted load for a prediction to be considered 'valid', in Watts.
   // By default, this threshold is not set.
   absoluteDeviationThreshold: '{absolute-deviation-threshold}'
@@ -83,8 +83,8 @@ The data given to the kit follows the given format:
 {
   date: '2017-09-21T12:00+02:00', // The date, as a string, a JavaScript Date or a Unix Timestamp.
   load: 1234, // The load, in Watts
-  tempMin: 123, // Mandatory if no `cfg.darkSkySecretKey` is provided, the minimum temperature in Degree Celsius
-  tempMax: 345, // Mandatory if no `cfg.darkSkySecretKey` is provided, the maximum temperature in Degree Celsius
+  tempMin: -0.5, // Mandatory if no `cfg.darkSkySecretKey` is provided, the minimum temperature in Degree Celsius
+  tempMax: 8.5, // Mandatory if no `cfg.darkSkySecretKey` is provided, the maximum temperature in Degree Celsius
 }
 ```
 
