@@ -38,40 +38,39 @@ function predict({ cfg, clients }, user = {}, { from, to } = {}) {
         .map((sample) => {
           const decision = interpreter.decide(tree, sample.sample);
           return {
-            from: sample.timestamp,
-            to: sample.timestamp + tree.configuration.time_quantum,
+            timestamp: sample.timestamp,
             actual: sample.sample[outputProperty],
-            expected: decision.output[outputProperty].predicted_value,
-            standardDeviation: decision.output[outputProperty].standard_deviation,
+            predicted: decision.output[outputProperty].predicted_value,
+            predictedStandardDeviation: decision.output[outputProperty].standard_deviation,
             confidence: decision.output[outputProperty].confidence,
             decisionRules: decision.output[outputProperty].decision_rules
           };
         })
-        .map(({ from, to, actual, expected, standardDeviation, confidence, decisionRules }) => {
-          const loadDeviation = Math.min(standardDeviation * cfg.sigmaDeviationThreshold, cfg.absoluteDeviationThreshold);
-          const predictedRange = [Math.max(expected - loadDeviation, 0), expected + loadDeviation];
+        .map(({ timestamp, actual, predicted, predictedStandardDeviation, confidence, decisionRules }) => {
+          const loadDeviation = Math.min(predictedStandardDeviation * cfg.sigmaDeviationThreshold, cfg.absoluteDeviationThreshold);
+          const predictedRange = [Math.max(predicted - loadDeviation, 0), predicted + loadDeviation];
           const valid = predictedRange[0] <= actual && actual <= predictedRange[1];
           if (confidence < cfg.confidenceThreshold) {
             return {
-              from, to, actual, decisionRules,
+              timestamp, actual, decisionRules,
               status: PREDICTION_STATUS.UNKNOWN
             };
           }
           else if (valid) {
             return {
-              from, to, actual, predictedRange, decisionRules,
+              timestamp, actual, predicted, predictedRange, predictedStandardDeviation, decisionRules,
               status: PREDICTION_STATUS.VALID
             };
           }
           else if (actual > predictedRange[1]) {
             return {
-              from, to, actual, predictedRange, decisionRules,
+              timestamp, actual, predicted, predictedRange, predictedStandardDeviation, decisionRules,
               status: PREDICTION_STATUS.OVERESTIMATED
             };
           }
           else {
             return {
-              from, to, actual, predictedRange, decisionRules,
+              timestamp, actual, predicted, predictedRange, predictedStandardDeviation, decisionRules,
               status: PREDICTION_STATUS.UNDERESTIMATED
             };
           }
