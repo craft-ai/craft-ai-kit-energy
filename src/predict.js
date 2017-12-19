@@ -20,11 +20,11 @@ function predict({ cfg, clients }, user = {}, { from, to } = {}) {
       const toTimestamp = to ? Time(to).timestamp : user.lastTimestamp;
 
       if (fromTimestamp <= user.firstTimestamp || fromTimestamp > user.lastTimestamp) {
-        return Promise.reject(new Error(`Argument \`cfg.from\` must belong to (${fromTimestamp}, ${toTimestamp}], the range of timestamp for which we have data for user \`${user.id}\`.`));
+        return Promise.reject(new Error(`Argument \`cfg.from\` must belong to (${user.firstTimestamp}, ${user.lastTimestamp}], the range of timestamp for which we have data for user \`${user.id}\`.`));
       }
 
-      if (toTimestamp <= fromTimestamp || toTimestamp > user.lastTimestamp) {
-        return Promise.reject(new Error(`Argument \`cfg.to\` must after the given \`cfg.from\` (${from}) and belong to (${from}, ${toTimestamp}], the range of timestamp for which we have data for user \`${user.id}\`.`));
+      if (toTimestamp <= fromTimestamp) {
+        return Promise.reject(new Error(`Argument \`cfg.to\` must after the given \`cfg.from\` (${from}).`));
       }
 
       return Promise.all([
