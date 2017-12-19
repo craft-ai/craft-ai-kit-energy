@@ -4,17 +4,30 @@ const DEFAULT_CONFIGURATION = {
   token: process.env.CRAFT_TOKEN,
   weatherCache: undefined,
   darkSkySecretKey: undefined,
-  sigmaFactorThreshold: 2,
-  confidenceThreshold: 0.4
+  confidenceThreshold: 0.4,
+  sigmaDeviationThreshold: 2,
+  absoluteDeviationThreshold: Number.MAX_VALUE
 };
 
 const CHECK_CONFIGURATION = {
-  sigmaFactorThreshold: (value) => {
+  absoluteDeviationThreshold: (value) => {
+    if (value == undefined) {
+      return true;
+    }
     if (!_.isNumber(value)) {
-      throw new Error(`'${value}' is not a valid Sigma factor threshold, it should be a number.`);
+      throw new Error(`'${value}' is not a valid absolute deviation threshold, it should be a number.`);
     }
     if (value <= 0) {
-      throw new Error(`'${value}' is not a valid Sigma factor threshold, it should be a positive number.`);
+      throw new Error(`'${value}' is not a valid absolute deviation threshold, it should be a positive number.`);
+    }
+    return true;
+  },
+  sigmaDeviationThreshold: (value) => {
+    if (!_.isNumber(value)) {
+      throw new Error(`'${value}' is not a valid relative deviation threshold, it should be a number.`);
+    }
+    if (value <= 0) {
+      throw new Error(`'${value}' is not a valid relative deviation threshold, it should be a positive number.`);
     }
     return true;
   },
