@@ -1,0 +1,12 @@
+const DATE_FEATURE = 'date';
+const DEFAULT_RECORD_BULK_SIZE = 200;
+const LOAD_FEATURE = 'load';
+const TIMEZONE_FEATURE = 'timezone';
+
+
+module.exports = {
+  DATE_FEATURE,
+  DEFAULT_RECORD_BULK_SIZE,
+  LOAD_FEATURE,
+  TIMEZONE_FEATURE,
+};

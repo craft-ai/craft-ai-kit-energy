@@ -1,3 +1,0 @@
---require ./test/globals.js
---timeout 10000
---check-leaks

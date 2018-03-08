@@ -1,65 +1,49 @@
-const { retrieveAgent } = require('./agent');
-const { checkConfiguration, DEFAULT_CONFIGURATION } = require('./configuration');
-const { computeAnomalies } = require('./computeAnomalies');
-const { createClient } = require('craft-ai');
-const { update } = require('./update');
-const { predict, PREDICTION_STATUS } = require('./predict');
-const { validate } = require('./validate');
-const createGeolocationClient = require('./geolocation');
-const createHolidays = require('./holidays');
-const createWeatherClient = require('./weather');
+const craftai = require('craft-ai');
+const uuid = require('uuid/v5');
 
-const debug = require('debug')('craft-ai:kit-energy');
+const Constants = require('./constants');
+const Kit = require('./kit');
 
-function createKit(cfg = {}) {
-  cfg = Object.assign({}, DEFAULT_CONFIGURATION, cfg);
 
-  checkConfiguration(cfg);
+async function initialize(configuration = {}) {
+  const token = configuration.token || process.env.CRAFT_AI_TOKEN || process.env.CRAFT_TOKEN;
 
-  const { darkSkySecretKey, token, weatherCache } = cfg;
-  const clients = {
-    craftai: createClient(token),
-    weather: darkSkySecretKey && createWeatherClient({
-      cache: weatherCache,
-      darkSkySecretKey: darkSkySecretKey
-    }),
-    geolocation: createGeolocationClient(),
-    holidays: createHolidays()
-  };
+  // TODO: proper error handling
+  if (!token) throw new Error();
 
-  cfg.weatherCache = clients.weather && clients.weather.cache;
-  cfg.darkSkySecretKey = clients.weather && clients.weather.darkSkySecretKey;
+  configuration.token = token;
 
-  return {
-    PREDICTION_STATUS,
-    cfg: cfg,
-    clients,
-    terminate: () => {
-      // Nothing to do for now
-      return Promise.resolve();
-    },
-    getLastDataTimestamp: (user) => {
-      return retrieveAgent({ clients }, user)
-        .then(({ lastTimestamp }) => lastTimestamp);
-    },
-    delete: (user) => {
-      debug(`Deleting user ${user.id} if it exists`);
-      return retrieveAgent({ clients }, user)
-        .then(
-          ({ agentId }) => clients.craftai.deleteAgent(agentId).then(() => user),
-          // Ignoring `retrieveAgent` errors, if we can't retrieve it, it means it no longer exists.
-          () => user
-        );
-    },
-    update: (user, data) =>
-      update({ clients }, user, data),
-    predict: (user, predictCfg) =>
-      predict({ cfg, clients }, user, predictCfg),
-    computeAnomalies: (user, computeAnomaliesCfg) =>
-      computeAnomalies({ cfg, clients }, user, computeAnomaliesCfg),
-    validate: (user, validateCfg) =>
-      validate({ cfg, clients }, user, validateCfg),
-  };
+  if (configuration.secret) {
+    // TODO: proper error handling
+    if (typeof configuration.secret !== 'string') throw new Error();
+
+    configuration.namespace = uuid(configuration.secret, ROOT_NAMESPACE);
+  }
+
+  return Object.create(Kit, {
+    configuration: { value: configuration },
+    client: { value: createClient(token) },
+  });
 }
 
-module.exports = createKit;
+
+function createClient(token, bulkSize = DEFAULT_RECORD_BULK_SIZE) {
+  try {
+    return craftai.createClient({
+      token,
+      operationsChunksSize: bulkSize,
+    });
+  } catch (error) {
+    // TODO: proper error handling
+    throw error;
+  }
+}
+
+
+const ROOT_NAMESPACE = uuid.DNS;
+const DEFAULT_RECORD_BULK_SIZE = Constants.DEFAULT_RECORD_BULK_SIZE;
+
+
+module.exports = {
+  initialize,
+};
