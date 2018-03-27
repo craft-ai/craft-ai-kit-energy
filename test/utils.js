@@ -6,10 +6,6 @@ const EnergyKit = require('../src/index');
 const Utils = require('../src/utils');
 
 
-function identity(value) { return value; }
-
-function streamify(records) { return new Stream(records); }
-
 function createContext(t) {
   return EnergyKit
     .initialize({ recordBulkSize: 1000 })
@@ -35,6 +31,10 @@ function destroyContext(t) {
 
   return Promise.all([...context.endpoint.all].map((id) => context.kit.client.deleteAgent(id)));
 }
+
+function identity(value) { return value; }
+
+function streamify(records) { return new Stream(records); }
 
 
 class Stream extends stream.Readable {

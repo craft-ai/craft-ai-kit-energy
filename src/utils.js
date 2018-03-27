@@ -1,5 +1,7 @@
+const buffer = require('most-buffer');
 const luxon = require('luxon');
 const most = require('most');
+const nth = require('most-nth');
 
 
 function formatTimezone(offset) {
@@ -51,6 +53,10 @@ function parseTimestamp(value) {
   throw new Error();
 }
 
+function toBuffer(stream) {
+  return stream.thru(buffer()).thru(nth.first);
+}
+
 function toStream(value) {
   if (isStream(value)) return fromStream(value);
 
@@ -86,5 +92,6 @@ module.exports = {
   isStream,
   parseDate,
   parseTimestamp,
+  toBuffer,
   toStream,
 };

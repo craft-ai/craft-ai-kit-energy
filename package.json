@@ -31,6 +31,7 @@
     "luxon": "0.5.3",
     "most": "1.7.3",
     "most-buffer": "0.0.10",
+    "most-nth": "0.0.10",
     "uuid": "3.2.1"
   },
   "devDependencies": {
@@ -39,7 +40,7 @@
     "@babel/polyfill": "latest",
     "@babel/preset-env": "latest",
     "@babel/register": "latest",
-    "ava": "latest",
+    "ava": "next",
     "dotenv": "latest",
     "eslint": "latest",
     "eslint-config-craft-ai": "^2.3.0",
@@ -47,13 +48,15 @@
     "seedrandom": "latest"
   },
   "ava": {
+    "babel": false,
+    "compileEnhancements": false,
     "require": [
       "@babel/register"
     ],
     "files": [
       "test/**/*.test.js"
     ],
-    "source": [
+    "sources": [
       "src/**/*.js"
     ]
   }
