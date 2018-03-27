@@ -70,13 +70,9 @@ function registerEndpoint() {
 
 
 const INPUT_METHODS = [identity, streamify];
-const INVALID_DATES = [
-  null, false, NaN,
-  'N/A', 'NaN', 'unknown',
-  '123456',
-  'string',
-  '5151-51-51T51:51:51.515Z',
-];
+const INVALID_DATES = [null, false, NaN, 'N/A', 'NaN', 'unknown', '123456', 'string', '5151-51-51T51:51:51.515Z'];
+const INVALID_NUMBERS = [null, {}, '12', true, new Date];
+const INVALID_OBJECTS = [null, 0, true, 'string', Symbol()];
 const RECORDS = require('./data/records');
 
 
@@ -87,5 +83,7 @@ module.exports = Object.assign({
   streamify,
   INPUT_METHODS,
   INVALID_DATES,
+  INVALID_NUMBERS,
+  INVALID_OBJECTS,
   RECORDS,
 }, Utils);

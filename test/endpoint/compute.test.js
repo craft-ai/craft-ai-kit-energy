@@ -146,8 +146,11 @@ test('fails computing anomalies with invalid parameters', (t) => {
     .loadEndpoint({ id: context.endpoint.register() })
     .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
     .then((endpoint) => Promise.all([endpoint.computeAnomalies(null)]
-      .concat(INVALID_OPTIONS.map((records) => endpoint.computeAnomalies(records)))
-      .concat(INVALID_OPTIONS.map((options) => endpoint.computeAnomalies(pipe([]), options)))
+      .concat(INVALID_OBJECTS.map((records) => endpoint.computeAnomalies(records)))
+      .concat(INVALID_OBJECTS.map((options) => endpoint.computeAnomalies(pipe([]), options)))
+      .concat(INVALID_NUMBERS.map((value) => endpoint.computeAnomalies(pipe([]), { minConfidence: value })))
+      .concat(INVALID_NUMBERS.map((value) => endpoint.computeAnomalies(pipe([]), { minAbsoluteDifference: value })))
+      .concat(INVALID_NUMBERS.map((value) => endpoint.computeAnomalies(pipe([]), { minSigmaDifference: value })))
       .concat(INVALID_DATES.map((date) => endpoint.computeAnomalies(pipe([]), null, date)))
       .map((promise) => t.throws(promise))))));
 });
@@ -250,8 +253,10 @@ test('fails computing a report with invalid parameters', (t) => {
     .loadEndpoint({ id: context.endpoint.register() })
     .then((endpoint) => endpoint.update(pipe(TEST_RECORDS)))
     .then((endpoint) => Promise.all([endpoint.computeReport(null)]
-      .concat(INVALID_OPTIONS.map((records) => endpoint.computeReport(records)))
-      .concat(INVALID_OPTIONS.map((options) => endpoint.computeReport(pipe([]), options)))
+      .concat(INVALID_OBJECTS.map((options) => endpoint.computeReport(pipe([]), options)))
+      .concat(INVALID_NUMBERS.map((value) => endpoint.computeReport(pipe([]), { minConfidence: value })))
+      .concat(INVALID_NUMBERS.map((value) => endpoint.computeReport(pipe([]), { minAbsoluteDifference: value })))
+      .concat(INVALID_NUMBERS.map((value) => endpoint.computeReport(pipe([]), { minSigmaDifference: value })))
       .concat(INVALID_DATES.map((date) => endpoint.computeReport(pipe([]), null, date)))
       .map((promise) => t.throws(promise))))));
 });
@@ -398,7 +403,8 @@ function isReport(object) {
 const DATE = Constants.DATE_FEATURE;
 const INPUTS = Utils.INPUT_METHODS;
 const INVALID_DATES = Utils.INVALID_DATES;
-const INVALID_OPTIONS = [0, true, 'string'];
+const INVALID_NUMBERS = Utils.INVALID_NUMBERS;
+const INVALID_OBJECTS = Utils.INVALID_OBJECTS.filter((object) => object !== null);
 const RECORDS = Utils.RECORDS;
 const INDEX = Math.floor((RECORDS.length - 1) * .4);
 const TRAINING_RECORDS = RECORDS.slice(0, INDEX);

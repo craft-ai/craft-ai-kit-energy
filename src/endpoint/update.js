@@ -10,9 +10,6 @@ async function update(records) {
 
   console.log(`${'-'.repeat(10)} updating agent "${agentId}".`);
 
-  // TODO: proper error handling
-  if (records === null || typeof records !== 'object') throw new Error();
-
   const client = this.kit.client;
   const agent = this.agent;
   const features = this.features;

@@ -7,10 +7,15 @@ const Utils = require('../utils');
 
 async function computeAnomalies(records, options, model) {
   if (options === null || options === undefined) options = {};
-  // TODO: proper error handling
-  else if (typeof options !== 'object') throw Error();
+  else if (typeof options !== 'object')
+    throw TypeError(`The "options" argument must be an "object". Received "${typeof options}".`);
+  if (options.minConfidence !== undefined && typeof options.minConfidence !== 'number')
+    throw TypeError(`The "minConfidence" option must be a "number". Received "${typeof options.minConfidence}".`);
+  if (options.minAbsoluteDifference !== undefined && typeof options.minAbsoluteDifference !== 'number')
+    throw TypeError(`The "minAbsoluteDifference" option must be a "number". Received "${typeof options.minAbsoluteDifference}".`);
+  if (options.minSigmaDifference !== undefined && typeof options.minSigmaDifference !== 'number')
+    throw TypeError(`The "minSigmaDifference" option must be a "number". Received "${typeof options.minSigmaDifference}".`);
 
-  // TODO: Check the options
   const minConfidence = options.minConfidence || .4;
   const minAbsoluteDifference = options.minAbsoluteDifference || 0;
   const minSigmaDifference = options.minSigmaDifference || 2;
@@ -90,11 +95,15 @@ async function retrieveModel(endpoint, value) {
 
 async function retrieveRecords(endpoint, value) {
   if (Array.isArray(value)) return value;
-  if (Utils.isStream(value)) return Utils.toStream(value).thru(Utils.toBuffer);
-  // TODO: proper error handling
-  if (value === null || typeof value !== 'object') throw new Error();
 
-  return endpoint.retrieveRecords(value.from, value.to);
+  return Utils
+    .toStream(value)
+    .thru(Utils.toBuffer)
+    .catch(() => {
+      if (value !== null && typeof value === 'object') return endpoint.retrieveRecords(value.from, value.to);
+
+      throw new TypeError('The records must be provided as a stream, an iterable or a window object.');
+    });
 }
 
 function computeAverages(values) {
@@ -115,7 +124,7 @@ function computeAverages(values) {
     return counts;
   }, { actualLoad: 0, predictedLoad: 0, predictedStandardDeviation: 0, absoluteDifference: 0 });
 
-  Object.keys(counts).forEach((key) => counts[key] /= length);
+  for (const key in counts) counts[key] /= length;
 
   return counts;
 }

@@ -1,6 +1,7 @@
 const test = require('ava');
 
 const EnergyKit = require('../src/index');
+const Utils = require('./utils');
 
 
 test.before(require('dotenv').load);
@@ -14,27 +15,33 @@ test.beforeEach((t) => {
 
 // Must be serial as it has side effects on `process.env`
 test.serial('fails with invalid configurations', async(t) => {
-  const WRONG_TOKEN = 'I am a bad, bad token';
-  const WRONG_SECRET = 713705;
+  const INVALID_TOKENS = [null, 1463, new Array(), new Date, 'very bad token'];
+  const INVALID_SECRETS = ['', 713705, [], Symbol(), Promise.resolve('hi!')];
+  const INVALID_OBJECTS = Utils.INVALID_OBJECTS;
 
+  await Promise.all(INVALID_OBJECTS.map((configuration) => t.throws(EnergyKit.initialize(configuration))));
+
+  // Invalid secrets, valid token passed through an environment variable
+  await Promise.all(INVALID_SECRETS.map((secret) => t.throws(EnergyKit.initialize({ secret }))));
+
+  // Invalid tokens passed through an environment variable
+  for (const token of INVALID_TOKENS) {
+    process.env.CRAFT_AI_TOKEN = token;
+    await t.throws(EnergyKit.initialize());
+  }
+
+  // Other cases, tokens passed as a property of the kit's configuration
   delete process.env.CRAFT_AI_TOKEN;
 
-  await Promise.all([
-    t.throws(EnergyKit.initialize()),
-    t.throws(EnergyKit.initialize({ token: null })),
-  ]);
+  await Promise.all([EnergyKit.initialize()]
+    .concat(INVALID_TOKENS.map((token) => EnergyKit.initialize({ token })))
+    .concat(INVALID_SECRETS.map((secret) => EnergyKit.initialize({ token: t.context.token, secret })))
+    .map((promise) => t.throws(promise)));
 
-  process.env.CRAFT_AI_TOKEN = WRONG_TOKEN;
-
-  await Promise.all([
-    t.throws(EnergyKit.initialize()),
-    t.throws(EnergyKit.initialize({ token: WRONG_TOKEN })),
-    t.throws(EnergyKit.initialize({ token: t.context.token, secret: WRONG_SECRET })),
-  ]);
 });
 
 test('initializes the kit', async(t) => {
-  const SECRET = 'a very strong secret';
+  const SECRET = 'valid secret';
 
   const promise = EnergyKit.initialize();
 

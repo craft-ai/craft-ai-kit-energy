@@ -7,9 +7,10 @@ const Constants = require('../constants');
 function formatRecords(features, records) {
   return records
     // Remove unknown keys
-    .tap((record) => Object.keys(record).forEach((key) => {
-      if (key !== DATE && !features.includes(key)) delete record[key];
-    }))
+    .tap((record) => {
+      for (const key in record)
+        if (key !== DATE && !features.includes(key)) delete record[key];
+    })
     // Remove unchanged features
     .loop((previous, record) => {
       features.forEach((key) => {
@@ -46,10 +47,13 @@ function mergeUntilFirstFullRecord(features, records) {
     .skipWhile(Utils.isNull);
 }
 
-function toRecordStream(value) {
+function toRecordStream(values) {
   return Utils
-    .toStream(value)
+    .toStream(values)
     .map((value) => {
+      if (value === null || typeof value !== 'object')
+        throw new TypeError(`A record must be an "object". Received "${value === null ? 'null' : typeof value}".`);
+
       const date = Utils.parseDate(value[DATE]);
       const record = Object.assign({}, value);
 
@@ -75,8 +79,8 @@ function checkRecordsAreSorted(records) {
       if (!previous) return { seed: record };
       if (!record) return { value: previous };
 
-      // TODO: proper error handling
-      if (previous[DATE] > record[DATE]) throw new Error();
+      if (previous[DATE] > record[DATE])
+        throw new Error('The records must be sorted by ascending date.');
 
       // Merge records on the same date
       return previous[DATE] === record[DATE]

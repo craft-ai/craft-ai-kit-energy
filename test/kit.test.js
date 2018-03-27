@@ -9,13 +9,20 @@ test.beforeEach((t) => Utils.createContext(t));
 test.afterEach.always((t) => Utils.destroyContext(t));
 
 
-test('fails loading an endpoint with invalid parameters', (t) => {
+test('fails loading an endpoint with invalid definition', (t) => {
+  const INVALID_DEFINITIONS = [undefined, null, 'string', 364, Promise.resolve({})];
+  const INVALID_IDENTIFIERS = [undefined, null, 364, [false]];
+  const INVALID_NUMBERS = Utils.INVALID_NUMBERS;
+  const INVALID_OBJECTS = Utils.INVALID_OBJECTS;
+
   const kit = t.context.kit;
 
-  return Promise.all([
-    t.throws(kit.loadEndpoint()),
-    t.throws(kit.loadEndpoint({})),
-  ]);
+  return Promise.all(INVALID_DEFINITIONS
+    .concat(INVALID_IDENTIFIERS.map((id) => ({ id })))
+    .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', learning: value })))
+    .concat(INVALID_NUMBERS.map((value) => ({ id: 'id', learning: { maxRecords: value } })))
+    .concat(INVALID_NUMBERS.map((value) => ({ id: 'id', learning: { maxRecordAge: value } })))
+    .map((definition) => t.throws(kit.loadEndpoint(definition))));
 });
 
 test('loads an endpoint', async(t) => {
@@ -55,16 +62,21 @@ test('loads an endpoint', async(t) => {
   t.snapshot(endpointA);
 });
 
-test('derives the agent\'s identifier when a secret is specified', async(t) => {
+test('derives the agent\'s identifier when a secret is specified', (t) => {
   const SECRET = 'a very strong secret';
   const ID = 'test';
 
-  const kit = await EnergyKit.initialize({ secret: SECRET });
-  const agentId = (await kit.loadEndpoint({ id: ID })).agentId;
+  return EnergyKit
+    .initialize({ secret: SECRET })
+    .then((kit) => kit.loadEndpoint({ id: ID }))
+    .then((endpoint) => {
+      const agentId = endpoint.agentId;
 
-  t.truthy(agentId);
-  t.is(typeof agentId, 'string');
-  t.not(agentId, ID);
+      t.truthy(agentId);
+      t.is(typeof agentId, 'string');
+      t.not(agentId, ID);
+    });
+
 });
 
 test('configures the agent\'s learning configuration', (t) => {
@@ -72,11 +84,10 @@ test('configures the agent\'s learning configuration', (t) => {
 
   const context = t.context;
   const kit = context.kit;
-  const id = context.endpoint.register();
 
   return kit
-    .loadEndpoint({ id, learning: { maxRecords: SEED, maxRecordAge: SEED } })
-    .then(() => kit.client.getAgent(id))
+    .loadEndpoint({ id: context.endpoint.register(), learning: { maxRecords: SEED, maxRecordAge: SEED } })
+    .then((endpoint) => kit.client.getAgent(endpoint.agentId))
     .then((agent) => {
       t.truthy(agent);
       t.is(typeof agent, 'object');

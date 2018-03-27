@@ -6,19 +6,28 @@ const Kit = require('./kit');
 
 
 async function initialize(configuration = {}) {
-  const token = configuration.token || process.env.CRAFT_AI_TOKEN || process.env.CRAFT_TOKEN;
+  if (configuration === null || typeof configuration !== 'object')
+    throw new TypeError(`The kit's configuration must be an "object". Received "${configuration === null ? 'null' : typeof configuration}".`);
 
-  // TODO: proper error handling
-  if (!token) throw new Error();
+  const token = configuration.token || process.env.CRAFT_AI_TOKEN || process.env.CRAFT_TOKEN;
+  const secret = configuration.secret;
+
+  if (!token)
+    throw new Error('A craft ai access token is required to initialize the kit. The token must be provided either as part of the kit\'s configuration or through the environment variable "CRAFT_AI_TOKEN", but none was found.');
+  if (typeof token !== 'string')
+    throw new TypeError(`The "token" property of the kit's configuration must be a "string". Received "${typeof token}".`);
 
   configuration.token = token;
 
-  if (configuration.secret) {
-    // TODO: proper error handling
-    if (typeof configuration.secret !== 'string') throw new Error();
+  /* istanbul ignore else */
+  if (secret !== undefined) {
+    if (typeof secret !== 'string')
+      throw new TypeError(`The "secret" property of the kit's configuration must be a "string". Received "${typeof secret}".`);
+    if (!secret)
+      throw new RangeError('The "secret" property of the kit\'s configuration must be a non-empty "string".');
 
-    configuration.namespace = uuid(configuration.secret, ROOT_NAMESPACE);
-  }
+    configuration.namespace = uuid(secret, ROOT_NAMESPACE);
+  } else if (process.env.NODE_ENV !== 'test') console.warn('WARNING: No secret was defined in the kit\'s configuration.');
 
   return Object.create(Kit, {
     configuration: { value: configuration },

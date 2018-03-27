@@ -9,20 +9,18 @@ test.beforeEach(Utils.createContext);
 test.afterEach.always(Utils.destroyContext);
 
 
-test('fails updating the endpoint with invalid parameters', (t) => {
+test('fails updating the endpoint with invalid records', (t) => {
+  const INVALID_RECORDS = [undefined, null, false, 762, 'records'];
+
   const context = t.context;
   const kit = context.kit;
 
   return kit
     .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => Promise.all([
-      t.throws(endpoint.update()),
-      t.throws(endpoint.update(null)),
-      t.throws(endpoint.update(false)),
-      t.throws(endpoint.update(1)),
-      t.throws(endpoint.update({})),
-      t.throws(endpoint.update('records')),
-    ]));
+    .then((endpoint) => Promise.all([{}]
+      .concat(INVALID_RECORDS)
+      .concat(INVALID_RECORDS.map((record) => [record]))
+      .map((records) => t.throws(endpoint.update(records)))));
 });
 
 test('fails updating the endpoint with records not passed in chronological order', (t) => {

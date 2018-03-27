@@ -6,8 +6,10 @@ const Endpoint = require('./endpoint');
 
 
 async function loadEndpoint(definition) {
-  // TODO: proper error handling
-  if (!definition || !definition.id) throw new Error();
+  if (definition === null || typeof definition !== 'object')
+    throw new TypeError(`The endpoint's definition must be an "object". Received "${definition === null ? 'null' : typeof definition}".`);
+  if (typeof definition.id !== 'string')
+    throw new TypeError(`The "id" property of the endpoint's definition must be a "string". Received "${definition.id === null ? 'null' : typeof definition.id}".`);
 
   const namespace = this.configuration.namespace;
   const agentId = definition.agentId || (namespace ? uuid(definition.id, namespace) : definition.id);
@@ -32,14 +34,20 @@ async function loadEndpoint(definition) {
 async function close(configuration) { /* Does nothing at the moment. */ }
 
 
-async function retrieveAgent(client, agentId, learning) {
-  // TODO: Check the learning configuration
+async function retrieveAgent(client, agentId, learning = {}) {
+  if (learning === null || typeof learning !== 'object')
+    throw new TypeError(`The "learning" property of the endpoint's definition must be an "object". Received "${learning === null ? 'null' : typeof learning}".`);
+  if (learning.maxRecords !== undefined && typeof learning.maxRecords !== 'number')
+    throw new TypeError(`The "maxRecords" property of the endpoint's learning definition must be a "number". Received "${learning.maxRecords === null ? 'null' : typeof learning.maxRecords}".`);
+  if (learning.maxRecordAge !== undefined && typeof learning.maxRecordAge !== 'number')
+    throw new TypeError(`The "maxRecordAge" property of the endpoint's learning definition must be a "number". Received "${learning.maxRecordAge === null ? 'null' : typeof learning.maxRecordAge}".`);
 
   // TODO: proper debug
   console.log(`${'-'.repeat(10)} retrieving agent "${agentId}".`);
 
   return client
     .getAgent(agentId)
+    // TODO: Check the configuration of the retrieved agent
     .catch((error) => {
       /* istanbul ignore else */
       if (error instanceof craftaiErrors.CraftAiBadRequestError && error.message.includes('[NotFound]'))
