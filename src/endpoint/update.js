@@ -3,6 +3,7 @@ const most = require('most');
 
 const Common = require('./common');
 const Constants = require('../constants');
+const Provider = require('../provider');
 
 
 async function update(records) {
@@ -19,6 +20,8 @@ async function update(records) {
   return Common
     .toRecordStream(records)
     // TODO: Convert index values to mean electrical loads
+    // Extend the record with providers
+    .thru(Provider.extendRecords.bind(null, this))
     .thru(end === undefined
       ? Common.mergeUntilFirstFullRecord.bind(null, features)
       : ignoreOldRecords.bind(null, end))

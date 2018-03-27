@@ -4,6 +4,7 @@ const uuid = require('uuid/v5');
 
 const Constants = require('./constants');
 const Endpoint = require('./endpoint');
+const Provider = require('./provider');
 
 
 async function loadEndpoint(definition) {
@@ -21,35 +22,39 @@ async function loadEndpoint(definition) {
   const namespace = this.configuration.namespace;
   const agentId = definition.agentId || (namespace ? uuid(id, namespace) : id);
 
-  return retrieveAgent(log, this.client, agentId, definition.learning).then((agent) => {
-    const context = agent.configuration.context;
-    const contextKeys = Object.keys(context);
-    const features = contextKeys.filter((feature) => !context[feature].is_generated);
-    const generated = contextKeys.filter((feature) => context[feature].is_generated);
+  return generateAgentConfiguration(log, this.configuration.providers, definition.learning)
+    .then((agentConfiguration) => retrieveAgent(log, this.client, agentId, agentConfiguration))
+    .then((agent) => {
+      const context = agent.configuration.context;
+      const contextKeys = Object.keys(context);
+      const features = contextKeys.filter((feature) => !context[feature].is_generated);
+      const generated = contextKeys.filter((feature) => context[feature].is_generated);
 
-    log('loaded');
+      log('loaded');
 
-    return Object.create(Endpoint, {
-      agent: { value: agent, configurable: true },
-      debug: { value: log },
-      definition: { value: definition },
-      features: { value: features },
-      generated: { value: generated },
-      kit: { value: this },
-      agentId: { value: agentId, enumerable: true },
-      id: { value: id, enumerable: true },
+      return Object.create(Endpoint, {
+        agent: { value: agent, configurable: true },
+        debug: { value: log },
+        definition: { value: definition },
+        features: { value: features },
+        generated: { value: generated },
+        kit: { value: this },
+        agentId: { value: agentId, enumerable: true },
+        id: { value: id, enumerable: true },
+        metadata: { value: definition.metadata, enumerable: true },
+      });
     });
-  });
 }
 
 async function close(configuration) {
-  /* Does nothing at the moment. */
-  this.debug('closed');
+  return Provider
+    .close(this.configuration.providers)
+    .then(() => this.debug('closed'));
 }
 
 
-async function retrieveAgent(log, client, agentId, learning = {}) {
-  log('retrieving the agent "%s"', agentId);
+async function generateAgentConfiguration(log, providers, learning = {}) {
+  log('generating the agent\'s configuration');
 
   if (learning === null || typeof learning !== 'object')
     throw new TypeError(`The "learning" property of the endpoint's definition must be an "object". Received "${learning === null ? 'null' : typeof learning}".`);
@@ -57,6 +62,27 @@ async function retrieveAgent(log, client, agentId, learning = {}) {
     throw new TypeError(`The "maxRecords" property of the endpoint's learning definition must be a "number". Received "${learning.maxRecords === null ? 'null' : typeof learning.maxRecords}".`);
   if (learning.maxRecordAge !== undefined && typeof learning.maxRecordAge !== 'number')
     throw new TypeError(`The "maxRecordAge" property of the endpoint's learning definition must be a "number". Received "${learning.maxRecordAge === null ? 'null' : typeof learning.maxRecordAge}".`);
+
+  return Provider
+    .extendConfiguration(providers, {
+      time: { type: 'time_of_day' },
+      day: { type: 'day_of_week' },
+      month: { type: 'month_of_year' },
+      [TIMEZONE]: { type: 'timezone' },
+      [LOAD]: { type: 'continuous' }
+    })
+    .then((context) => ({
+      context,
+      output: ['load'],
+      operations_as_events: true,
+      tree_max_depth: 6,
+      tree_max_operations: learning && learning.maxRecords || 50000,
+      learning_period: learning && learning.maxRecordAge || 365 * 24 * 60 * 60
+    }));
+}
+
+async function retrieveAgent(log, client, agentId, agentConfiguration) {
+  log('retrieving the agent "%s"', agentId);
 
   return client
     .getAgent(agentId)
@@ -71,7 +97,7 @@ async function retrieveAgent(log, client, agentId, learning = {}) {
       if (error instanceof craftaiErrors.CraftAiBadRequestError && error.message.includes('[NotFound]')) {
         log('the agent does not exist');
 
-        return createAgent(log, client, agentId, learning);
+        return createAgent(log, client, agentId, agentConfiguration);
       }
 
       /* istanbul ignore next */
@@ -80,24 +106,11 @@ async function retrieveAgent(log, client, agentId, learning = {}) {
     });
 }
 
-async function createAgent(log, client, agentId, learning) {
+async function createAgent(log, client, agentId, agentConfiguration) {
   log('creating the agent');
 
   return client
-    .createAgent({
-      context: {
-        time: { type: 'time_of_day' },
-        day: { type: 'day_of_week' },
-        month: { type: 'month_of_year' },
-        [TIMEZONE]: { type: 'timezone' },
-        [LOAD]: { type: 'continuous' }
-      },
-      output: ['load'],
-      operations_as_events: true,
-      tree_max_depth: 6,
-      tree_max_operations: learning && learning.maxRecords || 50000,
-      learning_period: learning && learning.maxRecordAge || 365 * 24 * 60 * 60
-    }, agentId)
+    .createAgent(agentConfiguration, agentId)
     .then((agent) => {
       log('the agent has been created');
 

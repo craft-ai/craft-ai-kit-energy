@@ -4,6 +4,7 @@ const uuid = require('uuid/v5');
 
 const Constants = require('./constants');
 const Kit = require('./kit');
+const Provider = require('./provider');
 
 
 async function initialize(configuration = {}) {
@@ -34,15 +35,28 @@ async function initialize(configuration = {}) {
     configuration.namespace = uuid(secret, ROOT_NAMESPACE);
   } else if (process.env.NODE_ENV !== 'test') console.warn('WARNING: No secret was defined in the kit\'s configuration.');
 
+  const providers = configuration.providers;
   const client = createClient(token, configuration.recordBulkSize);
-
-  log('initialized and linked to the project "%s/%s"', client.cfg.owner, client.cfg.project);
-
-  return Object.create(Kit, {
+  const kit = Object.create(Kit, {
     configuration: { value: configuration },
     debug: { value: log },
     client: { value: client },
   });
+
+  log('created and linked to the project "%s/%s"', client.cfg.owner, client.cfg.project);
+
+  if (providers !== undefined) {
+    if (!Array.isArray(providers))
+      throw new TypeError(`The "providers" property of the kit's configuration must be an "array". Received "${typeof providers}".`);
+
+    await Promise
+      .all(providers.map(Provider.initialize.bind(null, kit)))
+      .then((providers) => configuration.providers = providers);
+  } else configuration.providers = [];
+
+  log('initialized');
+
+  return kit;
 }
 
 

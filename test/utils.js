@@ -6,9 +6,9 @@ const EnergyKit = require('../src/index');
 const Utils = require('../src/utils');
 
 
-function createContext(t) {
+function createContext(t, configuration = {}) {
   return EnergyKit
-    .initialize({ recordBulkSize: 1000 })
+    .initialize(Object.assign({ recordBulkSize: 1000 }, configuration))
     .then((kit) => {
       const id = t.title;
       const random = seedrandom(id);
@@ -28,8 +28,12 @@ function createContext(t) {
 
 function destroyContext(t) {
   const context = t.context;
+  const kit = context.kit;
+  const client = kit.client;
 
-  return Promise.all([...context.endpoint.all].map((id) => context.kit.client.deleteAgent(id)));
+  return Promise
+    .all([...context.endpoint.all].map((id) => client.deleteAgent(id)))
+    .then(() => kit.close());
 }
 
 function identity(value) { return value; }

@@ -1,6 +1,5 @@
 const test = require('ava');
 
-const EnergyKit = require('../src/index');
 const Utils = require('./utils');
 
 
@@ -62,21 +61,22 @@ test('loads an endpoint', async(t) => {
   t.snapshot(endpointA);
 });
 
-test('derives the agent\'s identifier when a secret is specified', (t) => {
-  const SECRET = 'a very strong secret';
-  const ID = 'test';
+test('derives the agent\'s identifier when a secret is specified', async(t) => {
+  await Utils.createContext(t, { secret: 'a very strong secret' });
 
-  return EnergyKit
-    .initialize({ secret: SECRET })
-    .then((kit) => kit.loadEndpoint({ id: ID }))
+  const context = t.context;
+  const kit = context.kit;
+  const id = context.endpoint.register('test');
+
+  return kit
+    .loadEndpoint({ id })
     .then((endpoint) => {
       const agentId = endpoint.agentId;
 
       t.truthy(agentId);
       t.is(typeof agentId, 'string');
-      t.not(agentId, ID);
+      t.not(agentId, id);
     });
-
 });
 
 test('configures the agent\'s learning configuration', (t) => {
