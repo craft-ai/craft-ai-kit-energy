@@ -43,7 +43,8 @@
     "dotenv": "latest",
     "eslint": "latest",
     "eslint-config-craft-ai": "^2.3.0",
-    "nyc": "latest"
+    "nyc": "latest",
+    "seedrandom": "latest"
   },
   "ava": {
     "require": [

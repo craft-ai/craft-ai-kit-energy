@@ -17,7 +17,7 @@ async function loadEndpoint(definition) {
     const features = Object.keys(context).filter((feature) => !context[feature].is_generated);
 
     return Object.create(Endpoint, {
-      agent: { value: agent },
+      agent: { configurable: true, value: agent },
       definition: { value: definition },
       features: { value: features },
       kit: { value: this },

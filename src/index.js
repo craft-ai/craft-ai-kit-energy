@@ -22,7 +22,7 @@ async function initialize(configuration = {}) {
 
   return Object.create(Kit, {
     configuration: { value: configuration },
-    client: { value: createClient(token) },
+    client: { value: createClient(token, configuration.recordBulkSize) },
   });
 }
 

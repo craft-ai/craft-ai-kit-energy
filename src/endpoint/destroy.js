@@ -7,7 +7,11 @@ async function destroy() {
 
   return kit.client
     .deleteAgent(agentId)
-    .then(() => this.agent = null)
+    .then(() => {
+      delete this.agent;
+
+      return;
+    })
     .catch(/* istanbul ignore next */(error) => {
       // TODO: proper error handling
       throw error;
