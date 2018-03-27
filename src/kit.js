@@ -14,12 +14,15 @@ async function loadEndpoint(definition) {
 
   return retrieveAgent(this.client, agentId, definition.learning).then((agent) => {
     const context = agent.configuration.context;
-    const features = Object.keys(context).filter((feature) => !context[feature].is_generated);
+    const contextKeys = Object.keys(context);
+    const features = contextKeys.filter((feature) => !context[feature].is_generated);
+    const generated = contextKeys.filter((feature) => context[feature].is_generated);
 
     return Object.create(Endpoint, {
       agent: { configurable: true, value: agent },
       definition: { value: definition },
       features: { value: features },
+      generated: { value: generated },
       kit: { value: this },
       agentId: { value: agentId, enumerable: true },
     });

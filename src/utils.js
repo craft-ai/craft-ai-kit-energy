@@ -12,6 +12,16 @@ function formatTimezone(offset) {
 
 function isNull(value) { return value === null; }
 
+function isPredictiveModel(value) {
+  return value !== null
+    && typeof value === 'object'
+    && typeof value._version === 'string'
+    && typeof value.trees === 'object'
+    && typeof value.configuration === 'object'
+    && value.trees !== null
+    && value.configuration !== null;
+}
+
 function isStream(value) {
   return value !== null
     && typeof value === 'object'
@@ -29,6 +39,16 @@ function parseDate(value) {
     : value instanceof Date
       ? DateTime.fromJSDate(value)
       : DateTime.fromMillis(value);
+}
+
+function parseTimestamp(value) {
+  if (value === undefined) return value;
+
+  const date = parseDate(value);
+
+  if (date && date.isValid) return Math.floor(date.valueOf() / 1000);
+
+  throw new Error();
 }
 
 function toStream(value) {
@@ -62,7 +82,9 @@ const DateTime = luxon.DateTime;
 module.exports = {
   formatTimezone,
   isNull,
+  isPredictiveModel,
   isStream,
   parseDate,
+  parseTimestamp,
   toStream,
 };

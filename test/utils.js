@@ -3,6 +3,7 @@ const stream = require('stream');
 const uuid = require('uuid/v5');
 
 const EnergyKit = require('../src/index');
+const Utils = require('../src/utils');
 
 
 function identity(value) { return value; }
@@ -79,7 +80,7 @@ const INVALID_DATES = [
 const RECORDS = require('./data/records');
 
 
-module.exports = {
+module.exports = Object.assign({
   createContext,
   destroyContext,
   identity,
@@ -87,4 +88,4 @@ module.exports = {
   INPUT_METHODS,
   INVALID_DATES,
   RECORDS,
-};
+}, Utils);
