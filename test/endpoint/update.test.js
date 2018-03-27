@@ -91,9 +91,10 @@ test('filters out records with invalid date formats', (t) => {
   const kit = context.kit;
   const client = kit.client;
 
+  const dates = INVALID_DATES.concat([null]);
   const records = RECORDS
-    .slice(0, INVALID_DATES.length)
-    .map((record, index) => Object.assign({}, record, { [DATE]: INVALID_DATES[index] }));
+    .slice(0, dates.length)
+    .map((record, index) => Object.assign({}, record, { [DATE]: dates[index] }));
 
   return t.notThrows(Promise.all(INPUTS.map((pipe) => kit
     .loadEndpoint({ id: context.endpoint.register() })

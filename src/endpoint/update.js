@@ -6,23 +6,22 @@ const Constants = require('../constants');
 
 
 async function update(records) {
-  const agentId = this.agentId;
+  this.debug('updating');
 
-  console.log(`${'-'.repeat(10)} updating agent "${agentId}".`);
-
-  const client = this.kit.client;
   const agent = this.agent;
+  const agentId = this.agentId;
+  const client = this.kit.client;
   const features = this.features;
-  const lastSavedRecordDate = agent.lastTimestamp;
+  const end = agent.lastTimestamp;
 
   let failed = false;
 
   return Common
     .toRecordStream(records)
     // TODO: Convert index values to mean electrical loads
-    .thru(lastSavedRecordDate === undefined
+    .thru(end === undefined
       ? Common.mergeUntilFirstFullRecord.bind(null, features)
-      : ignoreOldRecords.bind(null, lastSavedRecordDate))
+      : ignoreOldRecords.bind(null, end))
     // Send the context operations by bulks.
     .thru(Common.formatRecords.bind(null, features))
     .thru(buffer(client.cfg.operationsChunksSize))
@@ -35,19 +34,30 @@ async function update(records) {
     })
     .concatMap((history) => most.fromPromise(client
       .addAgentContextOperations(agentId, history)
-      .then(() => history)
+      .then(() => {
+        this.debug('added %d records to the agent\'s history', history.length);
+
+        return history;
+      })
       .catch(/* istanbul ignore next */(error) => {
         if (!failed) throw error;
       })))
     // Update agent's local state
-    .reduce((agent, history) => {
-      if (!agent.firstTimestamp) agent.firstTimestamp = history[0].timestamp;
+    .reduce((result, history) => {
+      if (!result.start) result.start = history[0].timestamp;
 
-      agent.lastTimestamp = history[history.length - 1].timestamp;
+      result.end = history[history.length - 1].timestamp;
 
-      return agent;
-    }, Object.assign(agent, { lastContextUpdate: Date.now() }))
-    .then(() => this);
+      return result;
+    }, { start: agent.start, end })
+    .then((result) => {
+      agent.firstTimestamp = result.start;
+      agent.lastTimestamp = result.end;
+      agent.lastContextUpdate = Date.now();
+      this.debug('updated', agentId);
+
+      return this;
+    });
 }
 
 

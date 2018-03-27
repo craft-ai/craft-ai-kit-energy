@@ -6,6 +6,8 @@ const Utils = require('../utils');
 
 
 async function computeAnomalies(records, options, model) {
+  this.debug('computing anomalies');
+
   if (options === null || options === undefined) options = {};
   else if (typeof options !== 'object')
     throw TypeError(`The "options" argument must be an "object". Received "${typeof options}".`);
@@ -34,39 +36,51 @@ async function computeAnomalies(records, options, model) {
           && absoluteDifference >= minSigmaDifference * prediction.standardDeviation;
       });
 
+      this.debug('found %d anomalies among %d records', values.length, records.length);
+
       return { values, recordsCount: records.length };
     }));
 }
 
 async function computePredictions(states, model) {
+  this.debug('computing predictions');
+
   const features = this.features.filter((feature) => feature !== LOAD);
 
-  return retrieveModel(this, model).then((model) => Common
-    .toRecordStream(states)
-    .thru(Common.mergeUntilFirstFullRecord.bind(null, features))
-    .thru(Common.formatRecords.bind(null, features))
-    .loop((previous, state) => {
-      const context = state.context;
-      const current = Object.assign(previous, context);
-      const result = interpreter.decide(model, current, new craftai.Time(state[TIMESTAMP]));
-      const output = result.output[LOAD];
+  return retrieveModel(this, model)
+    .then((model) => Common
+      .toRecordStream(states)
+      .thru(Common.mergeUntilFirstFullRecord.bind(null, features))
+      .thru(Common.formatRecords.bind(null, features))
+      .loop((previous, state) => {
+        const context = state.context;
+        const current = Object.assign(previous, context);
+        const result = interpreter.decide(model, current, new craftai.Time(state[TIMESTAMP]));
+        const output = result.output[LOAD];
 
-      return {
-        seed: current,
-        value: Object.defineProperty({
-          date: context[PARSED_DATE].toJSDate(),
-          context: result.context,
-          predictedLoad: output.predicted_value,
-          confidence: output.confidence,
-          standardDeviation: output.standard_deviation,
-          decisionRules: output.decision_rules
-        }, ORIGINAL_RECORD, { value: context[ORIGINAL_RECORD] })
-      };
-    }, {})
-    .thru(Utils.toBuffer));
+        return {
+          seed: current,
+          value: Object.defineProperty({
+            date: context[PARSED_DATE].toJSDate(),
+            context: result.context,
+            predictedLoad: output.predicted_value,
+            confidence: output.confidence,
+            standardDeviation: output.standard_deviation,
+            decisionRules: output.decision_rules
+          }, ORIGINAL_RECORD, { value: context[ORIGINAL_RECORD] })
+        };
+      }, {})
+      .thru(Utils.toBuffer))
+    .then((predictions) => {
+      this.debug('computed %d predictions', predictions.length);
+
+      return predictions;
+    });
 }
 
 async function computeReport(records, options, model) {
+  this.debug('computing a report');
+
   if (options !== null && typeof options === 'object') {
     if (options.minConfidence === undefined) options.minConfidence = .4;
     if (options.minAbsoluteDifference === undefined) options.minAbsoluteDifference = 0;
@@ -77,6 +91,8 @@ async function computeReport(records, options, model) {
     .computeAnomalies(records, options, model)
     .then((result) => {
       const values = result.values;
+
+      this.debug('computed the report');
 
       return {
         values,

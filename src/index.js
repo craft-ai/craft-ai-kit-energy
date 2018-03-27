@@ -1,4 +1,5 @@
 const craftai = require('craft-ai');
+const debug = require('debug');
 const uuid = require('uuid/v5');
 
 const Constants = require('./constants');
@@ -6,6 +7,10 @@ const Kit = require('./kit');
 
 
 async function initialize(configuration = {}) {
+  const log = debug(DEBUG_PREFIX);
+
+  log('initializing');
+
   if (configuration === null || typeof configuration !== 'object')
     throw new TypeError(`The kit's configuration must be an "object". Received "${configuration === null ? 'null' : typeof configuration}".`);
 
@@ -29,9 +34,14 @@ async function initialize(configuration = {}) {
     configuration.namespace = uuid(secret, ROOT_NAMESPACE);
   } else if (process.env.NODE_ENV !== 'test') console.warn('WARNING: No secret was defined in the kit\'s configuration.');
 
+  const client = createClient(token, configuration.recordBulkSize);
+
+  log('initialized and linked to the project "%s/%s"', client.cfg.owner, client.cfg.project);
+
   return Object.create(Kit, {
     configuration: { value: configuration },
-    client: { value: createClient(token, configuration.recordBulkSize) },
+    debug: { value: log },
+    client: { value: client },
   });
 }
 
@@ -49,8 +59,9 @@ function createClient(token, bulkSize = DEFAULT_RECORD_BULK_SIZE) {
 }
 
 
-const ROOT_NAMESPACE = uuid.DNS;
+const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
 const DEFAULT_RECORD_BULK_SIZE = Constants.DEFAULT_RECORD_BULK_SIZE;
+const ROOT_NAMESPACE = uuid.DNS;
 
 
 module.exports = {

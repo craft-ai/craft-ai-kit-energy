@@ -31,7 +31,7 @@ test('retrieves the records\' history of an endpoint', (t) => {
   const firstIndex = context.random(middle);
   const secondIndex = middle + context.random(middle);
   const start = RECORDS[firstIndex][DATE];
-  const end = RECORDS[secondIndex][DATE];
+  const end = RECORDS[secondIndex - 1][DATE];
 
   return t.notThrows(kit
     .loadEndpoint({ id: t.context.endpoint.register() })
@@ -42,16 +42,19 @@ test('retrieves the records\' history of an endpoint', (t) => {
     .then((endpoint) => Promise.all([
       endpoint.retrieveRecords(),
       endpoint.retrieveRecords(start),
+      endpoint.retrieveRecords(null, end),
       endpoint.retrieveRecords(start, end),
     ]))
     .then((values) => {
       values.forEach((history) => t.true(Array.isArray(history)));
       t.is(values[0].length, length);
       t.is(values[1].length, length - firstIndex);
-      t.is(values[2].length, secondIndex - firstIndex + 1);
+      t.is(values[2].length, secondIndex);
+      t.is(values[3].length, secondIndex - firstIndex);
       t.deepEqual(values[0].map((record) => Object.assign({}, record, { date: record[DATE].toISOString() })), RECORDS);
       t.deepEqual(values[1], values[0].slice(firstIndex));
-      t.deepEqual(values[2], values[1].slice(0, secondIndex - firstIndex + 1));
+      t.deepEqual(values[2], values[0].slice(0, secondIndex));
+      t.deepEqual(values[3], values[1].slice(0, secondIndex - firstIndex));
       t.snapshot(values[0]);
     }));
 });

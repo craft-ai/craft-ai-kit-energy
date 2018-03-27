@@ -44,7 +44,7 @@ function parseDate(value) {
 }
 
 function parseTimestamp(value) {
-  if (value === undefined) return value;
+  if (value === undefined || value === null) return;
 
   const date = parseDate(value);
 

@@ -1,16 +1,14 @@
 async function destroy() {
-  const agentId = this.agentId;
-  const kit = this.kit;
+  this.debug('destroying');
 
-  // TODO: proper debug
-  console.log(`${'-'.repeat(10)} deleting agent "${agentId}".`);
+  const client = this.kit.client;
 
-  return kit.client
-    .deleteAgent(agentId)
+  return client
+    .deleteAgent(this.agentId)
     .then(() => {
       delete this.agent;
-
-      return;
+      this.debug('the agent has been deleted');
+      this.debug('destroyed');
     })
     .catch(/* istanbul ignore next */(error) => {
       // TODO: proper error handling
