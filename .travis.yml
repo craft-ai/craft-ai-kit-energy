@@ -12,15 +12,28 @@ after_success:
 before_deploy:
   - npm run build
 deploy:
-  provider: npm
-  email: ops@craft.ai
-  api_key:
-    secure: pLI5+/Px/f1LW441a5Q+TmkCk9ZtO5c5bhVlGS4Sz+2tqeMZ39OVJCrpIqqkpS1khCaDU+mPtm7snoFeefsTmgxAFu1DowOsfRyMHRHqSH8rz01vOyvhQl2ia2IEKzJRVi6//VqGUWWJ//OxX/7ewchHvR1h4MjZepK2ALigCedZoHrz40B5nMtIjtUujcuAZwglJT6IRDjgLzkLW78t9JQKbNmZsiHnAkhc/bDZakmyJow/mOYTSxMFyVCdmYvJUDEn+oWfaNaliJwsIwijRAR10Y7XBVhi8jwXgtU3cGmFohv0l7AqoCnZDWjg4OJGgStK8fgJT9Bs83XD8oOO3D7V4aL5H1A7FsLCJQ4gXdsj8WTvUVJRvfFpAp+N7a3+G4Z0jrmRS8RHNwkqsOnJVkpciCyTeD2coPRufNbSLXWJQl636hF8cYCEF9Bd2qUzGyZtj8iJirloejAvITVMTD7nt77huyIEleRsPZkiDZy2x5/jzdnM3EhIr+6i3WIG233+ZiOsy0LFnP/JZydp7Mo1FiIi790QOlkx0nX44nQ86ALrSDgPDehp+BfrnR+b0DxhuDzyBXzqCGHzRtIuG/4fmRxjOuoK5Hhzge5yGrCB4KhizzYzQfWwBWfBRL5wQaZbIsrpPu7lYWjOqFO529nU2dxsVC7qTX/RiTOBDNU=
-  on:
-    tags: true
-    repo: craft-ai/craft-ai-kit-energy
-    node: '6.9'
-  skip_cleanup: true
+  - provider: npm
+    tag: latest
+    skip_cleanup: true
+    email: ops@craft.ai
+    api_key:
+      secure: pLI5+/Px/f1LW441a5Q+TmkCk9ZtO5c5bhVlGS4Sz+2tqeMZ39OVJCrpIqqkpS1khCaDU+mPtm7snoFeefsTmgxAFu1DowOsfRyMHRHqSH8rz01vOyvhQl2ia2IEKzJRVi6//VqGUWWJ//OxX/7ewchHvR1h4MjZepK2ALigCedZoHrz40B5nMtIjtUujcuAZwglJT6IRDjgLzkLW78t9JQKbNmZsiHnAkhc/bDZakmyJow/mOYTSxMFyVCdmYvJUDEn+oWfaNaliJwsIwijRAR10Y7XBVhi8jwXgtU3cGmFohv0l7AqoCnZDWjg4OJGgStK8fgJT9Bs83XD8oOO3D7V4aL5H1A7FsLCJQ4gXdsj8WTvUVJRvfFpAp+N7a3+G4Z0jrmRS8RHNwkqsOnJVkpciCyTeD2coPRufNbSLXWJQl636hF8cYCEF9Bd2qUzGyZtj8iJirloejAvITVMTD7nt77huyIEleRsPZkiDZy2x5/jzdnM3EhIr+6i3WIG233+ZiOsy0LFnP/JZydp7Mo1FiIi790QOlkx0nX44nQ86ALrSDgPDehp+BfrnR+b0DxhuDzyBXzqCGHzRtIuG/4fmRxjOuoK5Hhzge5yGrCB4KhizzYzQfWwBWfBRL5wQaZbIsrpPu7lYWjOqFO529nU2dxsVC7qTX/RiTOBDNU=
+    on:
+      repo: craft-ai/craft-ai-kit-energy
+      branch: master
+      node: '6.9'
+      tags: true
+  - provider: npm
+    tag: next
+    skip_cleanup: true
+    email: ops@craft.ai
+    api_key:
+      secure: pLI5+/Px/f1LW441a5Q+TmkCk9ZtO5c5bhVlGS4Sz+2tqeMZ39OVJCrpIqqkpS1khCaDU+mPtm7snoFeefsTmgxAFu1DowOsfRyMHRHqSH8rz01vOyvhQl2ia2IEKzJRVi6//VqGUWWJ//OxX/7ewchHvR1h4MjZepK2ALigCedZoHrz40B5nMtIjtUujcuAZwglJT6IRDjgLzkLW78t9JQKbNmZsiHnAkhc/bDZakmyJow/mOYTSxMFyVCdmYvJUDEn+oWfaNaliJwsIwijRAR10Y7XBVhi8jwXgtU3cGmFohv0l7AqoCnZDWjg4OJGgStK8fgJT9Bs83XD8oOO3D7V4aL5H1A7FsLCJQ4gXdsj8WTvUVJRvfFpAp+N7a3+G4Z0jrmRS8RHNwkqsOnJVkpciCyTeD2coPRufNbSLXWJQl636hF8cYCEF9Bd2qUzGyZtj8iJirloejAvITVMTD7nt77huyIEleRsPZkiDZy2x5/jzdnM3EhIr+6i3WIG233+ZiOsy0LFnP/JZydp7Mo1FiIi790QOlkx0nX44nQ86ALrSDgPDehp+BfrnR+b0DxhuDzyBXzqCGHzRtIuG/4fmRxjOuoK5Hhzge5yGrCB4KhizzYzQfWwBWfBRL5wQaZbIsrpPu7lYWjOqFO529nU2dxsVC7qTX/RiTOBDNU=
+    on:
+      repo: craft-ai/craft-ai-kit-energy
+      branch: next
+      node: '6.9'
+      tags: true
 notifications:
   slack: craft-ai:ZNnQErHJhw40oKmphy3fNGza
   email:
