@@ -1,65 +1,83 @@
-const { retrieveAgent } = require('./agent');
-const { checkConfiguration, DEFAULT_CONFIGURATION } = require('./configuration');
-const { computeAnomalies } = require('./computeAnomalies');
-const { createClient } = require('craft-ai');
-const { update } = require('./update');
-const { predict, PREDICTION_STATUS } = require('./predict');
-const { validate } = require('./validate');
-const createGeolocationClient = require('./geolocation');
-const createHolidays = require('./holidays');
-const createWeatherClient = require('./weather');
+const craftai = require('craft-ai');
+const debug = require('debug');
+const uuid = require('uuid/v5');
 
-const debug = require('debug')('craft-ai:kit-energy');
+const Constants = require('./constants');
+const Kit = require('./kit');
+const Provider = require('./provider');
 
-function createKit(cfg = {}) {
-  cfg = Object.assign({}, DEFAULT_CONFIGURATION, cfg);
 
-  checkConfiguration(cfg);
+async function initialize(configuration = {}) {
+  const log = debug(DEBUG_PREFIX);
 
-  const { darkSkySecretKey, token, weatherCache } = cfg;
-  const clients = {
-    craftai: createClient(token),
-    weather: darkSkySecretKey && createWeatherClient({
-      cache: weatherCache,
-      darkSkySecretKey: darkSkySecretKey
-    }),
-    geolocation: createGeolocationClient(),
-    holidays: createHolidays()
-  };
+  log('initializing');
 
-  cfg.weatherCache = clients.weather && clients.weather.cache;
-  cfg.darkSkySecretKey = clients.weather && clients.weather.darkSkySecretKey;
+  if (configuration === null || typeof configuration !== 'object')
+    throw new TypeError(`The kit's configuration must be an "object". Received "${configuration === null ? 'null' : typeof configuration}".`);
 
-  return {
-    PREDICTION_STATUS,
-    cfg: cfg,
-    clients,
-    terminate: () => {
-      // Nothing to do for now
-      return Promise.resolve();
-    },
-    getLastDataTimestamp: (user) => {
-      return retrieveAgent({ clients }, user)
-        .then(({ lastTimestamp }) => lastTimestamp);
-    },
-    delete: (user) => {
-      debug(`Deleting user ${user.id} if it exists`);
-      return retrieveAgent({ clients }, user)
-        .then(
-          ({ agentId }) => clients.craftai.deleteAgent(agentId).then(() => user),
-          // Ignoring `retrieveAgent` errors, if we can't retrieve it, it means it no longer exists.
-          () => user
-        );
-    },
-    update: (user, data) =>
-      update({ clients }, user, data),
-    predict: (user, predictCfg) =>
-      predict({ cfg, clients }, user, predictCfg),
-    computeAnomalies: (user, computeAnomaliesCfg) =>
-      computeAnomalies({ cfg, clients }, user, computeAnomaliesCfg),
-    validate: (user, validateCfg) =>
-      validate({ cfg, clients }, user, validateCfg),
-  };
+  const token = configuration.token || process.env.CRAFT_AI_TOKEN || process.env.CRAFT_TOKEN;
+  const secret = configuration.secret;
+
+  if (!token)
+    throw new Error('A craft ai access token is required to initialize the kit. The token must be provided either as part of the kit\'s configuration or through the environment variable "CRAFT_AI_TOKEN", but none was found.');
+  if (typeof token !== 'string')
+    throw new TypeError(`The "token" property of the kit's configuration must be a "string". Received "${typeof token}".`);
+
+  configuration.token = token;
+
+  /* istanbul ignore else */
+  if (secret !== undefined) {
+    if (typeof secret !== 'string')
+      throw new TypeError(`The "secret" property of the kit's configuration must be a "string". Received "${typeof secret}".`);
+    if (!secret)
+      throw new RangeError('The "secret" property of the kit\'s configuration must be a non-empty "string".');
+
+    configuration.namespace = uuid(secret, ROOT_NAMESPACE);
+  } else if (process.env.NODE_ENV !== 'test') console.warn('WARNING: No secret was defined in the kit\'s configuration.');
+
+  const providers = configuration.providers;
+  const client = createClient(token, configuration.recordBulkSize);
+  const kit = Object.create(Kit, {
+    configuration: { value: configuration },
+    debug: { value: log },
+    client: { value: client },
+  });
+
+  log('created and linked to the project "%s/%s"', client.cfg.owner, client.cfg.project);
+
+  if (providers !== undefined) {
+    if (!Array.isArray(providers))
+      throw new TypeError(`The "providers" property of the kit's configuration must be an "array". Received "${typeof providers}".`);
+
+    await Promise
+      .all(providers.map(Provider.initialize.bind(null, kit)))
+      .then((providers) => configuration.providers = providers);
+  } else configuration.providers = [];
+
+  log('initialized');
+
+  return kit;
 }
 
-module.exports = createKit;
+
+function createClient(token, bulkSize = DEFAULT_RECORD_BULK_SIZE) {
+  try {
+    return craftai.createClient({
+      token,
+      operationsChunksSize: bulkSize,
+    });
+  } catch (error) {
+    // TODO: proper error handling
+    throw error;
+  }
+}
+
+
+const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
+const DEFAULT_RECORD_BULK_SIZE = Constants.DEFAULT_RECORD_BULK_SIZE;
+const ROOT_NAMESPACE = uuid.DNS;
+
+
+module.exports = {
+  initialize,
+};

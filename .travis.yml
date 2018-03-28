@@ -1,6 +1,16 @@
 language: node_js
 node_js:
-- '6.9'
+  - '6.9'
+  - '8.9'
+cache:
+  directories:
+    - node_modules
+before_install:
+  - npm install -g npm@5
+after_success:
+  - npx nyc report --reporter=text-lcov | npx coveralls
+before_deploy:
+  - npm run build
 deploy:
   provider: npm
   email: ops@craft.ai
@@ -9,11 +19,13 @@ deploy:
   on:
     tags: true
     repo: craft-ai/craft-ai-kit-energy
+    node: '6.9'
+  skip_cleanup: true
 notifications:
   slack: craft-ai:ZNnQErHJhw40oKmphy3fNGza
   email:
-  - ops@craft.ai
+    - ops@craft.ai
 env:
   global:
-  - secure: RDJQbX5k1BeGnmiF1jVrpvOQkxv+vstB361tRL/tJcDMjEw2Fgui+Wk8gX1wpqCTslr0JCLqx/rrSx3hzOwF9e6Yqi5RNtF2NcM4huGTi2HjVrWqUZ8Tx0Y2qK6sPgmZUiW0hSrsKXGY20JwEWOdzDIlC75sh2owL9f1Nvy74zEDIkoN6Y/UKr6F9nobOxtqjR3Kv+Y/7XsunEjzv+s5hCHcXxnW8IOggBjA6OYb6fMvYVBjVQwAnWyA6hJS6daZq4/cMW5MV2SpCnIeQJ8SNN8uCFEa50a14Nf31Rybfnk5YH5XcevaEtoJLaENe0CqykB+mg67vBCBDuyYwLYeov5ayBRnfQ2E3HrKhrvLXUWbAf9dRCSFPEiMlSyvrExr4vVGgO5xYEm09gOe+mQwB2mKN7108HbbrCBLRt+BUEApIxd75HNXWP3dYrlDk1orMXx54JfItP2ZBJUk1x7xfKmRYguRDk02towKRiDhOdLp3t9tBjPmq5p4ujB4btKS+OMywNFo6wjRr6FRypHDE2ei/UjItpZavTTl6PjTVyxkR/tfME9AK82xSYG0UpTylfjHtWY18tX/EITaNi+laU00d700OM6VVVlP7NijePGDIN7QGWn6RyzzoNj1RCJdOSwwgMUXN86ws38kTBiJWI8VgyRpqNrjrJCsBzckugU=
-  - secure: h4DkJhRYgg4hUl49YT23R7iVY5T4ukVlMM6TaYeojXknFySPSbPhU6IS/5fH5goJvXgVoj4XjL1qqD8nIzPEgYwkKI3Tui3+tPjQ8G09qDFX/ENdwuAsRkjqa7+2yJBjG5X0COPC0mep4sTJGidnVzcrq92DTwqDp/sNFEuODYNp6v2ZvjjbScXpiQjMwzA6aeFszjwWP0DPK4c1y/JuNKF3NHr7f6GdbNX2IQb/pAi0R4ZPqnthVEZnXlkjPPA/Rq8naGlUum79CDED5iW86c0cF5CAKPnFaO15MazdTWfEB2gmtr60B33m6bpoPO7esHl5PP2r/nvnOfQgOQ7n7bzmVbxHbImOFebojEda+2g63FgWXRAbCVJh29iSNETPACx5ihWgDbpZBgsO0rI1m56Ymg2z8qwhYpzlyu+Z4Omwr+TiCIB7CM+d9AMKxprliItvRPVjQyXiYCKSUBskOfl5F1zIV3aKiZR6wxEzvWC+ylVNyxBrYAZw9YcLmFM1Y52UmtzEgfxlTYWTS4fMQTH33a+uOfZcVRLFYaUnPCjMSBsrmaJ+1IQ+uHjvCA/IXeuGjJfbxdA506RoAsFEAxgc6DPSZJi2sm1Xdv//CVyVZecRHvY2SFHDkXFCR6yi0NNTGrhL/+JxsnauXyPG/AHkrlOeBkwGa/MF0xulS3A=
+    - secure: RDJQbX5k1BeGnmiF1jVrpvOQkxv+vstB361tRL/tJcDMjEw2Fgui+Wk8gX1wpqCTslr0JCLqx/rrSx3hzOwF9e6Yqi5RNtF2NcM4huGTi2HjVrWqUZ8Tx0Y2qK6sPgmZUiW0hSrsKXGY20JwEWOdzDIlC75sh2owL9f1Nvy74zEDIkoN6Y/UKr6F9nobOxtqjR3Kv+Y/7XsunEjzv+s5hCHcXxnW8IOggBjA6OYb6fMvYVBjVQwAnWyA6hJS6daZq4/cMW5MV2SpCnIeQJ8SNN8uCFEa50a14Nf31Rybfnk5YH5XcevaEtoJLaENe0CqykB+mg67vBCBDuyYwLYeov5ayBRnfQ2E3HrKhrvLXUWbAf9dRCSFPEiMlSyvrExr4vVGgO5xYEm09gOe+mQwB2mKN7108HbbrCBLRt+BUEApIxd75HNXWP3dYrlDk1orMXx54JfItP2ZBJUk1x7xfKmRYguRDk02towKRiDhOdLp3t9tBjPmq5p4ujB4btKS+OMywNFo6wjRr6FRypHDE2ei/UjItpZavTTl6PjTVyxkR/tfME9AK82xSYG0UpTylfjHtWY18tX/EITaNi+laU00d700OM6VVVlP7NijePGDIN7QGWn6RyzzoNj1RCJdOSwwgMUXN86ws38kTBiJWI8VgyRpqNrjrJCsBzckugU=
+    - secure: h4DkJhRYgg4hUl49YT23R7iVY5T4ukVlMM6TaYeojXknFySPSbPhU6IS/5fH5goJvXgVoj4XjL1qqD8nIzPEgYwkKI3Tui3+tPjQ8G09qDFX/ENdwuAsRkjqa7+2yJBjG5X0COPC0mep4sTJGidnVzcrq92DTwqDp/sNFEuODYNp6v2ZvjjbScXpiQjMwzA6aeFszjwWP0DPK4c1y/JuNKF3NHr7f6GdbNX2IQb/pAi0R4ZPqnthVEZnXlkjPPA/Rq8naGlUum79CDED5iW86c0cF5CAKPnFaO15MazdTWfEB2gmtr60B33m6bpoPO7esHl5PP2r/nvnOfQgOQ7n7bzmVbxHbImOFebojEda+2g63FgWXRAbCVJh29iSNETPACx5ihWgDbpZBgsO0rI1m56Ymg2z8qwhYpzlyu+Z4Omwr+TiCIB7CM+d9AMKxprliItvRPVjQyXiYCKSUBskOfl5F1zIV3aKiZR6wxEzvWC+ylVNyxBrYAZw9YcLmFM1Y52UmtzEgfxlTYWTS4fMQTH33a+uOfZcVRLFYaUnPCjMSBsrmaJ+1IQ+uHjvCA/IXeuGjJfbxdA506RoAsFEAxgc6DPSZJi2sm1Xdv//CVyVZecRHvY2SFHDkXFCR6yi0NNTGrhL/+JxsnauXyPG/AHkrlOeBkwGa/MF0xulS3A=
