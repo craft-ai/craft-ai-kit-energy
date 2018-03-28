@@ -16,19 +16,19 @@
     "test": "npm run lint && npm run test:coverage",
     "lint": "npx eslint . --ignore-path .gitignore",
     "build": "npx babel src --out-dir lib",
+    "lint:fix": "npm run lint -- --fix",
     "test:coverage": "npx nyc --reporter=html --reporter=text --reporter=text-summary npm run test:unit --",
     "test:unit": "npx ava",
     "test:update": "npm run test:coverage -- --update-snapshots",
-    "test:watch": "npm run test:unit -- --watch",
-    "lint:fix": "npm run lint -- --fix"
+    "test:watch": "npm run test:unit -- --watch"
   },
   "engines": {
     "node": ">=6.9.0 <7.0.0 || >=8.9.0"
   },
   "dependencies": {
-    "craft-ai": "1.13.0",
+    "craft-ai": "1.14.0",
     "debug": "3.1.0",
-    "luxon": "0.5.3",
+    "luxon": "1.0.0",
     "most": "1.7.3",
     "most-buffer": "0.0.10",
     "most-nth": "0.0.10",
@@ -47,6 +47,9 @@
     "nyc": "latest",
     "seedrandom": "latest"
   },
+  "files": [
+    "lib"
+  ],
   "ava": {
     "babel": false,
     "compileEnhancements": false,
