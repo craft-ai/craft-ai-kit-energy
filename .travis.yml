@@ -25,8 +25,7 @@ deploy:
       node: '6.9'
 notifications:
   slack: craft-ai:ZNnQErHJhw40oKmphy3fNGza
-  email:
-    - ops@craft.ai
+  email: ops@craft.ai
 env:
   global:
     - NPM_TAG=$([[ "$TRAVIS_TAG" == *-* ]] && echo 'next' || echo 'latest')
