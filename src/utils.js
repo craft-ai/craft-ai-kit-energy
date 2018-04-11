@@ -54,7 +54,10 @@ function parseTimestamp(value) {
 }
 
 function toBuffer(stream) {
-  return stream.thru(buffer()).thru(nth.first);
+  return stream
+    .thru(buffer())
+    .thru(nth.first)
+    .then((buffer) => buffer || []);
 }
 
 function toStream(value) {
