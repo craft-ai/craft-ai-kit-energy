@@ -28,7 +28,6 @@ async function update(records) {
     // Send the context operations by bulks.
     .thru(Common.formatRecords.bind(null, features))
     .thru(buffer(client.cfg.operationsChunksSize))
-    .filter((history) => history.length)
     .recoverWith((error) => {
       // TODO: proper error handling
       failed = true;
