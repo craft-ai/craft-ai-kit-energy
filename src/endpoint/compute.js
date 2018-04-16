@@ -18,9 +18,9 @@ async function computeAnomalies(records, options, model) {
   if (options.minSigmaDifference !== undefined && typeof options.minSigmaDifference !== 'number')
     throw TypeError(`The "minSigmaDifference" option must be a "number". Received "${typeof options.minSigmaDifference}".`);
 
-  const minConfidence = options.minConfidence || .4;
-  const minAbsoluteDifference = options.minAbsoluteDifference || 0;
-  const minSigmaDifference = options.minSigmaDifference || 2;
+  const minConfidence = options.minConfidence === undefined ? .4 : options.minConfidence;
+  const minAbsoluteDifference = options.minAbsoluteDifference === undefined ? 0 : options.minAbsoluteDifference;
+  const minSigmaDifference = options.minSigmaDifference === undefined ? 2 : options.minSigmaDifference;
 
   return retrieveRecords(this, records, true).then((records) => this
     .computePredictions(records, model === undefined && records.length ? records[0][DATE] : model)
