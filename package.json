@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "craft-ai": "1.14.0",
+    "date-easter": "0.2.2",
     "debug": "3.1.0",
     "luxon": "1.0.0",
     "most": "1.7.3",

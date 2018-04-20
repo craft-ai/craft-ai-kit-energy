@@ -50,7 +50,7 @@ async function initialize(configuration = {}) {
       throw new TypeError(`The "providers" property of the kit's configuration must be an "array". Received "${typeof providers}".`);
 
     await Promise
-      .all(providers.map(Provider.initialize.bind(null, kit)))
+      .all(providers.map(Provider.initialize))
       .then((providers) => configuration.providers = providers);
   } else configuration.providers = [];
 
