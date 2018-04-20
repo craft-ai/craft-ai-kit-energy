@@ -11,7 +11,7 @@ async function close(providers) {
   }));
 }
 
-async function initialize(kit, instance, index) {
+async function initialize(instance, index) {
   if (instance === null || typeof instance !== 'object')
     throw new TypeError(`The provider at index "${index}" of the kit's configuration is not valid. Received "${instance === null ? 'null' : typeof instance}".`);
 
@@ -26,7 +26,6 @@ async function initialize(kit, instance, index) {
     throw new TypeError(`The provider at index "${index}" of the kit's configuration is not valid.`);
 
   const provider = Object.create(Object.assign({}, prototype, { initialize: undefined }), {
-    kit: { value: kit },
     log: { value: log },
     options: { value: instance.options || {}, enumerable: true },
   });
