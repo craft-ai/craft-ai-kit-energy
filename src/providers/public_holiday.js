@@ -1,4 +1,6 @@
+const lru = require('quick-lru');
 const luxon = require('luxon');
+const memoize = require('mem');
 
 
 async function initialize(provider) {
@@ -27,7 +29,10 @@ async function initialize(provider) {
     throw error;
   }
 
-  context.easter = require('date-easter').easter;
+  const cache = new lru({ maxSize: 50 });
+
+  context.cache = cache;
+  context.easter = memoize(require('date-easter').easter, { cache });
   provider.context = context;
 }
 
