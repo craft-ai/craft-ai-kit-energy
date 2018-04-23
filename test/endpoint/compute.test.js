@@ -81,7 +81,7 @@ test('filters out states with invalid date formats', (t) => {
   const dates = INVALID_DATES.concat([null]);
   const states = TEST_RECORDS
     .slice(0, dates.length)
-    .map((state, index) => Object.assign({}, state, { [DATE]: dates[index] }));
+    .map((state, index) => ({ ...state, [DATE]: dates[index] }));
 
   return t.notThrows(Promise.all(INPUTS.map((pipe) => kit
     .loadEndpoint({ id: context.endpoint.register() })

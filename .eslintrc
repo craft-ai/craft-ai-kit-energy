@@ -2,6 +2,9 @@
   "root": true,
   "extends": "craft-ai/base",
   "parserOptions": {
-    "ecmaVersion": 8
+    "ecmaVersion": 8,
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true
+    }
   }
 }

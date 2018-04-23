@@ -94,7 +94,7 @@ test('filters out records with invalid date formats', (t) => {
   const dates = INVALID_DATES.concat([null]);
   const records = RECORDS
     .slice(0, dates.length)
-    .map((record, index) => Object.assign({}, record, { [DATE]: dates[index] }));
+    .map((record, index) => ({ ...record, [DATE]: dates[index] }));
 
   return t.notThrows(Promise.all(INPUTS.map((pipe) => kit
     .loadEndpoint({ id: context.endpoint.register() })
@@ -168,7 +168,7 @@ test('removes unknown keys from records', (t) => {
   const client = kit.client;
 
   // Add an unknown property to every records
-  const records = RECORDS.map((record) => Object.assign({ [UNKNOWN]: true }, record));
+  const records = RECORDS.map((record) => ({ ...record, [UNKNOWN]: true }));
 
   return t.notThrows(Promise
     .all(INPUTS.map((pipe) => kit

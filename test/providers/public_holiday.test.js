@@ -75,7 +75,7 @@ test('closes the provider', (t) => {
 function initializeProvider() {
   return Provider.initialize({
     provider: PublicHolidayProvider,
-    options: Object.assign({}, PROVIDER_OPTIONS)
+    options: { ...PROVIDER_OPTIONS }
   }, 0);
 }
 
