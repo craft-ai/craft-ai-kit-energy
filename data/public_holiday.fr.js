@@ -35,7 +35,7 @@ module.exports = {
   regions: [
     // Alsace-Moselle
     [
-      [54, 55, 57, 67, 68, 88, 90],
+      ['54', '55', '57', '67', '68', '88', '90'],
       {
         fixed: {
           // Saint Etienne
@@ -47,7 +47,7 @@ module.exports = {
     ],
     // Réunion
     [
-      [974],
+      ['974'],
       {
         fixed: {
           // Abolition de l'esclavage
