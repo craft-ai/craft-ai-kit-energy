@@ -8,7 +8,7 @@ async function initialize(provider) {
   const country = options.country;
 
   if (typeof country !== 'string')
-    throw new TypeError(`The "country" option of the holiday provider must be a "string". Received "${typeof country}".`);
+    throw new TypeError(`The "country" option of the public holiday provider must be a "string". Received "${typeof country}".`);
 
   const context = {};
 
@@ -24,7 +24,7 @@ async function initialize(provider) {
     context.regions = holidays.regions ? formatRegions(holidays.regions, fixed, easterOffseted) : {};
   } catch (error)/* istanbul ignore next */ {
     if (error.code === 'MODULE_NOT_FOUND')
-      throw new RangeError(`The "country" option of the holiday provider must be valid. Received "${country}".`);
+      throw new RangeError(`The "country" option of the public holiday provider must be valid. Received "${country}".`);
 
     throw error;
   }
