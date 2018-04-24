@@ -55,7 +55,7 @@ function toRecordStream(values) {
         throw new TypeError(`A record must be an "object". Received "${value === null ? 'null' : typeof value}".`);
 
       const date = Utils.parseDate(value[DATE]);
-      const record = Object.assign({}, value);
+      const record = { ...value };
 
       Object.defineProperty(record, ORIGINAL_RECORD, { value });
       Object.defineProperty(record, PARSED_DATE, { value: date });

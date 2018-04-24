@@ -33,9 +33,9 @@ module.exports = {
   fixed,
   easterOffseted,
   regions: [
-    // Alsace-Moselle
+    // Moselle, Bas-Rhin, Haut-Rhin
     [
-      [54, 55, 57, 67, 68, 88, 90],
+      ['57', '67', '68'],
       {
         fixed: {
           // Saint Etienne
@@ -45,13 +45,95 @@ module.exports = {
         easterOffseted: [-2]
       }
     ],
+    // Guadeloupe
+    [
+      ['971'],
+      {
+        fixed: {
+          // Abolition de l'esclavage
+          5: [27],
+          // Fête Victor Schœlcher
+          7: [21]
+        },
+        // Vendredi Saint
+        easterOffseted: [-2]
+      }
+    ],
+    // Martinique
+    [
+      ['972'],
+      {
+        fixed: {
+          // Abolition de l'esclavage
+          5: [22],
+          // Fête Victor Schœlcher
+          7: [21]
+        },
+        // Vendredi Saint
+        easterOffseted: [-2]
+      }
+    ],
+    // Guyane
+    [
+      ['973'],
+      {
+        fixed: {
+          // Abolition de l'esclavage
+          6: [10]
+        }
+      }
+    ],
     // Réunion
     [
-      [974],
+      ['974'],
       {
         fixed: {
           // Abolition de l'esclavage
           12: [20]
+        }
+      }
+    ],
+    // Saint-Barthélemy, Saint-Martin
+    [
+      ['977', '978'],
+      {
+        fixed: {
+          // Abolition de l'esclavage
+          5: [27],
+        }
+      }
+    ],
+    // Wallis-et-Futuna
+    [
+      ['986'],
+      {
+        fixed: {
+          // Saint-Pierre-Chanel
+          4: [28],
+          // Fête du Territoire
+          7: [29]
+        }
+      }
+    ],
+    // Polynésie française
+    [
+      ['987'],
+      {
+        fixed: {
+          // Fête de l’autonomie
+          6: [29]
+        },
+        // Vendredi Saint
+        easterOffseted: [-2]
+      }
+    ],
+    // Nouvelle-Calédonie
+    [
+      ['988'],
+      {
+        fixed: {
+          // Fête de la citoyenneté
+          9: [24]
         }
       }
     ],

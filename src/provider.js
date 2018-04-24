@@ -25,7 +25,7 @@ async function initialize(instance, index) {
   if (typeof initialize !== 'function' || !isProvider(prototype))
     throw new TypeError(`The provider at index "${index}" of the kit's configuration is not valid.`);
 
-  const provider = Object.create(Object.assign({}, prototype, { initialize: undefined }), {
+  const provider = Object.create({ ...prototype, initialize: undefined }, {
     log: { value: log },
     options: { value: instance.options || {}, enumerable: true },
   });

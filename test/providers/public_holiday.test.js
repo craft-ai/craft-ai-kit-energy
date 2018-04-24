@@ -28,43 +28,51 @@ test('computes the configuration\'s extension', (t) => {
 });
 
 test('computes the record\'s extension', (t) => {
-  return Promise.all(WINDOW.map((date) => initializeProvider().then((provider) => provider
-    .computeRecordExtension({ metadata: {} }, date)
-    .then((extension) => {
-      t.truthy(extension);
-      t.is(typeof extension, 'object');
-      t.is(extension.holiday === 'YES', isHoliday(date, HOLIDAYS));
-    }))));
+  return WINDOW.reduce((promise, date) => promise
+    .then(initializeProvider)
+    .then((provider) => provider
+      .computeRecordExtension({ metadata: {} }, date)
+      .then((extension) => {
+        t.truthy(extension);
+        t.is(typeof extension, 'object');
+        t.is(extension.holiday === 'YES', isHoliday(date, HOLIDAYS));
+      })), Promise.resolve());
 });
 
 test('computes the record\'s extension in Paris', (t) => {
-  return Promise.all(WINDOW.map((date) => initializeProvider().then((provider) => provider
-    .computeRecordExtension({ metadata: { region: '75' } }, date)
-    .then((extension) => {
-      t.truthy(extension);
-      t.is(typeof extension, 'object');
-      t.is(extension.holiday === 'YES', isHoliday(date, HOLIDAYS));
-    }))));
+  return WINDOW.reduce((promise, date) => promise
+    .then(initializeProvider)
+    .then((provider) => provider
+      .computeRecordExtension({ metadata: { region: '75' } }, date)
+      .then((extension) => {
+        t.truthy(extension);
+        t.is(typeof extension, 'object');
+        t.is(extension.holiday === 'YES', isHoliday(date, HOLIDAYS));
+      })), Promise.resolve());
 });
 
 test('computes the record\'s extension in Réunion', (t) => {
-  return Promise.all(WINDOW.map((date) => initializeProvider().then((provider) => provider
-    .computeRecordExtension({ metadata: { region: '974' } }, date)
-    .then((extension) => {
-      t.truthy(extension);
-      t.is(typeof extension, 'object');
-      t.is(extension.holiday === 'YES', isHoliday(date, REUNION_HOLIDAYS));
-    }))));
+  return WINDOW.reduce((promise, date) => promise
+    .then(initializeProvider)
+    .then((provider) => provider
+      .computeRecordExtension({ metadata: { region: '974' } }, date)
+      .then((extension) => {
+        t.truthy(extension);
+        t.is(typeof extension, 'object');
+        t.is(extension.holiday === 'YES', isHoliday(date, REUNION_HOLIDAYS));
+      })), Promise.resolve());
 });
 
-test('computes the record\'s extension in Alsace-Moselle', (t) => {
-  return Promise.all(WINDOW.map((date) => initializeProvider().then((provider) => provider
-    .computeRecordExtension({ metadata: { region: '88' } }, date)
-    .then((extension) => {
-      t.truthy(extension);
-      t.is(typeof extension, 'object');
-      t.is(extension.holiday === 'YES', isHoliday(date, ALSACE_MOSELLE_HOLIDAYS));
-    }))));
+test('computes the record\'s extension in Moselle', (t) => {
+  return WINDOW.reduce((promise, date) => promise
+    .then(initializeProvider)
+    .then((provider) => provider
+      .computeRecordExtension({ metadata: { region: '57' } }, date)
+      .then((extension) => {
+        t.truthy(extension);
+        t.is(typeof extension, 'object');
+        t.is(extension.holiday === 'YES', isHoliday(date, MOSELLE_HOLIDAYS));
+      })), Promise.resolve());
 });
 
 test('closes the provider', (t) => {
@@ -75,7 +83,7 @@ test('closes the provider', (t) => {
 function initializeProvider() {
   return Provider.initialize({
     provider: PublicHolidayProvider,
-    options: Object.assign({}, PROVIDER_OPTIONS)
+    options: { ...PROVIDER_OPTIONS }
   }, 0);
 }
 
@@ -103,7 +111,7 @@ const HOLIDAYS = [
   [2019, 11, 1], [2019, 11, 11],
   [2019, 12, 25],
 ];
-const ALSACE_MOSELLE_HOLIDAYS = [
+const MOSELLE_HOLIDAYS = [
   [2018, 3, 30],
   [2018, 12, 26],
   [2019, 4, 19],
@@ -118,6 +126,6 @@ const DateTime = luxon.DateTime;
 
 const WINDOW_START = DateTime.utc(...HOLIDAYS[0]).startOf('year');
 const WINDOW_END = DateTime.utc(...HOLIDAYS[HOLIDAYS.length - 1]).plus({ year: 1 }).startOf('year');
-const WINDOW = new Array(365 * WINDOW_END.diff(WINDOW_START).as('year'))
+const WINDOW = new Array(24 * WINDOW_END.diff(WINDOW_START).as('day'))
   .fill(null)
-  .map((_, index) => WINDOW_START.plus({ days: index }));
+  .map((_, index) => WINDOW_START.plus({ hours: index }));

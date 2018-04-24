@@ -8,7 +8,7 @@ const Utils = require('../src/utils');
 
 function createContext(t, configuration = {}) {
   return EnergyKit
-    .initialize(Object.assign({ recordBulkSize: 1000 }, configuration))
+    .initialize({ ...configuration, recordBulkSize: 1000 })
     .then((kit) => {
       const id = t.title;
       const random = seedrandom(id);
@@ -80,7 +80,8 @@ const INVALID_OBJECTS = [null, 0, true, 'string', Symbol()];
 const RECORDS = require('./data/records');
 
 
-module.exports = Object.assign({
+module.exports = {
+  ...Utils,
   createContext,
   destroyContext,
   identity,
@@ -90,4 +91,4 @@ module.exports = Object.assign({
   INVALID_NUMBERS,
   INVALID_OBJECTS,
   RECORDS,
-}, Utils);
+};
