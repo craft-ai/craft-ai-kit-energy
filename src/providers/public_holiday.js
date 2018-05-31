@@ -36,13 +36,13 @@ async function initialize(provider) {
   provider.context = context;
 }
 
-async function computeConfigurationExtension() {
+async function extendConfiguration() {
   return {
     [HOLIDAY]: { type: 'enum' },
   };
 }
 
-async function computeRecordExtension(endpoint, date) {
+async function extendRecord(endpoint, date) {
   return {
     [HOLIDAY]: isHoliday.call(this, date, endpoint.metadata.region) ? 'YES' : 'NO',
   };
@@ -113,7 +113,7 @@ const Indexer = indexWith(true);
 
 module.exports = {
   close,
-  computeConfigurationExtension,
-  computeRecordExtension,
+  extendConfiguration,
+  extendRecord,
   initialize,
 };

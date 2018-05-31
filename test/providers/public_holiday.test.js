@@ -19,7 +19,7 @@ test('initializes the provider', (t) => {
 
 test('computes the configuration\'s extension', (t) => {
   return initializeProvider().then((provider) => provider
-    .computeConfigurationExtension()
+    .extendConfiguration()
     .then((extension) => {
       t.truthy(extension);
       t.is(typeof extension, 'object');
@@ -31,7 +31,7 @@ test('computes the record\'s extension', (t) => {
   return WINDOW.reduce((promise, date) => promise
     .then(initializeProvider)
     .then((provider) => provider
-      .computeRecordExtension({ metadata: {} }, date)
+      .extendRecord({ metadata: {} }, date)
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
@@ -43,7 +43,7 @@ test('computes the record\'s extension in Paris', (t) => {
   return WINDOW.reduce((promise, date) => promise
     .then(initializeProvider)
     .then((provider) => provider
-      .computeRecordExtension({ metadata: { region: '75' } }, date)
+      .extendRecord({ metadata: { region: '75' } }, date)
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
@@ -55,7 +55,7 @@ test('computes the record\'s extension in Réunion', (t) => {
   return WINDOW.reduce((promise, date) => promise
     .then(initializeProvider)
     .then((provider) => provider
-      .computeRecordExtension({ metadata: { region: '974' } }, date)
+      .extendRecord({ metadata: { region: '974' } }, date)
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
@@ -67,7 +67,7 @@ test('computes the record\'s extension in Moselle', (t) => {
   return WINDOW.reduce((promise, date) => promise
     .then(initializeProvider)
     .then((provider) => provider
-      .computeRecordExtension({ metadata: { region: '57' } }, date)
+      .extendRecord({ metadata: { region: '57' } }, date)
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');

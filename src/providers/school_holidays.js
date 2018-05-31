@@ -21,13 +21,13 @@ async function initialize(provider) {
   return context.holidays.initialize();
 }
 
-async function computeConfigurationExtension() {
+async function extendConfiguration() {
   return {
     [HOLIDAY]: { type: 'enum' },
   };
 }
 
-async function computeRecordExtension(endpoint, date) {
+async function extendRecord(endpoint, date) {
   return this.context.holidays
     .isHolidays(date, endpoint.metadata.region)
     .then(formatRecordExtension)
@@ -54,7 +54,7 @@ const UNKNOWN = { [HOLIDAY]: 'UNKNOWN' };
 
 module.exports = {
   close,
-  computeConfigurationExtension,
-  computeRecordExtension,
+  extendConfiguration,
+  extendRecord,
   initialize,
 };

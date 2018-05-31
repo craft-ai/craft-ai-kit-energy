@@ -19,7 +19,7 @@ test('initializes the provider', (t) => {
 
 test('computes the configuration\'s extension', (t) => {
   return initializeProvider().then((provider) => provider
-    .computeConfigurationExtension()
+    .extendConfiguration()
     .then((extension) => {
       t.truthy(extension);
       t.is(typeof extension, 'object');
@@ -31,7 +31,7 @@ test('computes the record\'s extension in Paris', (t) => {
   return WINDOW.reduce((promise, date) => promise
     .then(initializeProvider)
     .then((provider) => provider
-      .computeRecordExtension({ metadata: { region: '75' } }, date)
+      .extendRecord({ metadata: { region: '75' } }, date)
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
@@ -43,7 +43,7 @@ test('computes the record\'s extension in Lille', (t) => {
   return WINDOW.reduce((promise, date) => promise
     .then(initializeProvider)
     .then((provider) => provider
-      .computeRecordExtension({ metadata: { region: '59' } }, date)
+      .extendRecord({ metadata: { region: '59' } }, date)
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
@@ -55,7 +55,7 @@ test('computes the record\'s extension in Caen', (t) => {
   return WINDOW.reduce((promise, date) => promise
     .then(initializeProvider)
     .then((provider) => provider
-      .computeRecordExtension({ metadata: { region: '14' } }, date)
+      .extendRecord({ metadata: { region: '14' } }, date)
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
@@ -67,7 +67,7 @@ test('handles computing the record\'s extension for an unknown region', (t) => {
   return WINDOW.reduce((promise, date) => promise
     .then(initializeProvider)
     .then((provider) => provider
-      .computeRecordExtension({ metadata: { region: '00' } }, date)
+      .extendRecord({ metadata: { region: '00' } }, date)
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
@@ -79,7 +79,7 @@ test('handles computing the record\'s extension with no school holidays informat
   return WINDOW.reduce((promise, date) => promise
     .then(initializeProvider)
     .then((provider) => provider
-      .computeRecordExtension({ metadata: { region: '75' } }, date.minus({ year: 200 }))
+      .extendRecord({ metadata: { region: '75' } }, date.minus({ year: 200 }))
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
