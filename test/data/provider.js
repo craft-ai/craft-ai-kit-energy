@@ -5,14 +5,14 @@ async function initialize(provider) {
   if (!provider.options.random) provider.options.random = seedrandom('weather');
 }
 
-async function computeConfigurationExtension() {
+async function extendConfiguration() {
   return {
     [TEMPERATURE_MAX]: { type: 'continuous' },
     [TEMPERATURE_MIN]: { type: 'continuous' },
   };
 }
 
-async function computeRecordExtension(endpoint) {
+async function extendRecord(endpoint) {
   const averageMax = endpoint.metadata && endpoint.metadata.averageMax || 10;
   const averageMin = endpoint.metadata && endpoint.metadata.averageMin || 3;
 
@@ -33,8 +33,8 @@ const FEATURES = [TEMPERATURE_MAX, TEMPERATURE_MIN];
 
 module.exports = {
   close,
-  computeConfigurationExtension,
-  computeRecordExtension,
+  extendConfiguration,
+  extendRecord,
   initialize,
   FEATURES,
 };

@@ -38,7 +38,7 @@ async function initialize(instance, index) {
 
 async function extendConfiguration(providers, context) {
   return Promise
-    .all(providers.map((provider) => provider.computeConfigurationExtension()))
+    .all(providers.map((provider) => provider.extendConfiguration()))
     .then((extensions) => Object.assign(context, ...extensions));
 }
 
@@ -46,7 +46,7 @@ function extendRecords(endpoint, records) {
   const providers = endpoint.kit.configuration.providers;
 
   return records.concatMap((record) => most.fromPromise(Promise
-    .all(providers.map((provider) => provider.computeRecordExtension(endpoint, record[PARSED_DATE])))
+    .all(providers.map((provider) => provider.extendRecord(endpoint, record[PARSED_DATE])))
     .then((extensions) => Object.assign(record, ...extensions))));
 }
 
@@ -55,8 +55,8 @@ function isProvider(value) {
   return value !== null
     && typeof value === 'object'
     && typeof value.initialize === 'function'
-    && typeof value.computeConfigurationExtension === 'function'
-    && typeof value.computeRecordExtension === 'function'
+    && typeof value.extendConfiguration === 'function'
+    && typeof value.extendRecord === 'function'
     && typeof value.close === 'function';
 }
 
