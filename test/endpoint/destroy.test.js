@@ -1,11 +1,11 @@
 const test = require('ava');
 
-const Utils = require('../utils');
+const Helpers = require('../helpers');
 
 
 test.before(require('dotenv').load);
-test.beforeEach(Utils.createContext);
-test.afterEach.always(Utils.destroyContext);
+test.beforeEach(Helpers.createContext);
+test.afterEach.always(Helpers.destroyContext);
 
 
 test('destroys the endpoint\'s related agent', (t) => {

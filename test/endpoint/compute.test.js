@@ -1,12 +1,12 @@
 const test = require('ava');
 
 const Constants = require('../../src/constants');
-const Utils = require('../utils');
+const Helpers = require('../helpers');
 
 
 test.before(require('dotenv').load);
-test.beforeEach(Utils.createContext);
-test.afterEach.always(Utils.destroyContext);
+test.beforeEach(Helpers.createContext);
+test.afterEach.always(Helpers.destroyContext);
 
 
 test('fails computing predictions with invalid parameters', (t) => {
@@ -402,11 +402,11 @@ function isReport(object) {
 
 
 const DATE = Constants.DATE_FEATURE;
-const INPUTS = Utils.INPUT_METHODS;
-const INVALID_DATES = Utils.INVALID_DATES;
-const INVALID_NUMBERS = Utils.INVALID_NUMBERS;
-const INVALID_OBJECTS = Utils.INVALID_OBJECTS.filter((object) => object !== null);
-const RECORDS = Utils.RECORDS;
+const INPUTS = Helpers.INPUT_METHODS;
+const INVALID_DATES = Helpers.INVALID_DATES;
+const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
+const INVALID_OBJECTS = Helpers.INVALID_OBJECTS.filter((object) => object !== null);
+const RECORDS = Helpers.RECORDS;
 const INDEX = Math.floor((RECORDS.length - 1) * .4);
 const TRAINING_RECORDS = RECORDS.slice(0, INDEX);
 const TEST_RECORDS = RECORDS.slice(INDEX);

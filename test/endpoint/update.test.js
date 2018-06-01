@@ -1,12 +1,12 @@
 const test = require('ava');
 
 const Constants = require('../../src/constants');
-const Utils = require('../utils');
+const Helpers = require('../helpers');
 
 
 test.before(require('dotenv').load);
-test.beforeEach(Utils.createContext);
-test.afterEach.always(Utils.destroyContext);
+test.beforeEach(Helpers.createContext);
+test.afterEach.always(Helpers.destroyContext);
 
 
 test('fails updating the endpoint with invalid records', (t) => {
@@ -219,8 +219,8 @@ test('reduces the size of the records by dropping successive identical values', 
 
 
 const DATE = Constants.DATE_FEATURE;
-const INPUTS = Utils.INPUT_METHODS;
-const INVALID_DATES = Utils.INVALID_DATES;
+const INPUTS = Helpers.INPUT_METHODS;
+const INVALID_DATES = Helpers.INVALID_DATES;
 const LOAD = Constants.LOAD_FEATURE;
-const RECORDS = Utils.RECORDS;
+const RECORDS = Helpers.RECORDS;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;

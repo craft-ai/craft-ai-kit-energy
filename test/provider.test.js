@@ -2,13 +2,13 @@ const test = require('ava');
 const seedrandom = require('seedrandom');
 
 const EnergyKit = require('../src/index');
-const Provider = require('./data/provider');
-const Utils = require('./utils');
+const Provider = require('./helpers/provider');
+const Helpers = require('./helpers');
 
 
 test.before(require('dotenv').load);
-test.beforeEach(Utils.createContext);
-test.afterEach.always(Utils.destroyContext);
+test.beforeEach(Helpers.createContext);
+test.afterEach.always(Helpers.destroyContext);
 
 
 test('fails initializing a kit with invalid providers', (t) => {
@@ -21,7 +21,7 @@ test('fails initializing a kit with invalid providers', (t) => {
 });
 
 test('uses a provider to extend records', async(t) => {
-  await Utils.createContext(t, { providers: [Provider] });
+  await Helpers.createContext(t, { providers: [Provider] });
 
   const context = t.context;
   const kit = context.kit;
@@ -41,7 +41,7 @@ test('uses a provider to extend records', async(t) => {
 });
 
 test('uses a provider with options to extend records', async(t) => {
-  await Utils.createContext(t, {
+  await Helpers.createContext(t, {
     providers: [{
       provider: Provider,
       options: { random: seedrandom('weather') }
@@ -74,5 +74,5 @@ function isExtended(history) {
 
 
 const FEATURES = Provider.FEATURES;
-const INVALID_OBJECTS = Utils.INVALID_OBJECTS;
-const RECORDS = Utils.RECORDS.slice(0, 500);
+const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
+const RECORDS = Helpers.RECORDS.slice(0, 500);

@@ -1,18 +1,18 @@
 const test = require('ava');
 
-const Utils = require('./utils');
+const Helpers = require('./helpers');
 
 
 test.before(require('dotenv').load);
-test.beforeEach((t) => Utils.createContext(t));
-test.afterEach.always((t) => Utils.destroyContext(t));
+test.beforeEach((t) => Helpers.createContext(t));
+test.afterEach.always((t) => Helpers.destroyContext(t));
 
 
 test('fails loading an endpoint with invalid definition', (t) => {
   const INVALID_DEFINITIONS = [undefined, null, 'string', 364, Promise.resolve({})];
   const INVALID_IDENTIFIERS = [undefined, null, 364, [false]];
-  const INVALID_NUMBERS = Utils.INVALID_NUMBERS;
-  const INVALID_OBJECTS = Utils.INVALID_OBJECTS;
+  const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
+  const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 
   const kit = t.context.kit;
 
@@ -62,7 +62,7 @@ test('loads an endpoint', async(t) => {
 });
 
 test('derives the agent\'s identifier when a secret is specified', async(t) => {
-  await Utils.createContext(t, { secret: 'a very strong secret' });
+  await Helpers.createContext(t, { secret: 'a very strong secret' });
 
   const context = t.context;
   const kit = context.kit;

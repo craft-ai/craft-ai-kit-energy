@@ -1,12 +1,12 @@
 const test = require('ava');
 
 const Constants = require('../../src/constants');
-const Utils = require('../utils');
+const Helpers = require('../helpers');
 
 
 test.before(require('dotenv').load);
-test.beforeEach(Utils.createContext);
-test.afterEach.always(Utils.destroyContext);
+test.beforeEach(Helpers.createContext);
+test.afterEach.always(Helpers.destroyContext);
 
 
 test('fails retrieving the records\' history of an endpoint with invalid paramaters', (t) => {
@@ -81,7 +81,7 @@ test('retrieves the predictive model of an endpoint', (t) => {
         endpoint.retrievePredictiveModel(RECORDS[RECORDS.length - 1][DATE]),
       ])))
     .then((values) => {
-      values.forEach((predictiveModel) => t.true(Utils.isPredictiveModel(predictiveModel)));
+      values.forEach((predictiveModel) => t.true(Helpers.isPredictiveModel(predictiveModel)));
       t.deepEqual(values[0], values[1]);
       t.snapshot(values[0]);
     }));
@@ -89,5 +89,5 @@ test('retrieves the predictive model of an endpoint', (t) => {
 
 
 const DATE = Constants.DATE_FEATURE;
-const RECORDS = Utils.RECORDS;
-const INVALID_DATES = Utils.INVALID_DATES;
+const RECORDS = Helpers.RECORDS;
+const INVALID_DATES = Helpers.INVALID_DATES;

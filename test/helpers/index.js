@@ -2,8 +2,8 @@ const seedrandom = require('seedrandom');
 const stream = require('stream');
 const uuid = require('uuid/v5');
 
-const EnergyKit = require('../src/index');
-const Utils = require('../src/utils');
+const EnergyKit = require('../../src/index');
+const Utils = require('../../src/utils');
 
 
 function createContext(t, configuration = {}) {
