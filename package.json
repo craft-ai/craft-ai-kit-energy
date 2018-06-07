@@ -26,10 +26,10 @@
     "node": ">=6.9.0 <7.0.0 || >=8.9.0"
   },
   "dependencies": {
-    "craft-ai": "1.14.0",
+    "craft-ai": "1.14.1",
     "date-easter": "0.2.2",
     "debug": "3.1.0",
-    "fast-xml-parser": "3.11.0",
+    "fast-xml-parser": "3.11.1",
     "luxon": "1.2.1",
     "mem": "3.0.0",
     "most": "1.7.3",
