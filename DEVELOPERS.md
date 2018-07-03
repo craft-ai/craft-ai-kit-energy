@@ -1,5 +1,7 @@
 # Developers instructions #
 
+> :warning: This repository relies on [git LFS](https://git-lfs.github.com)
+
 ## Running the tests locally ##
 
 1. Make sure you have a version of [Node.js](https://nodejs.org) installed (any version >6.9 should work).

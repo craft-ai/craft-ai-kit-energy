@@ -1,7 +1,7 @@
 const test = require('ava');
 
 const EnergyKit = require('../src/index');
-const Utils = require('./utils');
+const Helpers = require('./helpers');
 
 
 test.before(require('dotenv').load);
@@ -17,7 +17,7 @@ test.beforeEach((t) => {
 test.serial('fails with invalid configurations', async(t) => {
   const INVALID_TOKENS = [null, 1463, new Array(), new Date, 'very bad token'];
   const INVALID_SECRETS = ['', 713705, [], Symbol(), Promise.resolve('hi!')];
-  const INVALID_OBJECTS = Utils.INVALID_OBJECTS;
+  const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 
   await Promise.all(INVALID_OBJECTS.map((configuration) => t.throws(EnergyKit.initialize(configuration))));
 
