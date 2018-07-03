@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.7...HEAD) ##
+## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.1.0...HEAD) ##
+
+## [0.1.0](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.7...v0.1.0) - 2018-07-04 ##
+
+### BREAKING CHANGES ###
+
+In the aim of publishing the first version of the energy kit, we rewrote its API from the ground up:
+- introducing the notion of _endpoint_, which interfaces with a craft ai agent by uploading the consumption history of an electrical endpoint and exposing a few methods to make the most of the underlying predictive models.
+- introducing the concept of _providers_ to bring new context information, like weather condition, to the process of generating the predictive models.
 
 ## [0.0.7](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.6...v0.0.7) - 2017-12-19 ##
 
@@ -15,7 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Introducing `kit.predict`, a method able to run a bunch of predictions for a given user.
 - Introducing `cfg.absoluteDeviationThreshold`, the maximum deviation to the predicted load for a prediction to be considered 'valid', expressed in Watts, disabled by default.
 
-## Changed ##
+### Changed ###
 
 - Renaming `cfg.sigmaFactorThreshold` to `cfg.sigmaDeviationThreshold`.
 
