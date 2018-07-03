@@ -1,3 +1,7 @@
 {
-  "extends": "craft-ai/base"
+  "root": true,
+  "extends": "craft-ai/base",
+  "parserOptions": {
+    "ecmaVersion": 2018
+  }
 }
