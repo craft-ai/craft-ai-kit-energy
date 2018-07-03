@@ -23,7 +23,7 @@
     "test:watch": "npm run test:unit -- --watch"
   },
   "engines": {
-    "node": ">=6.9.0 <7.0.0 || >=8.9.0"
+    "node": ">=6.9.0 <7.0.0 || >=8.9.0 <9.0.0 || >=10.0.0"
   },
   "dependencies": {
     "craft-ai": "1.14.1",
