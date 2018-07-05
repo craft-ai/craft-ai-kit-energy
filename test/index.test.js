@@ -14,7 +14,7 @@ test.beforeEach((t) => {
 
 
 // Must be serial as it has side effects on `process.env`
-test.serial('fails with invalid configurations', async(t) => {
+test.serial('fails initializing the kit with invalid configurations', async(t) => {
   const INVALID_TOKENS = [null, 1463, new Array(), new Date, 'very bad token'];
   const INVALID_SECRETS = ['', 713705, [], Symbol(), Promise.resolve('hi!')];
   const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
