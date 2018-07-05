@@ -33,6 +33,8 @@ function isStream(value) {
     && typeof value._readableState === 'object';
 }
 
+function notString(value) { return typeof value !== 'string'; }
+
 function parseDate(value) {
   if (value === null || value === undefined || typeof value === 'boolean') return;
 
@@ -93,6 +95,7 @@ module.exports = {
   isNull,
   isPredictiveModel,
   isStream,
+  notString,
   parseDate,
   parseTimestamp,
   toBuffer,
