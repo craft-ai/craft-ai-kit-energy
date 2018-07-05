@@ -25,7 +25,7 @@ async function computeAnomalies(records, options, model) {
   return retrieveRecords(this, records, true).then((records) => this
     .computePredictions(records, model === undefined && records.length ? records[0][DATE] : model)
     .then((predictions) => {
-      predictions.forEach((prediction, index) => prediction.actualLoad = prediction[ORIGINAL_RECORD][LOAD]);
+      predictions.forEach((prediction) => prediction.actualLoad = prediction[ORIGINAL_RECORD][LOAD]);
 
       const values = predictions.filter((prediction) => {
         if (prediction.confidence < minConfidence) return false;
