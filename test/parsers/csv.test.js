@@ -25,46 +25,48 @@ test('fails streaming a CSV file with invalid parameters', (t) => {
       [[FILEPATH, { escape: 'string' }], RangeError],
       [[FILEPATH, { columns: 'not_an_array' }], TypeError],
       [[FILEPATH, { columns: ['not_only_strings', []] }], TypeError],
-      [[FILEPATH, { columns: ['missing_the_required_columns'] }], RangeError],
-      [[FILEPATH, { columns: ['date', 'missing_load_or_index'] }], RangeError],
-      [[FILEPATH, { columns: ['load', 'missing_date'] }], RangeError],
-      [[FILEPATH, { columns: ['index', 'missing_date'] }], RangeError],
-      [[path.join(DATA_DIRECTORY, './wrong_data.csv')], Error],
+      [[FILEPATH, { columns: ['not_matching_column_number'] }], Error],
     ].map((parameters) => t.throws(CsvHelper.stream(...parameters[0]).drain(), parameters[1])))
     .then((errors) => t.snapshot(errors));
 });
 
 test('streams a CSV file', (t) => {
   return CsvHelper
-    .stream(FILEPATH, { delimiter: ';', columns: ['date', 'load'] })
+    .stream(FILEPATH)
     .thru(buffer())
     .thru(nth.first)
-    .then((records) => t.deepEqual(records, Helpers.RECORDS));
+    .then((records) => t.deepEqual(parseRecords(records), Helpers.RECORDS));
 });
 
 test('streams a portion of a CSV file', (t) => {
   return CsvHelper
-    .stream(FILEPATH, {
-      from: WINDOW_START + 1,
-      to: WINDOW_END,
-      delimiter: ';',
-      columns: ['date', 'load']
-    })
+    .stream(FILEPATH, { from: WINDOW_START, to: WINDOW_END })
     .thru(buffer())
     .thru(nth.first)
-    .then((records) => t.deepEqual(records, RECORDS.slice(WINDOW_START, WINDOW_END)));
+    .then((records) => t.deepEqual(parseRecords(records), RECORDS.slice(WINDOW_START, WINDOW_END)));
 });
 
 test('streams a CSV file written in a custom format', (t) => {
   return CsvHelper
     .stream(path.join(DATA_DIRECTORY, './custom_format.csv'), {
+      delimiter: ';',
       quote: '.',
-      escape: '\\'
+      escape: '\\',
+      columns: ['date', 'index'],
     })
     .thru(buffer())
     .thru(nth.first)
     .then((records) => t.snapshot(records));
 });
+
+
+function parseRecords(records) {
+  return records.filter((record) => record.load).map((record) => {
+    record.load = Number(record.load.replace(',', '.'));
+
+    return record;
+  });
+}
 
 
 const DATA_DIRECTORY = path.join(__dirname, '../helpers/data');

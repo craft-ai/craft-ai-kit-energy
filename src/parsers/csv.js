@@ -1,7 +1,9 @@
 const csv = require('csv-parse');
 const fs = require('fs');
 const most = require('most');
+const path = require('path');
 
+const Stream = require('../stream');
 const Utils = require('../utils');
 
 
@@ -13,7 +15,7 @@ function stream(filepath, options = {}) {
   const file = fs.createReadStream(filepath);
 
   const rows = file.pipe(csv({
-    from: options.from,
+    from: options.from && options.from + 1,
     to: options.to,
     delimiter: options.delimiter || ',',
     quote: options.quote || '"',
@@ -30,19 +32,22 @@ function stream(filepath, options = {}) {
     rows.end();
   });
 
-  return most
-    .fromEvent('error', rows)
-    .chain((error) => {
-      /* istanbul ignore else */
-      if (error.code === 'ENOENT') throw new Error(`The "filepath" argument of the CSV helper refers to an unexisting file: "${filepath}".`);
-      /* istanbul ignore next */
-      if (error.code === 'EACCES') throw new Error(`The "filepath" argument of the CSV helper refers to a protected file: "${filepath}".`);
+  const result = Stream.fromNativeStream(rows, (error) => {
+    const displayedFilepath = process.env.NODE_ENV === 'test'
+      ? path.relative('.', filepath)
+      : /* istanbul ignore next */filepath;
 
-      /* istanbul ignore next */
-      throw error;
-    })
-    .merge(most.fromEvent('data', rows).filter(hasValue).tap(parse))
-    .until(most.fromEvent('end', rows));
+    if (error.code === 'ENOENT') throw new Error(`The "filepath" argument of the CSV helper refers to an unexisting file: "${displayedFilepath}".`);
+    /* istanbul ignore next */
+    if (error.code === 'EACCES') throw new Error(`The "filepath" argument of the CSV helper refers to a protected file: "${displayedFilepath}".`);
+
+    error.message = `Unable to parse the file "${displayedFilepath}" with the CSV helper. Reason:\n${error.message}`;
+
+    throw error;
+  });
+
+  // Handling reading no line at all (`csv-parse` does not) while still checking the availability of the file
+  return options.to === (options.from || 0) ? result.take(0) : result;
 }
 
 
@@ -102,21 +107,7 @@ function validateArguments(filepath, options) {
       return new TypeError(`The "columns" option of the CSV helper must be an "array". Received "${typeof columns}".`);
     if (columns.some(Utils.notString))
       return new TypeError(`The "columns" option of the CSV helper must only contain "string" value. Received ${JSON.stringify(JSON.stringify(columns))}.`);
-    if (!(columns.includes('date') && (columns.includes('load') || columns.includes('index'))))
-      return new RangeError(`The "columns" option of the CSV helper must at least contain the value "date" and either "load" or "index". Received ${JSON.stringify(JSON.stringify(columns))}.`);
   }
-}
-
-function hasValue(record) {
-  return record.load || record.index;
-}
-
-function parse(record) {
-  if (!record.date)
-    throw new Error(`Imported records from the CSV helper must contain a non-empty value "date". Received "${record.date}".`);
-
-  if (record.load) record.load = Number(record.load.replace(',', '.'));
-  if (record.index) record.index = Number(record.index.replace(',', '.'));
 }
 
 

@@ -6,7 +6,7 @@ const Constants = require('../constants');
 const Provider = require('../provider');
 
 
-async function update(records) {
+async function update(records, options) {
   this.debug('updating');
 
   const agent = this.agent;
@@ -18,7 +18,7 @@ async function update(records) {
   let failed = false;
 
   return Common
-    .toRecordStream(records)
+    .toRecordStream(records, options && options.import)
     // TODO: Convert index values to mean electrical loads
     // Extend the record with providers
     .thru(Provider.extendRecords.bind(null, this))

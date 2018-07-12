@@ -46,7 +46,7 @@ function extendRecords(endpoint, records) {
   const providers = endpoint.kit.configuration.providers;
 
   return records.concatMap((record) => most.fromPromise(Promise
-    .all(providers.map((provider) => provider.extendRecord(endpoint, record[PARSED_DATE])))
+    .all(providers.map((provider) => provider.extendRecord(endpoint, record[PARSED_RECORD][DATE])))
     .then((extensions) => Object.assign(record, ...extensions))));
 }
 
@@ -62,7 +62,8 @@ function isProvider(value) {
 
 
 const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
-const PARSED_DATE = Constants.PARSED_DATE;
+const PARSED_RECORD = Constants.PARSED_RECORD;
+const DATE = Constants.DATE_FEATURE;
 
 
 module.exports = {

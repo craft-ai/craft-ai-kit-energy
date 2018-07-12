@@ -1,3 +1,4 @@
+const path = require('path');
 const test = require('ava');
 
 const Constants = require('../../src/constants');
@@ -5,94 +6,102 @@ const Helpers = require('../helpers');
 
 
 test.before(require('dotenv').load);
-test.beforeEach(Helpers.createContext);
+
+test.beforeEach((t) => Helpers
+  .createContext(t)
+  .then(() => {
+    const context = t.context;
+    const kit = context.kit;
+
+    return kit
+      .loadEndpoint({ id: context.endpoint.register() })
+      .then((endpoint) => endpoint.update(TRAINING_RECORDS))
+      .then((endpoint) => t.context.endpoint.current = endpoint);
+  }));
+
 test.afterEach.always(Helpers.destroyContext);
 
 
 test('fails computing predictions with invalid parameters', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
-  return Promise.all(INPUTS.map((pipe) => kit
-    .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-    .then((endpoint) => {
-      return Promise.all(INVALID_DATES.map((date) => t.throws(endpoint.computePredictions(pipe([]), date))));
-    })));
+  return Promise.all(INVALID_DATES
+    .map((date) => t.throws(endpoint.computePredictions([], null, date))));
 });
 
 test('fails computing predictions with states not passed in chronological order', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
   // Shuffle the states
   const states = context.shuffle(TEST_RECORDS);
 
-  return Promise.all(INPUTS.map((pipe) => kit
-    .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-    .then((endpoint) => t.throws(endpoint.computePredictions(pipe(states))))));
+  return t.throws(endpoint.computePredictions(states));
 });
 
-test('computes predictions with states passed in chronological order', (t) => {
+test('computes predictions', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
   return t.notThrows(Promise
-    .all(INPUTS.map((pipe) => kit
-      .loadEndpoint({ id: context.endpoint.register() })
-      .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-      .then((endpoint) => endpoint.computePredictions(pipe(TEST_RECORDS)))))
+    .all([
+      [TEST_RECORDS],
+      [Helpers.streamify(TEST_RECORDS)],
+      [path.join(__dirname, '../helpers/data/records.csv'), { import: { from: INDEX } }],
+    ].map((parameters) => endpoint.computePredictions(...parameters)))
     .then((values) => {
-      values.forEach((predictions) => {
-        t.true(isPredictions(predictions));
-        t.is(predictions.length, TEST_RECORDS.length);
-      });
-      t.deepEqual(values[0], values[1]);
-      t.snapshot(values[0]);
+      const predictions = values[0];
+
+      t.true(isPredictions(predictions));
+      t.is(predictions.length, TEST_RECORDS.length);
+
+      values.slice(1).forEach((current) => t.deepEqual(predictions, current));
+      t.snapshot(predictions);
     }));
 });
 
 test('computes predictions given a model', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
-  return t.notThrows(Promise
-    .all(INPUTS.map((pipe) => kit
-      .loadEndpoint({ id: context.endpoint.register() })
-      .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-      .then((endpoint) => endpoint
-        .retrievePredictiveModel()
-        .then((model) => endpoint.computePredictions(pipe(TEST_RECORDS), model)))))
+  return t.notThrows(endpoint
+    .retrievePredictiveModel()
+    .then((model) => Promise.all([
+      endpoint.computePredictions(TEST_RECORDS),
+      endpoint.computePredictions(TEST_RECORDS, null, model),
+    ]))
     .then((values) => {
-      values.forEach((predictions) => {
-        t.true(isPredictions(predictions));
-        t.is(predictions.length, TEST_RECORDS.length);
-      });
-      t.deepEqual(values[0], values[1]);
-      t.snapshot(values[0]);
+      const predictions = values[0];
+
+      t.true(isPredictions(predictions));
+      t.is(predictions.length, TEST_RECORDS.length);
+
+      values.slice(1).forEach((current) => t.deepEqual(predictions, current));
+      t.snapshot(predictions);
     }));
 });
 
 test('filters out states with invalid date formats', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
   const dates = INVALID_DATES.concat([null]);
   const states = TEST_RECORDS
     .slice(0, dates.length)
     .map((state, index) => ({ ...state, [DATE]: dates[index] }));
 
-  return t.notThrows(Promise.all(INPUTS.map((pipe) => kit
-    .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-    .then((endpoint) => endpoint.computePredictions(pipe(states)))
-    .then((predictions) => t.true(Array.isArray(predictions) && !predictions.length)))));
+  return t.notThrows(endpoint
+    .computePredictions(states)
+    .then((predictions) => {
+      t.true(Array.isArray(predictions));
+      t.is(predictions.length, 0);
+    }));
 });
 
 test('merges states with the same date', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
   // Add a duplicate state
   const index = context.random(TEST_RECORDS.length - 1);
@@ -100,255 +109,236 @@ test('merges states with the same date', (t) => {
 
   states.splice(index + 1, 0, { [DATE]: TEST_RECORDS[index][DATE] });
 
-  return t.notThrows(Promise
-    .all(INPUTS.map((pipe) => kit
-      .loadEndpoint({ id: context.endpoint.register() })
-      .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-      .then((endpoint) => endpoint.computePredictions(pipe(states)))))
-    .then((values) => {
-      values.forEach((predictions) => {
-        // The duplicate state should be omitted
-        t.true(isPredictions(predictions));
-        t.is(predictions.length, TEST_RECORDS.length);
-      });
-      t.deepEqual(values[0], values[1]);
-      t.snapshot(values[0]);
+  return t.notThrows(endpoint
+    .computePredictions(states)
+    .then((predictions) => {
+      t.true(isPredictions(predictions));
+      // The duplicate state should be omitted
+      t.is(predictions.length, TEST_RECORDS.length);
+      t.snapshot(predictions);
     }));
 });
 
 test('merges partial states until first full state', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
   // Add some empty states
   const states = [{}, {}, {}].concat(TEST_RECORDS);
 
-  return t.notThrows(Promise
-    .all(INPUTS.map((pipe) => kit
-      .loadEndpoint({ id: context.endpoint.register() })
-      .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-      .then((endpoint) => endpoint.computePredictions(pipe(states)))))
-    .then((values) => {
-      values.forEach((predictions) => {
-        // The added empty states should be omitted
-        t.true(isPredictions(predictions));
-        t.is(predictions.length, TEST_RECORDS.length);
-      });
-      t.deepEqual(values[0], values[1]);
-      t.snapshot(values[0]);
+  return t.notThrows(endpoint
+    .computePredictions(states)
+    .then((predictions) => {
+      t.true(isPredictions(predictions));
+      // The added empty states should be omitted
+      t.is(predictions.length, TEST_RECORDS.length);
+      t.snapshot(predictions);
     }));
 });
 
 test('fails computing anomalies with invalid parameters', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
-  return Promise.all(INPUTS.map((pipe) => kit
-    .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-    .then((endpoint) => Promise.all([endpoint.computeAnomalies(null)]
-      .concat(INVALID_OBJECTS.map((records) => endpoint.computeAnomalies(records)))
-      .concat(INVALID_OBJECTS.map((options) => endpoint.computeAnomalies(pipe([]), options)))
-      .concat(INVALID_NUMBERS.map((value) => endpoint.computeAnomalies(pipe([]), { minConfidence: value })))
-      .concat(INVALID_NUMBERS.map((value) => endpoint.computeAnomalies(pipe([]), { minAbsoluteDifference: value })))
-      .concat(INVALID_NUMBERS.map((value) => endpoint.computeAnomalies(pipe([]), { minSigmaDifference: value })))
-      .concat(INVALID_DATES.map((date) => endpoint.computeAnomalies(pipe([]), null, date)))
-      .map((promise) => t.throws(promise))))));
+  return Promise.all([[null]]
+    .concat(INVALID_OBJECTS.map((records) => [records]))
+    .concat(INVALID_OBJECTS.map((options) => [[], options]))
+    .concat(INVALID_NUMBERS.map((value) => [[], { minConfidence: value }]))
+    .concat(INVALID_NUMBERS.map((value) => [[], { minAbsoluteDifference: value }]))
+    .concat(INVALID_NUMBERS.map((value) => [[], { minSigmaDifference: value }]))
+    .concat(INVALID_DATES.map((date) => [[], null, date]))
+    .map((parameters) => t.throws(endpoint.computeAnomalies(...parameters))));
 });
 
 test('fails computing anomalies with records not passed in chronological order', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
   // Shuffle the records
   const records = context.shuffle(TEST_RECORDS);
 
-  return Promise.all(INPUTS.map((pipe) => kit
-    .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-    .then((endpoint) => t.throws(endpoint.computeAnomalies(pipe(records))))));
+  return t.throws(endpoint.computeAnomalies(records));
 });
 
-test('computes anomalies from records passed in chronological order', (t) => {
+test('computes anomalies', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
   return t.notThrows(Promise
-    .all(INPUTS.map((pipe) => kit
-      .loadEndpoint({ id: context.endpoint.register() })
-      .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-      .then((endpoint) => endpoint.computeAnomalies(pipe(TEST_RECORDS)))))
+    .all([
+      [TEST_RECORDS],
+      [Helpers.streamify(TEST_RECORDS)],
+      [path.join(__dirname, '../helpers/data/records.csv'), { import: { from: INDEX } }],
+    ].map((parameters) => endpoint.computeAnomalies(...parameters)))
     .then((values) => {
-      values.forEach((anomalies) => {
-        t.true(isAnomalies(anomalies));
-        t.is(anomalies.recordsCount, TEST_RECORDS.length);
-      });
-      t.deepEqual(values[0], values[1]);
-      t.snapshot(values[0]);
+      const anomalies = values[0];
+
+      t.true(isAnomalies(anomalies));
+      t.is(anomalies.recordsCount, TEST_RECORDS.length);
+
+      values.slice(1).forEach((current) => t.deepEqual(anomalies, current));
+      t.snapshot(anomalies);
     }));
 });
 
-test('computes anomalies from records given a model', (t) => {
+test('computes anomalies given a model', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
-  return t.notThrows(Promise
-    .all(INPUTS.map((pipe) => kit
-      .loadEndpoint({ id: context.endpoint.register() })
-      .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-      .then((endpoint) => endpoint
-        .retrievePredictiveModel()
-        .then((model) => endpoint.computeAnomalies(pipe(TEST_RECORDS), null, model)))))
+  return t.notThrows(endpoint
+    .retrievePredictiveModel()
+    .then((model) => Promise.all([
+      [TEST_RECORDS],
+      [TEST_RECORDS, null, model],
+    ].map((parameters) => endpoint.computeAnomalies(...parameters))))
     .then((values) => {
-      values.forEach((anomalies) => {
-        t.true(isAnomalies(anomalies));
-        t.is(anomalies.recordsCount, TEST_RECORDS.length);
-      });
-      t.deepEqual(values[0], values[1]);
-      t.snapshot(values[0]);
+      const anomalies = values[0];
+
+      t.true(isAnomalies(anomalies));
+      t.is(anomalies.recordsCount, TEST_RECORDS.length);
+
+      values.slice(1).forEach((current) => t.deepEqual(anomalies, current));
+      t.snapshot(anomalies);
     }));
 });
 
 test('computes anomalies from a window', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
-  return t.notThrows(kit
-    .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => endpoint.update(RECORDS))
-    .then((endpoint) => Promise.all([
-      endpoint.computeAnomalies(WINDOW),
-      endpoint.retrievePredictiveModel(WINDOW.from).then((model) => endpoint.computeAnomalies(WINDOW, null, model))
-    ]))
+  return t.notThrows(endpoint
+    .update(RECORDS)
+    .then(() => endpoint.retrievePredictiveModel(WINDOW.from))
+    .then((model) => Promise.all([
+      [WINDOW],
+      [WINDOW_RECORDS, null, model],
+    ].map((parameters) => endpoint.computeAnomalies(...parameters))))
     .then((values) => {
-      values.forEach((anomalies) => {
-        t.true(isAnomalies(anomalies));
-        t.is(anomalies.recordsCount, WINDOW_LENGTH);
-      });
-      t.deepEqual(values[0], values[1]);
-      t.snapshot(values[0]);
+      const anomalies = values[0];
+
+      t.true(isAnomalies(anomalies));
+      t.is(anomalies.recordsCount, WINDOW_LENGTH);
+
+      values.slice(1).forEach((current) => t.deepEqual(anomalies, current));
+      t.snapshot(anomalies);
     }));
 });
 
 test('filters out anomalies given custom thresholds', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
-  return t.notThrows(kit
-    .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => endpoint.update(TRAINING_RECORDS))
-    .then((endpoint) => Promise.all([
-      endpoint.computeAnomalies([], {}),
-      endpoint.computeAnomalies(TEST_RECORDS, { minConfidence: 1 }),
-      endpoint.computeAnomalies(TEST_RECORDS, { minAbsoluteDifference: Infinity }),
-      endpoint.computeAnomalies(TEST_RECORDS, { minSigmaDifference: Infinity }),
-    ]))
-    .then((values) => values.forEach((anomalies) => t.true(isAnomalies(anomalies) && !anomalies.values.length))));
+  return t.notThrows(Promise
+    .all([
+      [[], {}],
+      [TEST_RECORDS, { minConfidence: 1 }],
+      [TEST_RECORDS, { minAbsoluteDifference: Infinity }],
+      [TEST_RECORDS, { minSigmaDifference: Infinity }],
+    ].map((parameters) => endpoint.computeAnomalies(...parameters)))
+    .then((values) => values.forEach((anomalies) => {
+      t.true(isAnomalies(anomalies));
+      t.is(anomalies.values.length, 0);
+    })));
 });
 
 test('fails computing a report with invalid parameters', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
-  return Promise.all(INPUTS.map((pipe) => kit
-    .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => endpoint.update(pipe(TEST_RECORDS)))
-    .then((endpoint) => Promise.all([endpoint.computeReport(null)]
-      .concat(INVALID_OBJECTS.map((options) => endpoint.computeReport(pipe([]), options)))
-      .concat(INVALID_NUMBERS.map((value) => endpoint.computeReport(pipe([]), { minConfidence: value })))
-      .concat(INVALID_NUMBERS.map((value) => endpoint.computeReport(pipe([]), { minAbsoluteDifference: value })))
-      .concat(INVALID_NUMBERS.map((value) => endpoint.computeReport(pipe([]), { minSigmaDifference: value })))
-      .concat(INVALID_DATES.map((date) => endpoint.computeReport(pipe([]), null, date)))
-      .map((promise) => t.throws(promise))))));
+  return Promise.all([[null]]
+    .concat(INVALID_OBJECTS.map((options) => [[], options]))
+    .concat(INVALID_NUMBERS.map((value) => [[], { minConfidence: value }]))
+    .concat(INVALID_NUMBERS.map((value) => [[], { minAbsoluteDifference: value }]))
+    .concat(INVALID_NUMBERS.map((value) => [[], { minSigmaDifference: value }]))
+    .concat(INVALID_DATES.map((date) => [[], null, date]))
+    .map((parameters) => t.throws(endpoint.computeReport(...parameters))));
 });
 
 test('fails computing a report with records not passed in chronological order', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
   // Shuffle the records
   const records = context.shuffle(TEST_RECORDS);
 
-  return Promise.all(INPUTS.map((pipe) => kit
-    .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-    .then((endpoint) => t.throws(endpoint.computeReport(pipe(records))))));
+  return t.throws(endpoint.computeReport(records));
 });
 
-test('computes a report from records passed in chronological order', (t) => {
+test('computes a report', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
   return t.notThrows(Promise
-    .all(INPUTS.map((pipe) => kit
-      .loadEndpoint({ id: context.endpoint.register() })
-      .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-      .then((endpoint) => endpoint.computeReport(pipe(TEST_RECORDS)))))
+    .all([
+      [TEST_RECORDS],
+      [Helpers.streamify(TEST_RECORDS)],
+      [path.join(__dirname, '../helpers/data/records.csv'), { import: { from: INDEX } }],
+    ].map((parameters) => endpoint.computeReport(...parameters)))
     .then((values) => {
-      values.forEach((report) => {
-        t.true(isReport(report));
-        t.is(report.recordsCount, TEST_RECORDS.length);
-      });
-      t.deepEqual(values[0], values[1]);
-      t.snapshot(values[0]);
+      const report = values[0];
+
+      t.true(isReport(report));
+      t.is(report.recordsCount, TEST_RECORDS.length);
+
+      values.slice(1).forEach((current) => t.deepEqual(report, current));
+      t.snapshot(report);
     }));
 });
 
-test('computes a report from records given a model', (t) => {
+test('computes a report given a model', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
-  return t.notThrows(Promise
-    .all(INPUTS.map((pipe) => kit
-      .loadEndpoint({ id: context.endpoint.register() })
-      .then((endpoint) => endpoint.update(pipe(TRAINING_RECORDS)))
-      .then((endpoint) => endpoint
-        .retrievePredictiveModel()
-        .then((model) => endpoint.computeReport(pipe(TEST_RECORDS), null, model)))))
+  return t.notThrows(endpoint
+    .retrievePredictiveModel()
+    .then((model) => Promise.all([
+      [TEST_RECORDS],
+      [TEST_RECORDS, null, model],
+    ].map((parameters) => endpoint.computeReport(...parameters))))
     .then((values) => {
-      values.forEach((report) => {
-        t.true(isReport(report));
-        t.is(report.recordsCount, TEST_RECORDS.length);
-      });
-      t.deepEqual(values[0], values[1]);
-      t.snapshot(values[0]);
+      const report = values[0];
+
+      t.true(isReport(report));
+      t.is(report.recordsCount, TEST_RECORDS.length);
+
+      values.slice(1).forEach((current) => t.deepEqual(report, current));
+      t.snapshot(report);
     }));
 });
 
 test('computes a report from a window', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
-  return t.notThrows(kit
-    .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => endpoint.update(RECORDS))
-    .then((endpoint) => Promise.all([
-      endpoint.computeReport(WINDOW),
-      endpoint.retrievePredictiveModel(WINDOW.from).then((model) => endpoint.computeReport(WINDOW, null, model))
-    ]))
+  return t.notThrows(endpoint
+    .update(RECORDS)
+    .then(() => endpoint.retrievePredictiveModel(WINDOW.from))
+    .then((model) => Promise.all([
+      [WINDOW],
+      [WINDOW_RECORDS, null, model],
+    ].map((parameters) => endpoint.computeReport(...parameters))))
     .then((values) => {
-      values.forEach((report) => {
-        t.true(isReport(report));
-        t.is(report.recordsCount, WINDOW_LENGTH);
-      });
-      t.deepEqual(values[0], values[1]);
-      t.snapshot(values[0]);
+      const report = values[0];
+
+      t.true(isReport(report));
+      t.is(report.recordsCount, WINDOW_LENGTH);
+
+      values.slice(1).forEach((current) => t.deepEqual(report, current));
+      t.snapshot(report);
     }));
 });
 
 test('computes a report with no values', (t) => {
   const context = t.context;
-  const kit = context.kit;
+  const endpoint = context.endpoint.current;
 
-  return t.notThrows(kit
-    .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => endpoint.update(TRAINING_RECORDS))
-    .then((endpoint) => Promise.all([
-      endpoint.computeReport([], {}),
-      endpoint.computeReport(TEST_RECORDS, { minConfidence: 1 }),
-      endpoint.computeReport(TEST_RECORDS, { minAbsoluteDifference: Infinity }),
-      endpoint.computeReport(TEST_RECORDS, { minSigmaDifference: Infinity }),
-    ]))
+  return t.notThrows(Promise
+    .all([
+      [[], {}],
+      [TEST_RECORDS, { minConfidence: 1 }],
+      [TEST_RECORDS, { minAbsoluteDifference: Infinity }],
+      [TEST_RECORDS, { minSigmaDifference: Infinity }],
+    ].map((parameters) => endpoint.computeReport(...parameters)))
     .then((values) => values.forEach((report) => {
       t.true(isReport(report));
       t.falsy(report.values.length);
@@ -402,7 +392,6 @@ function isReport(object) {
 
 
 const DATE = Constants.DATE_FEATURE;
-const INPUTS = Helpers.INPUT_METHODS;
 const INVALID_DATES = Helpers.INVALID_DATES;
 const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS.filter((object) => object !== null);
@@ -413,4 +402,5 @@ const TEST_RECORDS = RECORDS.slice(INDEX);
 const WINDOW_END = RECORDS.length - 1;
 const WINDOW_START = Math.floor(WINDOW_END * .9);
 const WINDOW_LENGTH = WINDOW_END - WINDOW_START + 1;
+const WINDOW_RECORDS = RECORDS.slice(WINDOW_START);
 const WINDOW = { from: RECORDS[WINDOW_START][DATE], to: RECORDS[WINDOW_END][DATE] };
