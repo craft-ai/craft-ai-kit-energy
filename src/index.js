@@ -3,6 +3,7 @@ const debug = require('debug');
 const uuid = require('uuid/v5');
 
 const Constants = require('./constants');
+const CsvParser = require('./parsers/csv');
 const Kit = require('./kit');
 const Provider = require('./provider');
 
@@ -80,4 +81,7 @@ const ROOT_NAMESPACE = uuid.DNS;
 
 module.exports = {
   initialize,
+  import: {
+    csv: CsvParser.stream,
+  }
 };

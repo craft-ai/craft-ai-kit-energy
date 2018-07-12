@@ -2,6 +2,7 @@ const craftai = require('craft-ai');
 
 const Common = require('./common');
 const Constants = require('../constants');
+const Stream = require('../stream');
 const Utils = require('../utils');
 
 
@@ -22,10 +23,10 @@ async function computeAnomalies(records, options, model) {
   const minAbsoluteDifference = options.minAbsoluteDifference === undefined ? 0 : options.minAbsoluteDifference;
   const minSigmaDifference = options.minSigmaDifference === undefined ? 2 : options.minSigmaDifference;
 
-  return retrieveRecords(this, records, true).then((records) => this
-    .computePredictions(records, model === undefined && records.length ? records[0][DATE] : model)
+  return retrieveRecords(this, records, options.import).then((records) => this
+    .computePredictions(records, options, model === undefined && records.length ? records[0][DATE] : model)
     .then((predictions) => {
-      predictions.forEach((prediction, index) => prediction.actualLoad = prediction[ORIGINAL_RECORD][LOAD]);
+      predictions.forEach((prediction) => prediction.actualLoad = prediction[ORIGINAL_CONTEXT][PARSED_RECORD][LOAD]);
 
       const values = predictions.filter((prediction) => {
         if (prediction.confidence < minConfidence) return false;
@@ -42,14 +43,14 @@ async function computeAnomalies(records, options, model) {
     }));
 }
 
-async function computePredictions(states, model) {
+async function computePredictions(states, options, model) {
   this.debug('computing predictions');
 
-  const features = this.features.filter((feature) => feature !== LOAD);
+  const features = this.features.filter(featureIsLoad);
 
   return retrieveModel(this, model)
     .then((model) => Common
-      .toRecordStream(states)
+      .toRecordStream(states, options && options.import)
       .thru(Common.mergeUntilFirstFullRecord.bind(null, features))
       .thru(Common.formatRecords.bind(null, features))
       .loop((previous, state) => {
@@ -61,16 +62,16 @@ async function computePredictions(states, model) {
         return {
           seed: current,
           value: Object.defineProperty({
-            date: context[PARSED_DATE].toJSDate(),
+            date: context[PARSED_RECORD][DATE].toJSDate(),
             context: result.context,
             predictedLoad: output.predicted_value,
             confidence: output.confidence,
             standardDeviation: output.standard_deviation,
             decisionRules: output.decision_rules
-          }, ORIGINAL_RECORD, { value: context[ORIGINAL_RECORD] })
+          }, ORIGINAL_CONTEXT, { value: context })
         };
       }, {})
-      .thru(Utils.toBuffer))
+      .thru(Stream.toBuffer))
     .then((predictions) => {
       this.debug('computed %d predictions', predictions.length);
 
@@ -81,11 +82,8 @@ async function computePredictions(states, model) {
 async function computeReport(records, options, model) {
   this.debug('computing a report');
 
-  if (options !== null && typeof options === 'object') {
-    if (options.minConfidence === undefined) options.minConfidence = .4;
-    if (options.minAbsoluteDifference === undefined) options.minAbsoluteDifference = 0;
-    if (options.minSigmaDifference === undefined) options.minSigmaDifference = 0;
-  }
+  if (options === null || options === undefined) options = { minSigmaDifference: 0 };
+  else if (typeof options === 'object') options = Object.assign({ minSigmaDifference: 0 }, options);
 
   return this
     .computeAnomalies(records, options, model)
@@ -109,12 +107,12 @@ async function retrieveModel(endpoint, value) {
   return endpoint.retrievePredictiveModel(value);
 }
 
-async function retrieveRecords(endpoint, value) {
+async function retrieveRecords(endpoint, value, options) {
   if (Array.isArray(value)) return value;
 
-  return Utils
-    .toStream(value)
-    .thru(Utils.toBuffer)
+  return Stream
+    .from(value, options)
+    .thru(Stream.toBuffer)
     .catch(() => {
       if (value !== null && typeof value === 'object') return endpoint.retrieveRecords(value.from, value.to);
 
@@ -145,11 +143,13 @@ function computeAverages(values) {
   return counts;
 }
 
+function featureIsLoad(feature) { return feature !== LOAD; }
+
 
 const DATE = Constants.DATE_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;
-const ORIGINAL_RECORD = Constants.ORIGINAL_RECORD;
-const PARSED_DATE = Constants.PARSED_DATE;
+const ORIGINAL_CONTEXT = Constants.ORIGINAL_CONTEXT;
+const PARSED_RECORD = Constants.PARSED_RECORD;
 const TIMESTAMP = Constants.TIMESTAMP_FEATURE;
 
 const interpreter = craftai.interpreter;

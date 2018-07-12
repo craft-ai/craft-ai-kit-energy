@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.1.0...HEAD) ##
 
+### BREAKING CHANGES ###
+
+The signature of the method `endpoint.computePredictions()` has been changed to include an `options` argument.
+
+### Added ###
+
+- Introducing a CSV import helper with streaming capabilities and custom parsing options
+- Supporting a path to a CSV file as the first argument of some methods of an endpoint's instance
+
 ## [0.1.0](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.7...v0.1.0) - 2018-07-04 ##
 
 ### BREAKING CHANGES ###

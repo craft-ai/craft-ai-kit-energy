@@ -37,8 +37,12 @@ test('retrieves the records\' history of an endpoint', (t) => {
     .loadEndpoint({ id: t.context.endpoint.register() })
     .then((endpoint) => endpoint
       .retrieveRecords()
-      .then((history) => t.true(Array.isArray(history) && !history.length))
-      .then(() => endpoint.update(RECORDS)))
+      .then((history) => {
+        t.true(Array.isArray(history));
+        t.is(history.length, 0);
+
+        return endpoint.update(RECORDS);
+      }))
     .then((endpoint) => Promise.all([
       endpoint.retrieveRecords(),
       endpoint.retrieveRecords(start),
