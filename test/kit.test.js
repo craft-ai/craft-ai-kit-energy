@@ -21,6 +21,7 @@ test('fails loading an endpoint with invalid definition', (t) => {
     .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', learning: value })))
     .concat(INVALID_NUMBERS.map((value) => ({ id: 'id', learning: { maxRecords: value } })))
     .concat(INVALID_NUMBERS.map((value) => ({ id: 'id', learning: { maxRecordAge: value } })))
+    .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', metadata: value })))
     .map((definition) => t.throws(kit.loadEndpoint(definition))));
 });
 
