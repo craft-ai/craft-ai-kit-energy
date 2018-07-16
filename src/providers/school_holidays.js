@@ -5,7 +5,7 @@ async function initialize(provider) {
   if (typeof country !== 'string')
     throw new TypeError(`The "country" option of the school holidays provider must be a "string". Received "${typeof country}".`);
 
-  const context = {};
+  const context = provider.context;
 
   try {
     context.holidays = require(`../../data/school_holidays.${country}.js`);
@@ -16,7 +16,7 @@ async function initialize(provider) {
     throw error;
   }
 
-  provider.context = context;
+  provider.refresh.timeout = { days: 1 };
 
   return context.holidays.initialize();
 }

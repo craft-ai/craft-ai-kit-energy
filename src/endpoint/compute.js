@@ -51,6 +51,7 @@ async function computePredictions(states, options, model) {
   return retrieveModel(this, model)
     .then((model) => Common
       .toRecordStream(states, options && options.import)
+      .thru(Common.checkRecordsAreSorted)
       .thru(Common.mergeUntilFirstFullRecord.bind(null, features))
       .thru(Common.formatRecords.bind(null, features))
       .loop((previous, state) => {

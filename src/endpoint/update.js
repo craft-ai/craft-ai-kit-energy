@@ -22,6 +22,7 @@ async function update(records, options) {
     // TODO: Convert index values to mean electrical loads
     // Extend the record with providers
     .thru(Provider.extendRecords.bind(null, this))
+    .thru(Common.checkRecordsAreSorted)
     .thru(end === undefined
       ? Common.mergeUntilFirstFullRecord.bind(null, features)
       : ignoreOldRecords.bind(null, end))

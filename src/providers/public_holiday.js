@@ -10,7 +10,7 @@ async function initialize(provider) {
   if (typeof country !== 'string')
     throw new TypeError(`The "country" option of the public holiday provider must be a "string". Received "${typeof country}".`);
 
-  const context = {};
+  const context = provider.context;
 
   try {
     const holidays = require(`../../data/public_holiday.${country}.js`);
@@ -33,7 +33,7 @@ async function initialize(provider) {
 
   context.cache = cache;
   context.easter = memoize(require('date-easter').easter, { cache });
-  provider.context = context;
+  provider.refresh.timeout = { days: 1 };
 }
 
 async function extendConfiguration() {

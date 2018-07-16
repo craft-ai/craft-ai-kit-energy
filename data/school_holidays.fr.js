@@ -162,6 +162,7 @@ function toArray(value) {
   return Array.isArray(value) ? value : [value];
 }
 
+
 const MEMOIZE_OPTIONS = { maxAge: 2 * 24 * 3600 * 1000 };
 const RETRY_OPTIONS = { retries: 5, minTimeout: 100 };
 const PARSER_OPTIONS = { attributeNamePrefix: '', ignoreAttributes: false, parseNodeValue: false };
