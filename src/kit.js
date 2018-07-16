@@ -46,7 +46,7 @@ async function loadEndpoint(definition) {
     });
 }
 
-async function close(configuration) {
+async function close() {
   return Provider
     .close(this.configuration.providers)
     .then(() => this.debug('closed'));
