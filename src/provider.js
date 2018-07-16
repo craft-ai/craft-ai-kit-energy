@@ -53,6 +53,7 @@ async function initialize(instance, index) {
 async function extendConfiguration(providers, context) {
   if (!providers.length) return context;
 
+  // TODO: Submit the endpoint's metadata to the providers for validation
   return Promise
     .all(providers.map((provider) => provider.extendConfiguration()))
     .then((extensions) => Object.assign(context, ...extensions));
@@ -77,7 +78,7 @@ function extendRecords(endpoint, records) {
 
         states[index] = roundDate(interval, timeout, previous);
 
-        return record[PARSED_RECORD][DATE];
+        return record;
       });
 
       return { seed: states, value: [record, values] };
@@ -85,9 +86,9 @@ function extendRecords(endpoint, records) {
     // Compute the extensions and merge them to the record
     .concatMap((data) => most.fromPromise(Promise
       .all(providers.map((provider, index) => {
-        const date = data[1][index];
+        const record = data[1][index];
 
-        return date && provider.extendRecord(endpoint, date);
+        return record && provider.extendRecord(endpoint, record);
       }))
       .then((extensions) => Object.assign({}, ...extensions, data[0]))));
 }

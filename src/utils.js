@@ -32,7 +32,7 @@ function parseDate(value) {
     ? DateTime.fromISO(value)
     : value instanceof Date
       ? DateTime.fromJSDate(value)
-      : DateTime.fromMillis(value);
+      : typeof value === 'number' ? DateTime.fromMillis(value) : value;
 }
 
 function parseTimestamp(value) {

@@ -2,6 +2,8 @@ const lru = require('quick-lru');
 const luxon = require('luxon');
 const memoize = require('mem');
 
+const Constants = require('../constants');
+
 
 async function initialize(provider) {
   const options = provider.options;
@@ -20,8 +22,7 @@ async function initialize(provider) {
 
     context.fixed = fixed;
     context.easterOffseted = easterOffseted;
-    /* istanbul ignore next */
-    context.regions = holidays.regions ? formatRegions(holidays.regions, fixed, easterOffseted) : {};
+    context.regions = holidays.regions ? formatRegions(holidays.regions, fixed, easterOffseted) : /* istanbul ignore next */{};
   } catch (error)/* istanbul ignore next */ {
     if (error.code === 'MODULE_NOT_FOUND')
       throw new RangeError(`The "country" option of the public holiday provider must be valid. Received "${country}".`);
@@ -37,14 +38,16 @@ async function initialize(provider) {
 }
 
 async function extendConfiguration() {
+  // TODO: Check the endpoint's metadata
+
   return {
     [HOLIDAY]: { type: 'enum' },
   };
 }
 
-async function extendRecord(endpoint, date) {
+async function extendRecord(endpoint, record) {
   return {
-    [HOLIDAY]: isHoliday.call(this, date, endpoint.metadata.region) ? 'YES' : 'NO',
+    [HOLIDAY]: isHoliday.call(this, record[PARSED_RECORD][DATE], endpoint.metadata.region) ? 'YES' : 'NO',
   };
 }
 
@@ -106,6 +109,9 @@ function isHoliday(date, region) {
 }
 
 
+const PARSED_RECORD = Constants.PARSED_RECORD;
+const DATE = Constants.DATE_FEATURE;
+// TODO: Accept custom context property name and labels
 const HOLIDAY = 'holiday';
 const DateTime = luxon.DateTime;
 const Indexer = indexWith(true);
