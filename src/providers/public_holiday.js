@@ -31,10 +31,18 @@ async function initialize(provider) {
   }
 
   const cache = new lru({ maxSize: 50 });
+  const easter = require('date-easter').easter;
 
   context.cache = cache;
-  context.easter = memoize(require('date-easter').easter, { cache });
+  context.easter = memoize(getEasterDate, { cache });
   provider.refresh.timeout = { days: 1 };
+
+
+  function getEasterDate(year) {
+    const date = easter(year);
+
+    return DateTime.utc(year, date.month, date.day);
+  }
 }
 
 async function extendConfiguration() {
@@ -74,13 +82,6 @@ function formatRegions(regions, fixed, easterOffseted) {
   }, {});
 }
 
-function getEasterOffset(date) {
-  const year = date.year;
-  const easter = this.context.easter(year);
-
-  return Math.floor(date.diff(DateTime.utc(year, easter.month, easter.day)).as('day'));
-}
-
 function getRegionalHolidays(index) {
   const context = this.context;
 
@@ -104,7 +105,8 @@ function isHoliday(date, region) {
 
   if (holidays.fixed[date.month][date.day]) return true;
 
-  const easterOffset = getEasterOffset.call(this, date);
+  const easterDate = this.context.easter(date.year);
+  const easterOffset = Math.floor(date.diff(easterDate, 'days').days);
 
   return holidays.easterOffseted[easterOffset];
 }
