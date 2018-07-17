@@ -52,7 +52,8 @@ async function extendRecord(endpoint, record) {
 }
 
 async function close() {
-  /* Does nothing. */
+  // Clear the cache
+  this.context.cache.clear();
 }
 
 
