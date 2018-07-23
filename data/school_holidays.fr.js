@@ -4,6 +4,8 @@ const memoize = require('mem');
 const retry = require('p-retry');
 const xml = require('fast-xml-parser');
 
+const Utils = require('../src/utils');
+
 
 function close() {
   // Clear the cache
@@ -36,7 +38,8 @@ function isHolidays(date, region) {
 
 function fetchHolidays() {
   return fetch('https://telechargement.index-education.com/vacances.xml')
-    .then(responseHandler)
+    .then(Utils.checkResponse)
+    .then(handleResponse)
     .then(parse);
 }
 
@@ -154,7 +157,7 @@ function reduceHolidays(years, holidays) {
   return years;
 }
 
-function responseHandler(response) {
+async function handleResponse(response) {
   return response.textConverted();
 }
 

@@ -7,13 +7,10 @@ const Helpers = require('./helpers');
 
 
 test.before(require('dotenv').load);
-test.beforeEach(Helpers.createContext);
-test.afterEach.always(Helpers.destroyContext);
+test.afterEach.always(Helpers.destroyEndpointContext);
 
 
 test('fails initializing a kit with invalid providers', (t) => {
-  const INVALID_ARRAYS = [null, 0, true, 'string', Symbol(), new Uint8Array(10)];
-
   return Promise.all(INVALID_ARRAYS
     .concat(INVALID_OBJECTS.map((value) => [value]))
     .concat(INVALID_OBJECTS.map((value) => [{ provider: value }]))
@@ -21,7 +18,7 @@ test('fails initializing a kit with invalid providers', (t) => {
 });
 
 test('uses a provider to extend records', async(t) => {
-  await Helpers.createContext(t, { providers: [Provider] });
+  await Helpers.createEndpointContext(t, { providers: [Provider] });
 
   const context = t.context;
   const kit = context.kit;
@@ -41,7 +38,7 @@ test('uses a provider to extend records', async(t) => {
 });
 
 test('uses a provider with options to extend records', async(t) => {
-  await Helpers.createContext(t, {
+  await Helpers.createEndpointContext(t, {
     providers: [{
       provider: Provider,
       options: { random: seedrandom('weather') }
@@ -74,5 +71,6 @@ function isExtended(history) {
 
 
 const FEATURES = Provider.FEATURES;
+const INVALID_ARRAYS = Helpers.INVALID_ARRAYS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const RECORDS = Helpers.RECORDS.slice(0, 500);

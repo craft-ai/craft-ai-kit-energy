@@ -3,24 +3,19 @@ const test = require('ava');
 
 const Common = require('../../src/endpoint/common');
 const Constants = require('../../src/constants');
+const Helpers = require('../helpers');
 const Provider = require('../../src/provider');
 const PublicHolidayProvider = require('../../src/providers/public_holiday');
 
 
-test.beforeEach((t) => Provider
-  .initialize({
-    provider: PublicHolidayProvider,
-    options: { ...PROVIDER_OPTIONS }
-  }, 0)
-  .then((provider) => t.context.provider = provider));
+test.beforeEach((t) => Helpers.createProviderContext(t, PublicHolidayProvider, { country: 'fr' }));
+test.afterEach.always(Helpers.destroyProviderContext);
 
 
 test('fails initializing the provider with invalid options', (t) => {
-  const INVALID_OPTIONS = [null, undefined, 1228, false, Promise.resolve(), Symbol(), '', 'Jupiter'];
-
-  return Promise.all(INVALID_OPTIONS
-    .concat(INVALID_OPTIONS.map((option) => ({ country: option })))
-    .map((options) => t.throws(PublicHolidayProvider.initialize({ options }))));
+  return Promise.all(INVALID_OBJECTS
+    .concat(INVALID_OBJECTS.map((option) => ({ country: option })))
+    .map((options) => t.throws(Provider.initialize({ provider: PublicHolidayProvider, options }, 0))));
 });
 
 test('initializes the provider', (t) => {
@@ -109,6 +104,7 @@ function isHoliday(record, holidays) {
 
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const DATE = Constants.DATE_FEATURE;
+const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const HOLIDAYS = [
   [2018, 1, 1],
   [2018, 4, 1], [2018, 4, 2],
@@ -136,11 +132,8 @@ const REUNION_HOLIDAYS = [
   [2018, 12, 20],
   [2019, 12, 20],
 ].concat(HOLIDAYS);
-const PROVIDER_OPTIONS = { country: 'fr' };
-const DateTime = luxon.DateTime;
-
-const WINDOW_START = DateTime.utc(...HOLIDAYS[0]).startOf('year');
-const WINDOW_END = DateTime.utc(...HOLIDAYS[HOLIDAYS.length - 1]).plus({ year: 1 }).startOf('year');
+const WINDOW_START = luxon.DateTime.utc(...HOLIDAYS[0]).startOf('year');
+const WINDOW_END = luxon.DateTime.utc(...HOLIDAYS[HOLIDAYS.length - 1]).plus({ years: 1 }).startOf('year');
 const WINDOW = new Array(WINDOW_END.diff(WINDOW_START).as('days'))
   .fill(null)
-  .map((_, index) => ({ date: WINDOW_START.plus({ days: index }) }));
+  .map((_, days) => ({ date: WINDOW_START.plus({ days }) }));

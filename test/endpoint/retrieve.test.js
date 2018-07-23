@@ -5,8 +5,8 @@ const Helpers = require('../helpers');
 
 
 test.before(require('dotenv').load);
-test.beforeEach(Helpers.createContext);
-test.afterEach.always(Helpers.destroyContext);
+test.beforeEach(Helpers.createEndpointContext);
+test.afterEach.always(Helpers.destroyEndpointContext);
 
 
 test('fails retrieving the records\' history of an endpoint with invalid paramaters', (t) => {

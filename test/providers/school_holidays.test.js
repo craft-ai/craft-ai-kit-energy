@@ -3,23 +3,19 @@ const test = require('ava');
 
 const Common = require('../../src/endpoint/common');
 const Constants = require('../../src/constants');
+const Helpers = require('../helpers');
 const Provider = require('../../src/provider');
 const SchoolHolidaysProvider = require('../../src/providers/school_holidays');
 
 
-test.beforeEach((t) => Provider
-  .initialize({
-    provider: SchoolHolidaysProvider,
-    options: { ...PROVIDER_OPTIONS }
-  }, 0)
-  .then((provider) => t.context.provider = provider));
+test.beforeEach((t) => Helpers.createProviderContext(t, SchoolHolidaysProvider, { country: 'fr' }));
+test.afterEach.always(Helpers.destroyProviderContext);
+
 
 test('fails initializing the provider with invalid options', (t) => {
-  const INVALID_OPTIONS = [null, undefined, 1228, false, Promise.resolve(), Symbol(), '', 'Jupiter'];
-
-  return Promise.all(INVALID_OPTIONS
-    .concat(INVALID_OPTIONS.map((option) => ({ country: option })))
-    .map((options) => t.throws(SchoolHolidaysProvider.initialize({ options }))));
+  return Promise.all(INVALID_OBJECTS
+    .concat(INVALID_OBJECTS.map((option) => ({ country: option })))
+    .map((options) => t.throws(Provider.initialize({ provider: SchoolHolidaysProvider, options }, 0))));
 });
 
 test('initializes the provider', (t) => {
@@ -104,27 +100,21 @@ test('handles computing the record\'s extension with no school holidays informat
 });
 
 test('closes the provider', (t) => {
-  return initializeProvider().then((provider) => t.notThrows(provider.close()));
+  return t.notThrows(t.context.provider.close());
 });
 
-
-function initializeProvider() {
-  return Provider.initialize({
-    provider: SchoolHolidaysProvider,
-    options: { ...PROVIDER_OPTIONS }
-  }, 0);
-}
 
 function isHoliday(record, holidays) {
   const date = record[PARSED_RECORD][DATE];
 
-  return holidays.some((holidays) => date > DateTime.utc(...holidays[0]).endOf('day')
-    && date < DateTime.utc(...holidays[1]).startOf('day'));
+  return holidays.some((holidays) => date > DateTime.local(...holidays[0]).endOf('day')
+    && date < DateTime.local(...holidays[1]).startOf('day'));
 }
 
 
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const DATE = Constants.DATE_FEATURE;
+const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const PARIS_HOLIDAYS = [
   [[2017, 7, 31], [2017, 9, 4]],
   [[2017, 10, 21], [2017, 11, 6]],
@@ -149,11 +139,10 @@ const LILLE_HOLIDAYS = [
   [[2018, 4, 21], [2018, 5, 7]],
   [[2018, 7, 7], [2018, 7, 31]],
 ];
-const PROVIDER_OPTIONS = { country: 'fr' };
 const DateTime = luxon.DateTime;
 
-const WINDOW_START = DateTime.utc(...PARIS_HOLIDAYS[0][0]).plus({ day: 1 });
-const WINDOW_END = DateTime.utc(...PARIS_HOLIDAYS[PARIS_HOLIDAYS.length - 1][1]);
+const WINDOW_START = DateTime.local(...PARIS_HOLIDAYS[0][0]).plus({ days: 1 });
+const WINDOW_END = DateTime.local(...PARIS_HOLIDAYS[PARIS_HOLIDAYS.length - 1][1]);
 const WINDOW = new Array(WINDOW_END.diff(WINDOW_START).as('days'))
   .fill(null)
-  .map((_, index) => ({ date: WINDOW_START.plus({ days: index }) }));
+  .map((_, days) => ({ date: WINDOW_START.plus({ days }) }));

@@ -15,9 +15,8 @@ test.beforeEach((t) => {
 
 // Must be serial as it has side effects on `process.env`
 test.serial('fails initializing the kit with invalid configurations', async(t) => {
-  const INVALID_TOKENS = [null, 1463, new Array(), new Date, 'very bad token'];
-  const INVALID_SECRETS = ['', 713705, [], Symbol(), Promise.resolve('hi!')];
-  const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
+  const INVALID_TOKENS = [undefined].concat(INVALID_STRINGS, 'very bad token');
+  const INVALID_SECRETS = INVALID_STRINGS.concat(['']);
 
   await Promise.all(INVALID_OBJECTS.map((configuration) => t.throws(EnergyKit.initialize(configuration))));
 
@@ -61,3 +60,7 @@ test('initializes the kit', async(t) => {
   t.is(typeof kit.loadEndpoint, 'function');
   t.is(typeof kit.close, 'function');
 });
+
+
+const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
+const INVALID_STRINGS = Helpers.INVALID_STRINGS;

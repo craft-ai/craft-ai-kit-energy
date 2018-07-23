@@ -4,19 +4,17 @@ const Helpers = require('./helpers');
 
 
 test.before(require('dotenv').load);
-test.beforeEach((t) => Helpers.createContext(t));
-test.afterEach.always((t) => Helpers.destroyContext(t));
+test.beforeEach(Helpers.createEndpointContext);
+test.afterEach.always(Helpers.destroyEndpointContext);
 
 
 test('fails loading an endpoint with invalid definition', (t) => {
-  const INVALID_DEFINITIONS = [undefined, null, 'string', 364, Promise.resolve({})];
-  const INVALID_IDENTIFIERS = [undefined, null, 364, [false]];
-  const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
-  const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
+  const INVALID_DEFINTIONS = [undefined].concat(INVALID_OBJECTS);
+  const INVALID_IDENTIFIERS = [undefined].concat(INVALID_STRINGS);
 
   const kit = t.context.kit;
 
-  return Promise.all(INVALID_DEFINITIONS
+  return Promise.all(INVALID_DEFINTIONS
     .concat(INVALID_IDENTIFIERS.map((id) => ({ id })))
     .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', learning: value })))
     .concat(INVALID_NUMBERS.map((value) => ({ id: 'id', learning: { maxRecords: value } })))
@@ -63,7 +61,7 @@ test('loads an endpoint', async(t) => {
 });
 
 test('derives the agent\'s identifier when a secret is specified', async(t) => {
-  await Helpers.createContext(t, { secret: 'a very strong secret' });
+  await Helpers.createEndpointContext(t, { secret: 'a very strong secret' });
 
   const context = t.context;
   const kit = context.kit;
@@ -106,3 +104,8 @@ test('closes the kit', (t) => {
     .close()
     .then((result) => t.is(result, undefined)));
 });
+
+
+const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
+const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
+const INVALID_STRINGS = Helpers.INVALID_STRINGS;
