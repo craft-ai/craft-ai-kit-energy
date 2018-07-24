@@ -104,6 +104,7 @@ function isHoliday(record, holidays) {
 
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const DATE = Constants.DATE_FEATURE;
+const LOAD = Constants.LOAD_FEATURE;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const HOLIDAYS = [
   [2018, 1, 1],
@@ -136,4 +137,4 @@ const WINDOW_START = luxon.DateTime.utc(...HOLIDAYS[0]).startOf('year');
 const WINDOW_END = luxon.DateTime.utc(...HOLIDAYS[HOLIDAYS.length - 1]).plus({ years: 1 }).startOf('year');
 const WINDOW = new Array(WINDOW_END.diff(WINDOW_START).as('days'))
   .fill(null)
-  .map((_, days) => ({ date: WINDOW_START.plus({ days }) }));
+  .map((_, days) => ({ [DATE]: WINDOW_START.plus({ days }), [LOAD]: 0 }));

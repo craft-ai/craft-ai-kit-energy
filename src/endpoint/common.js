@@ -71,8 +71,7 @@ function checkRecordsAreSorted(records) {
 function recordHasValidDate(record) { return !isNaN(record[DATE]); }
 
 function recordHasValue(record) {
-  // TODO: Accept index values
-  return typeof record[LOAD] === 'number';
+  return record[LOAD] !== undefined;
 }
 
 function toContextOperation(record) {
@@ -95,15 +94,15 @@ function toRecord(value) {
     const parsed = {};
     const timezone = Utils.formatTimezone(date.offset);
 
-    parsed[DATE] = date;
     record[DATE] = Math.floor(date.valueOf() / 1000);
-    parsed[TIMEZONE] = timezone;
     record[TIMEZONE] = timezone;
+    record[LOAD] = Utils.parseNumber(record[LOAD]);
+    record[ENERGY] = Utils.parseNumber(record[ENERGY]);
 
-    if (typeof record[LOAD] === 'string') record[LOAD] = Number(record[LOAD].replace(',', '.'));
-    // TODO: Parse index values
-
+    parsed[DATE] = date;
+    parsed[TIMEZONE] = timezone;
     parsed[LOAD] = record[LOAD];
+    parsed[ENERGY] = record[ENERGY];
 
     Object.defineProperty(record, ORIGINAL_RECORD, { value });
     Object.defineProperty(record, PARSED_RECORD, { value: parsed });
@@ -115,6 +114,7 @@ function toRecord(value) {
 
 const DATE = Constants.DATE_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;
+const ENERGY = Constants.ENERGY_FEATURE;
 const ORIGINAL_RECORD = Constants.ORIGINAL_RECORD;
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;

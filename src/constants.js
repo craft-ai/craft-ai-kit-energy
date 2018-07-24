@@ -1,6 +1,7 @@
 const DATE_FEATURE = 'date';
 const DEBUG_PREFIX = 'craft-ai:kit-energy';
 const DEFAULT_RECORD_BULK_SIZE = 200;
+const ENERGY_FEATURE = 'energy';
 const LOAD_FEATURE = 'load';
 const ORIGINAL_CONTEXT = Symbol('ORIGINAL_CONTEXT');
 const ORIGINAL_RECORD = Symbol('ORIGINAL_RECORD');
@@ -13,6 +14,7 @@ module.exports = {
   DATE_FEATURE,
   DEFAULT_RECORD_BULK_SIZE,
   DEBUG_PREFIX,
+  ENERGY_FEATURE,
   LOAD_FEATURE,
   ORIGINAL_CONTEXT,
   ORIGINAL_RECORD,

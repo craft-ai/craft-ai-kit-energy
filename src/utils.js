@@ -45,6 +45,12 @@ function parseDate(value) {
       : typeof value === 'number' ? DateTime.fromMillis(value) : value;
 }
 
+function parseNumber(value) {
+  const result = value && typeof value === 'string' ? Number(value.replace(',', '.')) : value;
+
+  return Number.isFinite(result) ? result : undefined;
+}
+
 function parseTimestamp(value) {
   if (value === undefined || value === null) return;
 
@@ -67,5 +73,6 @@ module.exports = {
   isPredictiveModel,
   isNotString,
   parseDate,
+  parseNumber,
   parseTimestamp,
 };

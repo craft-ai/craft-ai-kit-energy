@@ -9,6 +9,7 @@ const test = require('ava');
 const uuid = require('uuid/v5');
 
 const Common = require('../../src/endpoint/common');
+const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
 const Provider = require('../../src/provider');
 const WeatherProvider = require('../../src/providers/weather');
@@ -194,10 +195,14 @@ function getCacheName(title) {
 }
 
 
+const DATE = Constants.DATE_FEATURE;
+const LOAD = Constants.LOAD_FEATURE;
 const INVALID_ARRAYS = Helpers.INVALID_ARRAYS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const INVALID_STRINGS = Helpers.INVALID_STRINGS;
 const WINDOW_START = luxon.DateTime.local(2018, 4);
 const CACHE_DIRECTORY = path.join(__dirname, '../helpers/cache');
-const WINDOW = new Array(7 * 24).fill(null).map((_, hours) => ({ date: WINDOW_START.plus({ hours }) }));
+const WINDOW = new Array(7 * 24)
+  .fill(null)
+  .map((_, hours) => ({ [DATE]: WINDOW_START.plus({ hours }), [LOAD]: 0 }));
 const DAILY_WINDOW = WINDOW.filter((_, index) => !(index % 24));
