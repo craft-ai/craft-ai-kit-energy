@@ -20,7 +20,8 @@
     "test:coverage": "npx nyc --reporter=html --reporter=text --reporter=text-summary npm run test:unit --",
     "test:unit": "npx ava",
     "test:update": "npm run test:coverage -- --update-snapshots",
-    "test:watch": "npm run test:unit -- --watch"
+    "test:watch": "npm run test:unit -- --watch",
+    "examples:download_and_prepare": "node ./examples/download_and_prepare.js"
   },
   "engines": {
     "node": ">=6.9.0 <7.0.0 || >=8.9.0 <9.0.0 || >=10.0.0"
@@ -50,12 +51,14 @@
     "@babel/preset-env": "latest",
     "@babel/register": "latest",
     "ava": "next",
+    "csv-stringify": "latest",
     "dotenv": "latest",
     "eslint": "latest",
     "eslint-config-craft-ai": "^2.3.0",
     "nock": "latest",
     "nyc": "latest",
-    "seedrandom": "latest"
+    "seedrandom": "latest",
+    "unzipper": "latest"
   },
   "files": [
     "lib",

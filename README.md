@@ -156,6 +156,19 @@ The kit uses the following environment variables for secrets and global configur
 
 > ℹ To manage the environment variables of your project, you can use the [`dotenv` project](https://github.com/motdotla/dotenv).
 
+## Examples ##
+
+:construction:
+
+### Data preparation ###
+
+The script in <`examples/download_and_prepare.js`> downloads and prepares the [UCI
+Individual Household Electric Power Consumption Data Set](https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption) to < `examples/data/uci_household_power_consumption.csv`> in order to use it in other examples.
+
+```console
+$ npm run examples:download_and_prepare
+```
+
 ## Attribution ##
 
 [![Powered By Dark Sky](./poweredby_dark_sky.png)](https://darksky.net/poweredby/)
