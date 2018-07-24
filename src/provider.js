@@ -33,7 +33,7 @@ async function initialize(instance, index) {
 
   const refresh = {
     origin: { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 },
-    timeout: { seconds: 1 }
+    period: { seconds: 1 }
   };
 
   const provider = Object.create(prototype, {
@@ -44,7 +44,7 @@ async function initialize(instance, index) {
   });
 
   await initialize(provider);
-  refresh.timeout = luxon.Duration.fromObject(refresh.timeout);
+  refresh.period = luxon.Duration.fromObject(refresh.period);
   log('initialized');
 
   return provider;
@@ -71,12 +71,12 @@ function extendRecords(endpoint, records) {
 
       const values = states.map((previous, index) => {
         const refresh = providers[index].refresh;
-        const timeout = refresh.timeout;
-        const interval = getInterval(refresh.origin, timeout, date, previous);
+        const period = refresh.period;
+        const interval = getInterval(refresh.origin, period, date, previous);
 
-        if (previous && interval.toDuration() < timeout) return;
+        if (previous && interval.toDuration() < period) return;
 
-        states[index] = roundDate(interval, timeout, previous);
+        states[index] = roundDate(interval, period, previous);
 
         return record;
       });
@@ -103,14 +103,14 @@ function isProvider(value) {
     && typeof value.close === 'function';
 }
 
-function getInterval(origin, duration, date, previous) {
-  if (!previous) previous = date.set(origin).minus(duration);
+function getInterval(origin, period, date, previous) {
+  if (!previous) previous = date.set(origin).minus(period);
 
   return previous.until(date);
 }
 
-function roundDate(interval, duration, previous) {
-  const intervals = interval.splitBy(duration);
+function roundDate(interval, period, previous) {
+  const intervals = interval.splitBy(period);
   const lastInterval = intervals[intervals.length - 1];
 
   return previous ? lastInterval.end : lastInterval.start;

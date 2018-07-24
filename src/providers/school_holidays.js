@@ -19,7 +19,7 @@ async function initialize(provider) {
     throw error;
   }
 
-  provider.refresh.timeout = { days: 1 };
+  provider.refresh.period = { days: 1 };
 
   return context.holidays.initialize();
 }
