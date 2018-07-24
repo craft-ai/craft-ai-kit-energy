@@ -8,7 +8,7 @@ const Helpers = require('../helpers');
 test.before(require('dotenv').load);
 
 test.beforeEach((t) => Helpers
-  .createContext(t)
+  .createEndpointContext(t)
   .then(() => {
     const context = t.context;
     const kit = context.kit;
@@ -19,7 +19,7 @@ test.beforeEach((t) => Helpers
       .then((endpoint) => t.context.endpoint.current = endpoint);
   }));
 
-test.afterEach.always(Helpers.destroyContext);
+test.afterEach.always(Helpers.destroyEndpointContext);
 
 
 test('fails computing predictions with invalid parameters', (t) => {

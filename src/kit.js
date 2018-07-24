@@ -19,6 +19,13 @@ async function loadEndpoint(definition) {
   if (typeof id !== 'string')
     throw new TypeError(`The "id" property of the endpoint's definition must be a "string". Received "${id === null ? 'null' : typeof id}".`);
 
+  const metadata = definition.metadata;
+
+  if (metadata !== undefined) {
+    if (metadata === null || typeof metadata !== 'object')
+      throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
+  }
+
   const namespace = this.configuration.namespace;
   const agentId = definition.agentId || (namespace ? uuid(id, namespace) : id);
 
@@ -41,12 +48,12 @@ async function loadEndpoint(definition) {
         kit: { value: this },
         agentId: { value: agentId, enumerable: true },
         id: { value: id, enumerable: true },
-        metadata: { value: definition.metadata, enumerable: true },
+        metadata: { value: metadata || {}, enumerable: true },
       });
     });
 }
 
-async function close(configuration) {
+async function close() {
   return Provider
     .close(this.configuration.providers)
     .then(() => this.debug('closed'));

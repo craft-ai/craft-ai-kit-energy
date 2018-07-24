@@ -4,8 +4,8 @@ const Helpers = require('../helpers');
 
 
 test.before(require('dotenv').load);
-test.beforeEach(Helpers.createContext);
-test.afterEach.always(Helpers.destroyContext);
+test.beforeEach(Helpers.createEndpointContext);
+test.afterEach.always(Helpers.destroyEndpointContext);
 
 
 test('destroys the endpoint\'s related agent', (t) => {

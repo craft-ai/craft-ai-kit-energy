@@ -1,99 +1,110 @@
 const luxon = require('luxon');
 const test = require('ava');
 
+const Common = require('../../src/endpoint/common');
+const Constants = require('../../src/constants');
+const Helpers = require('../helpers');
 const Provider = require('../../src/provider');
 const PublicHolidayProvider = require('../../src/providers/public_holiday');
 
 
-test('fails initializing the provider with invalid options', (t) => {
-  const INVALID_OPTIONS = [null, undefined, 1228, false, Promise.resolve(), Symbol(), '', 'Jupiter'];
+test.beforeEach((t) => Helpers.createProviderContext(t, PublicHolidayProvider, { country: 'fr' }));
+test.afterEach.always(Helpers.destroyProviderContext);
 
-  return Promise.all(INVALID_OPTIONS
-    .concat(INVALID_OPTIONS.map((option) => ({ country: option })))
-    .map((option) => t.throws(PublicHolidayProvider.initialize({ options: option }))));
+
+test('fails initializing the provider with invalid options', (t) => {
+  return Promise.all(INVALID_OBJECTS
+    .concat(INVALID_OBJECTS.map((option) => ({ country: option })))
+    .map((options) => t.throws(Provider.initialize({ provider: PublicHolidayProvider, options }, 0))));
 });
 
 test('initializes the provider', (t) => {
-  return initializeProvider().then((provider) => t.snapshot(provider));
+  return t.snapshot(t.context.provider);
 });
 
 test('computes the configuration\'s extension', (t) => {
-  return initializeProvider().then((provider) => provider
+  return t.context.provider
     .extendConfiguration()
     .then((extension) => {
       t.truthy(extension);
       t.is(typeof extension, 'object');
       t.snapshot(extension);
-    }));
+    });
 });
 
 test('computes the record\'s extension', (t) => {
-  return WINDOW.reduce((promise, date) => promise
-    .then(initializeProvider)
-    .then((provider) => provider
-      .extendRecord({ metadata: {} }, date)
+  return Common
+    .toRecordStream(WINDOW)
+    .map((record) => t.context.provider
+      .extendRecord({ metadata: {} }, record)
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
-        t.is(extension.holiday === 'YES', isHoliday(date, HOLIDAYS));
-      })), Promise.resolve());
+        t.is(extension.holiday === 'YES', isHoliday(record, HOLIDAYS));
+      }))
+    .awaitPromises()
+    .drain();
 });
 
 test('computes the record\'s extension in Paris', (t) => {
-  return WINDOW.reduce((promise, date) => promise
-    .then(initializeProvider)
-    .then((provider) => provider
-      .extendRecord({ metadata: { region: '75' } }, date)
+  return Common
+    .toRecordStream(WINDOW)
+    .map((record) => t.context.provider
+      .extendRecord({ metadata: { region: '75' } }, record)
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
-        t.is(extension.holiday === 'YES', isHoliday(date, HOLIDAYS));
-      })), Promise.resolve());
+        t.is(extension.holiday === 'YES', isHoliday(record, HOLIDAYS));
+      }))
+    .awaitPromises()
+    .drain();
 });
 
 test('computes the record\'s extension in Réunion', (t) => {
-  return WINDOW.reduce((promise, date) => promise
-    .then(initializeProvider)
-    .then((provider) => provider
-      .extendRecord({ metadata: { region: '974' } }, date)
+  return Common
+    .toRecordStream(WINDOW)
+    .map((record) => t.context.provider
+      .extendRecord({ metadata: { region: '974' } }, record)
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
-        t.is(extension.holiday === 'YES', isHoliday(date, REUNION_HOLIDAYS));
-      })), Promise.resolve());
+        t.is(extension.holiday === 'YES', isHoliday(record, REUNION_HOLIDAYS));
+      }))
+    .awaitPromises()
+    .drain();
 });
 
 test('computes the record\'s extension in Moselle', (t) => {
-  return WINDOW.reduce((promise, date) => promise
-    .then(initializeProvider)
-    .then((provider) => provider
-      .extendRecord({ metadata: { region: '57' } }, date)
+  return Common
+    .toRecordStream(WINDOW)
+    .map((record) => t.context.provider
+      .extendRecord({ metadata: { region: '57' } }, record)
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
-        t.is(extension.holiday === 'YES', isHoliday(date, MOSELLE_HOLIDAYS));
-      })), Promise.resolve());
+        t.is(extension.holiday === 'YES', isHoliday(record, MOSELLE_HOLIDAYS));
+      }))
+    .awaitPromises()
+    .drain();
 });
 
 test('closes the provider', (t) => {
-  return initializeProvider().then((provider) => t.notThrows(provider.close()));
+  return t.notThrows(t.context.provider.close());
 });
 
 
-function initializeProvider() {
-  return Provider.initialize({
-    provider: PublicHolidayProvider,
-    options: { ...PROVIDER_OPTIONS }
-  }, 0);
-}
+function isHoliday(record, holidays) {
+  const date = record[PARSED_RECORD][DATE];
 
-function isHoliday(date, holidays) {
   return holidays.some((dateParts) => date.year === dateParts[0]
     && date.month === dateParts[1]
     && date.day === dateParts[2]);
 }
 
 
+const PARSED_RECORD = Constants.PARSED_RECORD;
+const DATE = Constants.DATE_FEATURE;
+const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const HOLIDAYS = [
   [2018, 1, 1],
   [2018, 4, 1], [2018, 4, 2],
@@ -121,11 +132,8 @@ const REUNION_HOLIDAYS = [
   [2018, 12, 20],
   [2019, 12, 20],
 ].concat(HOLIDAYS);
-const PROVIDER_OPTIONS = { country: 'fr' };
-const DateTime = luxon.DateTime;
-
-const WINDOW_START = DateTime.utc(...HOLIDAYS[0]).startOf('year');
-const WINDOW_END = DateTime.utc(...HOLIDAYS[HOLIDAYS.length - 1]).plus({ year: 1 }).startOf('year');
-const WINDOW = new Array(24 * WINDOW_END.diff(WINDOW_START).as('day'))
+const WINDOW_START = luxon.DateTime.utc(...HOLIDAYS[0]).startOf('year');
+const WINDOW_END = luxon.DateTime.utc(...HOLIDAYS[HOLIDAYS.length - 1]).plus({ years: 1 }).startOf('year');
+const WINDOW = new Array(WINDOW_END.diff(WINDOW_START).as('days'))
   .fill(null)
-  .map((_, index) => WINDOW_START.plus({ hours: index }));
+  .map((_, days) => ({ date: WINDOW_START.plus({ days }) }));

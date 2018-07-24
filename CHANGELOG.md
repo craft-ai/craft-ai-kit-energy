@@ -13,8 +13,16 @@ The signature of the method `endpoint.computePredictions()` has been changed to 
 
 ### Added ###
 
-- Introducing a CSV import helper with streaming capabilities and custom parsing options
-- Supporting a path to a CSV file as the first argument of some methods of an endpoint's instance
+- Introducing a CSV import helper with streaming capabilities and custom parsing options.
+- Supporting a path to a CSV file as the first argument of some methods of an endpoint's instance.
+- Introducing a WeatherProvider [powered by Dark Sky API](https://darksky.net/poweredby/).
+- Exposing an option to control the refresh rate of the providers.
+- Checking the optionnal field `metadata` of the endpoints.
+
+### Changed ###
+
+- Clearing caches when closing a provider.
+- Passing the whole record to the provider for the generation of record extensions.
 
 ## [0.1.0](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.0.7...v0.1.0) - 2018-07-04 ##
 

@@ -6,21 +6,19 @@ const Helpers = require('../helpers');
 
 
 test.before(require('dotenv').load);
-test.beforeEach(Helpers.createContext);
-test.afterEach.always(Helpers.destroyContext);
+test.beforeEach(Helpers.createEndpointContext);
+test.afterEach.always(Helpers.destroyEndpointContext);
 
 
 test('fails updating the endpoint with invalid records', (t) => {
-  const INVALID_RECORDS = [undefined, null, false, 762, 'records'];
-
   const context = t.context;
   const kit = context.kit;
 
   return kit
     .loadEndpoint({ id: context.endpoint.register() })
     .then((endpoint) => Promise.all([{}]
-      .concat(INVALID_RECORDS)
-      .concat(INVALID_RECORDS.map((record) => [record]))
+      .concat(INVALID_OBJECTS)
+      .concat(INVALID_OBJECTS.map((record) => [record]))
       .map((records) => t.throws(endpoint.update(records)))));
 });
 
@@ -215,6 +213,7 @@ test('reduces the size of the records by dropping successive identical values', 
 
 const DATE = Constants.DATE_FEATURE;
 const INVALID_DATES = Helpers.INVALID_DATES;
+const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const LOAD = Constants.LOAD_FEATURE;
 const RECORDS = Helpers.RECORDS;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;

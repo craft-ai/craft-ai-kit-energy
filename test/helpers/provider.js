@@ -3,6 +3,9 @@ const seedrandom = require('seedrandom');
 
 async function initialize(provider) {
   if (!provider.options.random) provider.options.random = seedrandom('weather');
+
+  provider.refresh.origin.hours = 12;
+  provider.refresh.timeout = { days: 1 };
 }
 
 async function extendConfiguration() {

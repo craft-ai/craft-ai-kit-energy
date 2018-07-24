@@ -3,37 +3,57 @@ const stream = require('stream');
 const uuid = require('uuid/v5');
 
 const EnergyKit = require('../../src/index');
+const Provider = require('../../src/provider');
 const Utils = require('../../src/utils');
 
 
-function createContext(t, configuration = {}) {
+async function createEndpointContext(t, configuration = {}) {
   return EnergyKit
     .initialize({ ...configuration, recordBulkSize: 1000 })
     .then((kit) => {
       const id = t.title;
+      const context = t.context;
       const random = seedrandom(id);
-      const endpoint = Object.create({ id, all: new Set, register: registerEndpoint, seed: '' });
 
-      t.context = {
-        kit, endpoint,
-        random(upper) { return Math.floor(random() * (upper + 1)); },
-        shuffle(value) {
-          const index = random(value.length - 2) + 1;
+      context.kit = kit;
+      context.endpoint = Object.create({ id, all: new Set, register: registerEndpoint, seed: '' });
+      context.random = randomInteger;
+      context.shuffle = shuffle;
 
-          return value.slice(index).concat(RECORDS.slice(0, index));
-        },
-      };
+
+      function randomInteger(upper) { return Math.floor(random() * (upper + 1)); }
+
+      function shuffle(value) {
+        const index = randomInteger(value.length - 2) + 1;
+
+        return value.slice(index).concat(RECORDS.slice(0, index));
+      }
     });
 }
 
-function destroyContext(t) {
+async function createProviderContext(t, provider, options = {}) {
+  return Provider
+    .initialize({ provider, options }, 0)
+    .then((provider) => t.context.provider = provider);
+}
+
+async function destroyEndpointContext(t) {
   const context = t.context;
   const kit = context.kit;
+
+  if (!kit) return;
+
   const client = kit.client;
 
   return Promise
     .all([...context.endpoint.all].map((id) => client.deleteAgent(id)))
     .then(() => kit.close());
+}
+
+async function destroyProviderContext(t) {
+  const provider = t.context.provider;
+
+  return provider && provider.close();
 }
 
 function identity(value) { return value; }
@@ -73,20 +93,26 @@ function registerEndpoint() {
 }
 
 
+const INVALID_ARRAYS = [null, 0, true, 'string', Symbol(), new Uint8Array(10)];
 const INVALID_DATES = [false, NaN, 'N/A', 'NaN', 'unknown', '123456', 'string', '5151-51-51T51:51:51.515Z'];
-const INVALID_NUMBERS = [null, {}, '12', true, new Date];
+const INVALID_NUMBERS = [null, {}, '12', true, new Date(2018)];
 const INVALID_OBJECTS = [null, 0, true, 'string', Symbol()];
+const INVALID_STRINGS = [null, {}, [false], true, new Date(2018), Promise.resolve('string')];
 const RECORDS = require('./data/records');
 
 
 module.exports = {
   ...Utils,
-  createContext,
-  destroyContext,
+  createEndpointContext,
+  createProviderContext,
+  destroyEndpointContext,
+  destroyProviderContext,
   identity,
   streamify,
+  INVALID_ARRAYS,
   INVALID_DATES,
   INVALID_NUMBERS,
   INVALID_OBJECTS,
+  INVALID_STRINGS,
   RECORDS,
 };

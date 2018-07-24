@@ -1,4 +1,5 @@
 const debug = require('debug');
+const luxon = require('luxon');
 const most = require('most');
 
 const Constants = require('./constants');
@@ -17,26 +18,42 @@ async function initialize(instance, index) {
 
   const name = instance.name || index.toString();
   const log = debug(`${DEBUG_PREFIX}:provider:${name}`);
-  const prototype = instance.provider || instance;
-  const initialize = prototype.initialize;
+  const constructor = instance.provider || instance;
+  const initialize = constructor.initialize;
 
   log('initializing');
 
-  if (typeof initialize !== 'function' || !isProvider(prototype))
+  if (typeof initialize !== 'function' || !isProvider(constructor))
     throw new TypeError(`The provider at index "${index}" of the kit's configuration is not valid.`);
 
-  const provider = Object.create({ ...prototype, initialize: undefined }, {
+  const prototype = { ...constructor };
+  const options = instance.options ? { ...instance.options } : {};
+
+  delete prototype.initialize;
+
+  const refresh = {
+    origin: { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 },
+    timeout: { seconds: 1 }
+  };
+
+  const provider = Object.create(prototype, {
+    context: { value: {} },
     log: { value: log },
-    options: { value: instance.options || {}, enumerable: true },
+    refresh: { value: refresh },
+    options: { value: options, enumerable: true },
   });
 
   await initialize(provider);
+  refresh.timeout = luxon.Duration.fromObject(refresh.timeout);
   log('initialized');
 
   return provider;
 }
 
 async function extendConfiguration(providers, context) {
+  if (!providers.length) return context;
+
+  // TODO: Submit the endpoint's metadata to the providers for validation
   return Promise
     .all(providers.map((provider) => provider.extendConfiguration()))
     .then((extensions) => Object.assign(context, ...extensions));
@@ -45,9 +62,35 @@ async function extendConfiguration(providers, context) {
 function extendRecords(endpoint, records) {
   const providers = endpoint.kit.configuration.providers;
 
-  return records.concatMap((record) => most.fromPromise(Promise
-    .all(providers.map((provider) => provider.extendRecord(endpoint, record[PARSED_RECORD][DATE])))
-    .then((extensions) => Object.assign(record, ...extensions))));
+  if (!providers.length) return records;
+
+  return records
+    // Check the providers that have to refresh its output
+    .loop((states, record) => {
+      const date = record[PARSED_RECORD][DATE];
+
+      const values = states.map((previous, index) => {
+        const refresh = providers[index].refresh;
+        const timeout = refresh.timeout;
+        const interval = getInterval(refresh.origin, timeout, date, previous);
+
+        if (previous && interval.toDuration() < timeout) return;
+
+        states[index] = roundDate(interval, timeout, previous);
+
+        return record;
+      });
+
+      return { seed: states, value: [record, values] };
+    }, new Array(providers.length).fill(null))
+    // Compute the extensions and merge them to the record
+    .concatMap((data) => most.fromPromise(Promise
+      .all(providers.map((provider, index) => {
+        const record = data[1][index];
+
+        return record && provider.extendRecord(endpoint, record);
+      }))
+      .then((extensions) => Object.assign({}, ...extensions, data[0]))));
 }
 
 
@@ -58,6 +101,19 @@ function isProvider(value) {
     && typeof value.extendConfiguration === 'function'
     && typeof value.extendRecord === 'function'
     && typeof value.close === 'function';
+}
+
+function getInterval(origin, duration, date, previous) {
+  if (!previous) previous = date.set(origin).minus(duration);
+
+  return previous.until(date);
+}
+
+function roundDate(interval, duration, previous) {
+  const intervals = interval.splitBy(duration);
+  const lastInterval = intervals[intervals.length - 1];
+
+  return previous ? lastInterval.end : lastInterval.start;
 }
 
 

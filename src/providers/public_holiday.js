@@ -2,6 +2,8 @@ const lru = require('quick-lru');
 const luxon = require('luxon');
 const memoize = require('mem');
 
+const Constants = require('../constants');
+
 
 async function initialize(provider) {
   const options = provider.options;
@@ -10,7 +12,7 @@ async function initialize(provider) {
   if (typeof country !== 'string')
     throw new TypeError(`The "country" option of the public holiday provider must be a "string". Received "${typeof country}".`);
 
-  const context = {};
+  const context = provider.context;
 
   try {
     const holidays = require(`../../data/public_holiday.${country}.js`);
@@ -20,8 +22,7 @@ async function initialize(provider) {
 
     context.fixed = fixed;
     context.easterOffseted = easterOffseted;
-    /* istanbul ignore next */
-    context.regions = holidays.regions ? formatRegions(holidays.regions, fixed, easterOffseted) : {};
+    context.regions = holidays.regions ? formatRegions(holidays.regions, fixed, easterOffseted) : /* istanbul ignore next */{};
   } catch (error)/* istanbul ignore next */ {
     if (error.code === 'MODULE_NOT_FOUND')
       throw new RangeError(`The "country" option of the public holiday provider must be valid. Received "${country}".`);
@@ -30,26 +31,37 @@ async function initialize(provider) {
   }
 
   const cache = new lru({ maxSize: 50 });
+  const easter = require('date-easter').easter;
 
   context.cache = cache;
-  context.easter = memoize(require('date-easter').easter, { cache });
-  provider.context = context;
+  context.easter = memoize(getEasterDate, { cache });
+  provider.refresh.timeout = { days: 1 };
+
+
+  function getEasterDate(year) {
+    const date = easter(year);
+
+    return DateTime.utc(year, date.month, date.day);
+  }
 }
 
 async function extendConfiguration() {
+  // TODO: Check the endpoint's metadata
+
   return {
     [HOLIDAY]: { type: 'enum' },
   };
 }
 
-async function extendRecord(endpoint, date) {
+async function extendRecord(endpoint, record) {
   return {
-    [HOLIDAY]: isHoliday.call(this, date, endpoint.metadata.region) ? 'YES' : 'NO',
+    [HOLIDAY]: isHoliday.call(this, record[PARSED_RECORD][DATE], endpoint.metadata.region) ? 'YES' : 'NO',
   };
 }
 
 async function close() {
-  /* Does nothing. */
+  // Clear the cache
+  this.context.cache.clear();
 }
 
 
@@ -68,13 +80,6 @@ function formatRegions(regions, fixed, easterOffseted) {
 
     return Object.assign(regions, element[0].reduce(indexWith(regionalHolidays), {}));
   }, {});
-}
-
-function getEasterOffset(date) {
-  const year = date.year;
-  const easter = this.context.easter(year);
-
-  return Math.floor(date.diff(DateTime.utc(year, easter.month, easter.day)).as('day'));
 }
 
 function getRegionalHolidays(index) {
@@ -100,12 +105,16 @@ function isHoliday(date, region) {
 
   if (holidays.fixed[date.month][date.day]) return true;
 
-  const easterOffset = getEasterOffset.call(this, date);
+  const easterDate = this.context.easter(date.year);
+  const easterOffset = Math.floor(date.diff(easterDate, 'days').days);
 
   return holidays.easterOffseted[easterOffset];
 }
 
 
+const PARSED_RECORD = Constants.PARSED_RECORD;
+const DATE = Constants.DATE_FEATURE;
+// TODO: Accept custom context property name and labels
 const HOLIDAY = 'holiday';
 const DateTime = luxon.DateTime;
 const Indexer = indexWith(true);

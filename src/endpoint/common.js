@@ -45,10 +45,8 @@ function toRecordStream(values, options) {
   return Stream
     .from(values, options)
     .map(toRecord)
-    .filter(recordHasValidDate)
-    .thru(checkRecordsAreSorted);
+    .filter(recordHasValidDate);
 }
-
 
 function checkRecordsAreSorted(records) {
   return records
@@ -67,6 +65,7 @@ function checkRecordsAreSorted(records) {
     })
     .filter(Utils.isNotUndefined);
 }
+
 
 function recordHasValidDate(record) { return !isNaN(record[DATE]); }
 
@@ -121,6 +120,7 @@ const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
 
 module.exports = {
+  checkRecordsAreSorted,
   formatRecords,
   mergeUntilFirstFullRecord,
   toRecordStream,

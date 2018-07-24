@@ -105,7 +105,7 @@ function validateArguments(filepath, options) {
   if (columns !== undefined) {
     if (!Array.isArray(columns))
       return new TypeError(`The "columns" option of the CSV helper must be an "array". Received "${typeof columns}".`);
-    if (columns.some(Utils.notString))
+    if (columns.some(Utils.isNotString))
       return new TypeError(`The "columns" option of the CSV helper must only contain "string" value. Received ${JSON.stringify(JSON.stringify(columns))}.`);
   }
 }

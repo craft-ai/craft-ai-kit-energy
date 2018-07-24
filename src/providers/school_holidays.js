@@ -1,3 +1,6 @@
+const Constants = require('../constants');
+
+
 async function initialize(provider) {
   const options = provider.options;
   const country = options.country;
@@ -5,7 +8,7 @@ async function initialize(provider) {
   if (typeof country !== 'string')
     throw new TypeError(`The "country" option of the school holidays provider must be a "string". Received "${typeof country}".`);
 
-  const context = {};
+  const context = provider.context;
 
   try {
     context.holidays = require(`../../data/school_holidays.${country}.js`);
@@ -16,21 +19,23 @@ async function initialize(provider) {
     throw error;
   }
 
-  provider.context = context;
+  provider.refresh.timeout = { days: 1 };
 
   return context.holidays.initialize();
 }
 
 async function extendConfiguration() {
+  // TODO: Check the endpoint's metadata
+
   return {
     [HOLIDAY]: { type: 'enum' },
   };
 }
 
-async function extendRecord(endpoint, date) {
+async function extendRecord(endpoint, record) {
   return this.context.holidays
-    .isHolidays(date, endpoint.metadata.region)
-    .then(formatRecordExtension)
+    .isHolidays(record[PARSED_RECORD][DATE], endpoint.metadata.region)
+    .then(formatExtension)
     .catch((error) => {
       this.log(error.message);
 
@@ -43,11 +48,14 @@ async function close() {
 }
 
 
-function formatRecordExtension(isHolidays) {
+function formatExtension(isHolidays) {
   return { [HOLIDAY]: isHolidays ? 'YES' : 'NO', };
 }
 
 
+const PARSED_RECORD = Constants.PARSED_RECORD;
+const DATE = Constants.DATE_FEATURE;
+// TODO: Accept custom context property name and labels
 const HOLIDAY = 'holiday';
 const UNKNOWN = { [HOLIDAY]: 'UNKNOWN' };
 

@@ -1,5 +1,15 @@
 const luxon = require('luxon');
+const retry = require('p-retry');
 
+
+async function checkResponse(response) {
+  const status = response.status;
+
+  /* istanbul ignore next */
+  return status < 500
+    ? status < 400 ? response : retry.AbortError(response)
+    : Promise.reject(response);
+}
 
 function formatTimezone(offset) {
   const offsetValue = Math.abs(offset);
@@ -23,7 +33,7 @@ function isPredictiveModel(value) {
     && value.configuration !== null;
 }
 
-function notString(value) { return typeof value !== 'string'; }
+function isNotString(value) { return typeof value !== 'string'; }
 
 function parseDate(value) {
   if (value === null || value === undefined || typeof value === 'boolean') return;
@@ -32,7 +42,7 @@ function parseDate(value) {
     ? DateTime.fromISO(value)
     : value instanceof Date
       ? DateTime.fromJSDate(value)
-      : DateTime.fromMillis(value);
+      : typeof value === 'number' ? DateTime.fromMillis(value) : value;
 }
 
 function parseTimestamp(value) {
@@ -50,11 +60,12 @@ const DateTime = luxon.DateTime;
 
 
 module.exports = {
+  checkResponse,
   formatTimezone,
   isNotUndefined,
   isNull,
   isPredictiveModel,
-  notString,
+  isNotString,
   parseDate,
   parseTimestamp,
 };
