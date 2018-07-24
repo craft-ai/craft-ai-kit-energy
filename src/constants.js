@@ -2,9 +2,9 @@ const DATE_FEATURE = 'date';
 const DEBUG_PREFIX = 'craft-ai:kit-energy';
 const DEFAULT_RECORD_BULK_SIZE = 200;
 const LOAD_FEATURE = 'load';
-const ORIGINAL_CONTEXT = 'ORIGINAL_CONTEXT';
-const ORIGINAL_RECORD = 'ORIGINAL_RECORD';
-const PARSED_RECORD = 'PARSED_RECORD';
+const ORIGINAL_CONTEXT = Symbol('ORIGINAL_CONTEXT');
+const ORIGINAL_RECORD = Symbol('ORIGINAL_RECORD');
+const PARSED_RECORD = Symbol('PARSED_RECORD');
 const TIMESTAMP_FEATURE = 'timestamp';
 const TIMEZONE_FEATURE = 'timezone';
 
