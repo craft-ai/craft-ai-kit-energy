@@ -107,15 +107,17 @@ test('merges states with the same date', (t) => {
   const index = context.random(TEST_RECORDS.length - 1);
   const states = [...TEST_RECORDS];
 
-  states.splice(index + 1, 0, { [DATE]: TEST_RECORDS[index][DATE] });
+  states.splice(index + 1, 0, { ...TEST_RECORDS[index] });
 
-  return t.notThrows(endpoint
-    .computePredictions(states)
-    .then((predictions) => {
-      t.true(isPredictions(predictions));
+  return t.notThrows(Promise
+    .all([
+      endpoint.computePredictions(states),
+      endpoint.computePredictions(TEST_RECORDS),
+    ])
+    .then((results) => {
+      results.forEach((predictions) => t.true(isPredictions(predictions)));
       // The duplicate state should be omitted
-      t.is(predictions.length, TEST_RECORDS.length);
-      t.snapshot(predictions);
+      t.deepEqual(results[0], results[1]);
     }));
 });
 
