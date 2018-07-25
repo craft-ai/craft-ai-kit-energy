@@ -208,6 +208,27 @@ test('reduces the size of the records by dropping successive identical values', 
     }));
 });
 
+test('supports additional embedded context properties', (t) => {
+  const context = t.context;
+  const kit = context.kit;
+  const client = kit.client;
+
+  const records = RECORDS.map((record, index) => ({ ...record, index }));
+
+  return kit
+    .loadEndpoint({
+      id: context.endpoint.register(),
+      learning: { properties: { index: { type: 'continuous' } } }
+    })
+    .then((endpoint) => endpoint.update(records))
+    .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
+    .then((history) => {
+      t.true(Array.isArray(history));
+      t.is(history.length, records.length);
+      t.true(history.every((current, index) => current.context.index === index));
+    });
+});
+
 // test.todo('converts index values to mean electrical loads');
 
 
