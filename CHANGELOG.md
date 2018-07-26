@@ -18,6 +18,7 @@ The signature of the method `endpoint.computePredictions()` has been changed to 
 - Introducing a WeatherProvider [powered by Dark Sky API](https://darksky.net/poweredby/).
 - Exposing an option to control the refresh rate of the providers.
 - Checking the optionnal field `metadata` of the endpoints.
+- Supporting additional embedded context properties.
 
 ### Changed ###
 

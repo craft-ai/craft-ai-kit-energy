@@ -21,10 +21,8 @@ async function loadEndpoint(definition) {
 
   const metadata = definition.metadata;
 
-  if (metadata !== undefined) {
-    if (metadata === null || typeof metadata !== 'object')
-      throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
-  }
+  if (metadata !== undefined && (metadata === null || typeof metadata !== 'object'))
+    throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
 
   const namespace = this.configuration.namespace;
   const agentId = definition.agentId || (namespace ? uuid(id, namespace) : id);
@@ -65,16 +63,28 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
 
   if (learning === null || typeof learning !== 'object')
     throw new TypeError(`The "learning" property of the endpoint's definition must be an "object". Received "${learning === null ? 'null' : typeof learning}".`);
-  if (learning.maxRecords !== undefined && typeof learning.maxRecords !== 'number')
-    throw new TypeError(`The "maxRecords" property of the endpoint's learning definition must be a "number". Received "${learning.maxRecords === null ? 'null' : typeof learning.maxRecords}".`);
-  if (learning.maxRecordAge !== undefined && typeof learning.maxRecordAge !== 'number')
-    throw new TypeError(`The "maxRecordAge" property of the endpoint's learning definition must be a "number". Received "${learning.maxRecordAge === null ? 'null' : typeof learning.maxRecordAge}".`);
+
+  const maxRecords = learning.maxRecords;
+
+  if (maxRecords !== undefined && typeof maxRecords !== 'number')
+    throw new TypeError(`The "maxRecords" property of the endpoint's learning definition must be a "number". Received "${maxRecords === null ? 'null' : typeof maxRecords}".`);
+
+  const maxRecordAge = learning.maxRecordAge;
+
+  if (maxRecordAge !== undefined && typeof maxRecordAge !== 'number')
+    throw new TypeError(`The "maxRecordAge" property of the endpoint's learning definition must be a "number". Received "${maxRecordAge === null ? 'null' : typeof maxRecordAge}".`);
+
+  const properties = learning.properties;
+
+  if (properties !== undefined && (properties === null || typeof properties !== 'object'))
+    throw new TypeError(`The "properties" property of the endpoint's learning definition must be an "object". Received "${properties === null ? 'null' : typeof properties}".`);
 
   return Provider
     .extendConfiguration(providers, {
       time: { type: 'time_of_day' },
       day: { type: 'day_of_week' },
       month: { type: 'month_of_year' },
+      ...properties,
       [TIMEZONE]: { type: 'timezone' },
       [LOAD]: { type: 'continuous' }
     })
@@ -83,8 +93,8 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
       output: ['load'],
       operations_as_events: true,
       tree_max_depth: 6,
-      tree_max_operations: learning && learning.maxRecords || 50000,
-      learning_period: learning && learning.maxRecordAge || 365 * 24 * 60 * 60
+      tree_max_operations: maxRecords || 50000,
+      learning_period: maxRecordAge || 365 * 24 * 60 * 60
     }));
 }
 

@@ -19,6 +19,7 @@ test('fails loading an endpoint with invalid definition', (t) => {
     .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', learning: value })))
     .concat(INVALID_NUMBERS.map((value) => ({ id: 'id', learning: { maxRecords: value } })))
     .concat(INVALID_NUMBERS.map((value) => ({ id: 'id', learning: { maxRecordAge: value } })))
+    .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', learning: { properties: value } })))
     .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', metadata: value })))
     .map((definition) => t.throws(kit.loadEndpoint(definition))));
 });
@@ -79,21 +80,32 @@ test('derives the agent\'s identifier when a secret is specified', async(t) => {
 });
 
 test('configures the agent\'s learning configuration', (t) => {
+  const PROPERTIES = { enumValue: { type: 'enum' }, numericValue: { type: 'continuous' } };
   const SEED = 1;
 
   const context = t.context;
   const kit = context.kit;
 
   return kit
-    .loadEndpoint({ id: context.endpoint.register(), learning: { maxRecords: SEED, maxRecordAge: SEED } })
+    .loadEndpoint({
+      id: context.endpoint.register(),
+      learning: { properties: PROPERTIES, maxRecords: SEED, maxRecordAge: SEED }
+    })
     .then((endpoint) => kit.client.getAgent(endpoint.agentId))
     .then((agent) => {
       t.truthy(agent);
       t.is(typeof agent, 'object');
-      t.truthy(agent.configuration);
-      t.is(typeof agent.configuration, 'object');
-      t.is(agent.configuration.tree_max_operations, SEED);
-      t.is(agent.configuration.learning_period, SEED);
+
+      const configuration = agent.configuration;
+
+      t.truthy(configuration);
+      t.is(typeof configuration, 'object');
+      t.is(configuration.tree_max_operations, SEED);
+      t.is(configuration.learning_period, SEED);
+
+      const context = configuration.context;
+
+      Object.keys(PROPERTIES).forEach((key) => t.deepEqual(context[key], PROPERTIES[key]));
     });
 });
 
