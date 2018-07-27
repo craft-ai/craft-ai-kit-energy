@@ -7,7 +7,6 @@ const Utils = require('../utils');
 
 function formatRecords(features, records) {
   return records
-    .filter(recordHasValue)
     // Remove unknown keys
     .tap((record) => {
       for (const key in record)
@@ -45,33 +44,32 @@ function toRecordStream(values, options) {
   return Stream
     .from(values, options)
     .map(toRecord)
-    .filter(recordHasValidDate)
+    .filter(isValidRecord)
     .thru(checkRecordsAreSorted);
 }
 
 
 function checkRecordsAreSorted(records) {
   return records
-    .concat(most.of(undefined))
+    .concat(most.of(null))
     .loop((previous, record) => {
-      if (!previous) return { seed: record };
       if (!record) return { value: previous };
+      if (!previous) return { value: null, seed: record };
 
       if (previous[DATE] > record[DATE])
         throw new Error('The records must be sorted by ascending date.');
 
       // Merge records on the same date
       return previous[DATE] === record[DATE]
-        ? { seed: Object.assign(previous, record) }
-        : { seed: record, value: previous };
-    })
-    .filter(Utils.isNotUndefined);
+        ? { value: null, seed: Object.assign(previous, record) }
+        : { value: previous, seed: record };
+    }, null)
+    .filter(Utils.isNotNull);
 }
 
-function recordHasValidDate(record) { return !isNaN(record[DATE]); }
-
-function recordHasValue(record) {
-  return record[LOAD] !== undefined;
+function isValidRecord(record) {
+  return !isNaN(record[DATE])
+    && (record[LOAD] !== undefined || record[ENERGY] !== undefined);
 }
 
 function toContextOperation(record) {

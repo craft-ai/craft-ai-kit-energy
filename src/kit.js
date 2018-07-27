@@ -1,5 +1,6 @@
 const craftaiErrors = require('craft-ai/lib/errors');
 const debug = require('debug');
+const luxon = require('luxon');
 const uuid = require('uuid/v5');
 
 const Constants = require('./constants');
@@ -24,6 +25,7 @@ async function loadEndpoint(definition) {
   if (metadata !== undefined && (metadata === null || typeof metadata !== 'object'))
     throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
 
+  const energy = parseEnergyArgument(definition.energy);
   const namespace = this.configuration.namespace;
   const agentId = definition.agentId || (namespace ? uuid(id, namespace) : id);
 
@@ -40,7 +42,7 @@ async function loadEndpoint(definition) {
       return Object.create(Endpoint, {
         agent: { value: agent, configurable: true },
         debug: { value: log },
-        definition: { value: definition },
+        energy: { value: energy },
         features: { value: features },
         generated: { value: generated },
         kit: { value: this },
@@ -143,6 +145,40 @@ async function createAgent(log, client, agentId, agentConfiguration) {
       // TODO: proper error handling
       throw error;
     });
+}
+
+function parseEnergyArgument(value) {
+  const energy = {};
+
+  if (value === undefined) return energy;
+  if (value === null || typeof value !== 'object')
+    throw new TypeError(`The "energy" property of the endpoint's definition must be an "object". Received "${value === null ? 'null' : typeof value}".`);
+
+  if (value.period !== undefined) {
+    if (value.period === null || typeof value.period !== 'object')
+      throw new TypeError(`The "period" property of the endpoint's energy definition must be an "object". Received "${value.period === null ? 'null' : typeof value.period}".`);
+
+    const period = luxon.Duration.fromObject(value.period);
+
+    if (period.valueOf() === 0)
+      throw new RangeError(`The "period" property of the endpoint's energy definition must represent a strictly positive duration. Received "${value.period}".`);
+
+    energy.period = period;
+    energy.hours = period.as('hours');
+  }
+
+  if (value.origin !== undefined) {
+    if (value.origin === null || typeof value.origin !== 'object')
+      throw new TypeError(`The "origin" property of the endpoint's energy definition must be an "object". Received "${value.origin === null ? 'null' : typeof value.origin}".`);
+    if (luxon.DateTime.fromObject(value.origin).invalidReason)
+      throw new RangeError(`The "origin" property of the endpoint's energy definition must be a valid date definition. Received "${JSON.stringify(value.origin)}". Reason: ${luxon.DateTime.fromObject(value.origin).invalidReason}.`);
+    if (value.period === undefined)
+      throw new Error('The "origin" property of the endpoint\'s energy definition cannot be defined without a "period" property.');
+
+    energy.origin = value.origin;
+  }
+
+  return energy;
 }
 
 

@@ -4,6 +4,7 @@ const most = require('most');
 const Common = require('./common');
 const Constants = require('../constants');
 const Provider = require('../provider');
+const Utils = require('../utils');
 
 
 async function update(records, options) {
@@ -12,14 +13,18 @@ async function update(records, options) {
   const agent = this.agent;
   const agentId = this.agentId;
   const client = this.kit.client;
+  const energy = this.energy;
   const features = this.features;
   const end = agent.lastTimestamp;
 
+  let stream = Common.toRecordStream(records, options && options.import);
   let failed = false;
 
-  return Common
-    .toRecordStream(records, options && options.import)
-    // TODO: Convert index values to mean electrical loads
+  if (energy.period) stream = energy.origin
+    ? stream.thru(convertAccumulatedEnergyToLoad.bind(null, energy))
+    : stream.tap(convertEnergyToLoad.bind(null, energy.hours));
+
+  return stream
     // Extend the record with providers
     .thru(Provider.extendRecords.bind(null, this))
     .thru(end === undefined
@@ -63,12 +68,50 @@ async function update(records, options) {
 }
 
 
+function convertAccumulatedEnergyToLoad(energy, records) {
+  const period = energy.period;
+  const origin = energy.origin;
+
+  return records.loop((seed, record) => {
+    const date = record[PARSED_RECORD][DATE];
+    const interval = Utils.getInterval(origin, period, date, seed.date);
+
+    if (seed.date && interval.toDuration() <= period) {
+      const previous = seed.record;
+      const hours = (record[DATE] - previous[DATE]) / 3600;
+
+      if (record[LOAD] === undefined) record[LOAD] = (record[ENERGY] - previous[ENERGY]) / hours;
+      else record[ENERGY] = previous[ENERGY] + record[LOAD] * hours;
+    } else {
+      seed.date = Utils.roundDate(interval, period);
+
+      const hours = date.diff(seed.date, 'hours').hours;
+
+      if (record[LOAD] === undefined) record[LOAD] = record[ENERGY] / hours;
+      else record[ENERGY] = record[LOAD] * hours;
+    }
+
+    seed.record = { ...record };
+
+    return { seed, value: record };
+  }, { record: null, date: null });
+}
+
+function convertEnergyToLoad(hours, record) {
+  if (record[LOAD] !== undefined) return;
+
+  record[LOAD] = record[ENERGY] / hours;
+}
+
 function ignoreOldRecords(lastSavedRecordDate, records) {
   return records.skipWhile((record) => record[DATE] <= lastSavedRecordDate);
 }
 
 
 const DATE = Constants.DATE_FEATURE;
+const ENERGY = Constants.ENERGY_FEATURE;
+const LOAD = Constants.LOAD_FEATURE;
+const PARSED_RECORD = Constants.PARSED_RECORD;
 
 
 module.exports = update;

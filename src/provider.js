@@ -3,6 +3,7 @@ const luxon = require('luxon');
 const most = require('most');
 
 const Constants = require('./constants');
+const Utils = require('./utils');
 
 
 async function close(providers) {
@@ -72,11 +73,11 @@ function extendRecords(endpoint, records) {
       const values = states.map((previous, index) => {
         const refresh = providers[index].refresh;
         const period = refresh.period;
-        const interval = getInterval(refresh.origin, period, date, previous);
+        const interval = Utils.getInterval(refresh.origin, period, date, previous);
 
         if (previous && interval.toDuration() < period) return;
 
-        states[index] = roundDate(interval, period, previous);
+        states[index] = Utils.roundDate(interval, period, previous);
 
         return record;
       });
@@ -101,19 +102,6 @@ function isProvider(value) {
     && typeof value.extendConfiguration === 'function'
     && typeof value.extendRecord === 'function'
     && typeof value.close === 'function';
-}
-
-function getInterval(origin, period, date, previous) {
-  if (!previous) previous = date.set(origin).minus(period);
-
-  return previous.until(date);
-}
-
-function roundDate(interval, period, previous) {
-  const intervals = interval.splitBy(period);
-  const lastInterval = intervals[intervals.length - 1];
-
-  return previous ? lastInterval.end : lastInterval.start;
 }
 
 

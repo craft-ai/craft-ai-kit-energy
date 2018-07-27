@@ -11,6 +11,9 @@ test.afterEach.always(Helpers.destroyEndpointContext);
 test('fails loading an endpoint with invalid definition', (t) => {
   const INVALID_DEFINTIONS = [undefined].concat(INVALID_OBJECTS);
   const INVALID_IDENTIFIERS = [undefined].concat(INVALID_STRINGS);
+  const INVALID_DURATIONS = INVALID_OBJECTS.concat([{}, { test: 1 }, { milliseconds: 0 }]);
+  const INVALID_ORIGINS = INVALID_OBJECTS.concat([{ months: 0 }, { days: 0 }]);
+  const VALID_ORIGINS = [{ years: 2016, months: 1, days: 1 }];
 
   const kit = t.context.kit;
 
@@ -20,6 +23,10 @@ test('fails loading an endpoint with invalid definition', (t) => {
     .concat(INVALID_NUMBERS.map((value) => ({ id: 'id', learning: { maxRecords: value } })))
     .concat(INVALID_NUMBERS.map((value) => ({ id: 'id', learning: { maxRecordAge: value } })))
     .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', learning: { properties: value } })))
+    .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', energy: value })))
+    .concat(INVALID_DURATIONS.map((value) => ({ id: 'id', energy: { period: value } })))
+    .concat(INVALID_ORIGINS.map((value) => ({ id: 'id', energy: { origin: value } })))
+    .concat(VALID_ORIGINS.map((value) => ({ id: 'id', energy: { origin: value } })))
     .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', metadata: value })))
     .map((definition) => t.throws(kit.loadEndpoint(definition))));
 });
