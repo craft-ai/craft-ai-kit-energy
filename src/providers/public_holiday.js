@@ -35,7 +35,7 @@ async function initialize(provider) {
 
   context.cache = cache;
   context.easter = memoize(getEasterDate, { cache });
-  provider.refresh.timeout = { days: 1 };
+  provider.refresh.period = { days: 1 };
 
 
   function getEasterDate(year) {

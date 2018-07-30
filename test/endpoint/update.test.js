@@ -64,9 +64,8 @@ test('updates the endpoint', (t) => {
 
       t.true(Array.isArray(history));
       t.is(history.length, RECORDS.length);
-
       values.slice(1).forEach((current) => t.deepEqual(history, current));
-      t.snapshot(history);
+      t.deepEqual(toRecords(history), RECORDS);
     }));
 });
 
@@ -89,7 +88,7 @@ test('filters out records which precede the endpoint\'s last sent record', (t) =
           .then(() => client.getAgentContextOperations(endpoint.agentId))
           .then((updated) => {
             t.deepEqual(updated, history);
-            t.snapshot(history);
+            t.deepEqual(toRecords(history), RECORDS);
           });
       })));
 });
@@ -124,6 +123,7 @@ test('merges records with the same date', (t) => {
   // Duplicate an entry with a special value
   const index = context.random(RECORDS.length - 1);
   const records = [...RECORDS];
+  const load = RECORDS[index][LOAD];
 
   records.splice(index + 1, 0, { [DATE]: RECORDS[index][DATE], [LOAD]: SEED });
 
@@ -136,30 +136,11 @@ test('merges records with the same date', (t) => {
       t.is(history.length, RECORDS.length);
       // The special value should have replaced the real one
       t.is(history[index].context[LOAD], SEED);
-      t.snapshot(history);
-    }));
-});
 
-test('merges partial records until first full record', (t) => {
-  const context = t.context;
-  const kit = context.kit;
-  const client = kit.client;
+      const records = toRecords(history);
 
-  // Create some partial records only containing the date
-  const timestamp = new Date(RECORDS[0][DATE]).getTime();
-  const timestamps = new Array(10).fill(timestamp).map((date, index) => date - ((index + 1) * 60 * 60 * 1000));
-  const records = timestamps.reverse().map((date) => ({ [DATE]: date })).concat(RECORDS);
-
-  return t.notThrows(kit
-    .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => endpoint.update(records))
-    .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
-    .then((history) => {
-      t.true(Array.isArray(history));
-      t.is(history.length, RECORDS.length);
-      // The added partial records should be omitted
-      t.is(history[0].timestamp, Math.floor(timestamp / 1000));
-      t.snapshot(history);
+      records[index][LOAD] = load;
+      t.deepEqual(records, RECORDS);
     }));
 });
 
@@ -182,7 +163,7 @@ test('removes unknown keys from records', (t) => {
       t.is(history.length, records.length);
       // The added unknown property should never appear in the history
       t.false(history.some((current) => UNKNOWN in current.context));
-      t.snapshot(history);
+      t.deepEqual(toRecords(history), RECORDS);
     }));
 });
 
@@ -215,7 +196,7 @@ test('supports additional embedded context properties', (t) => {
 
   const records = RECORDS.map((record, index) => ({ ...record, index }));
 
-  return kit
+  return t.notThrows(kit
     .loadEndpoint({
       id: context.endpoint.register(),
       learning: { properties: { index: { type: 'continuous' } } }
@@ -226,10 +207,95 @@ test('supports additional embedded context properties', (t) => {
       t.true(Array.isArray(history));
       t.is(history.length, records.length);
       t.true(history.every((current, index) => current.context.index === index));
-    });
+    }));
 });
 
-// test.todo('converts index values to mean electrical loads');
+test('merges partial records until first full record', (t) => {
+  const context = t.context;
+  const kit = context.kit;
+  const client = kit.client;
+
+  // Add some partial records not containing the embedded property `index`
+  const timestamp = new Date(RECORDS[0][DATE]).getTime();
+  const timestamps = new Array(11)
+    .fill(timestamp)
+    .map((date, index) => ({ [DATE]: date - index * 3600 * 1000, [LOAD]: 0 }));
+  const records = timestamps.slice(1).reverse().concat(RECORDS.map((record, index) => ({ ...record, index })));
+
+  return t.notThrows(kit
+    .loadEndpoint({
+      id: context.endpoint.register(),
+      learning: { properties: { index: { type: 'continuous' } } }
+    })
+    .then((endpoint) => endpoint.update(records))
+    .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
+    .then((history) => {
+      t.true(Array.isArray(history));
+      t.is(history.length, RECORDS.length);
+      // The added partial records should be omitted
+      t.deepEqual(toRecords(history), records.slice(10));
+    }));
+});
+
+test('converts energy values to mean electrical loads', (t) => {
+  const context = t.context;
+  const kit = context.kit;
+  const client = kit.client;
+
+  return t.notThrows(kit
+    .loadEndpoint({
+      id: context.endpoint.register(),
+      energy: { period: { minutes: 30 } }
+    })
+    .then((endpoint) => endpoint.update(RECORDS_AS_ENERGY))
+    .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
+    .then((history) => {
+      t.true(Array.isArray(history));
+      t.is(history.length, RECORDS_AS_ENERGY.length);
+      t.deepEqual(toRecords(history), RECORDS);
+    }));
+});
+
+test('converts accumulated energy values to mean electrical loads', (t) => {
+  const context = t.context;
+  const kit = context.kit;
+  const client = kit.client;
+
+  return t.notThrows(kit
+    .loadEndpoint({
+      id: context.endpoint.register(),
+      energy: {
+        origin: { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 },
+        period: { days: 1 }
+      }
+    })
+    .then((endpoint) => endpoint.update(RECORDS_AS_ACCUMULATED_ENERGY))
+    .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
+    .then((history) => {
+      t.true(Array.isArray(history));
+      t.is(history.length, RECORDS_AS_ACCUMULATED_ENERGY.length);
+
+      const records = toRecords(history);
+
+      // Avoid rounding issue when comparing to the source
+      records.forEach((record) => record[LOAD] = Math.round(record[LOAD] * 10) / 10);
+      t.deepEqual(records, RECORDS);
+    }));
+});
+
+
+function toRecords(history) {
+  const state = Object.defineProperty({}, 'timezone', { writable: true });
+
+  return history.map((current) => {
+    Object.assign(state, {
+      ...current.context,
+      [DATE]: new Date(current.timestamp * 1000).toISOString()
+    });
+
+    return { ...state };
+  });
+}
 
 
 const DATE = Constants.DATE_FEATURE;
@@ -237,4 +303,6 @@ const INVALID_DATES = Helpers.INVALID_DATES;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const LOAD = Constants.LOAD_FEATURE;
 const RECORDS = Helpers.RECORDS;
+const RECORDS_AS_ACCUMULATED_ENERGY = Helpers.RECORDS_AS_ACCUMULATED_ENERGY;
+const RECORDS_AS_ENERGY = Helpers.RECORDS_AS_ENERGY;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;

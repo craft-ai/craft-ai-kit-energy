@@ -99,6 +99,8 @@ const INVALID_NUMBERS = [null, {}, '12', true, new Date(2018)];
 const INVALID_OBJECTS = [null, 0, true, 'string', Symbol()];
 const INVALID_STRINGS = [null, {}, [false], true, new Date(2018), Promise.resolve('string')];
 const RECORDS = require('./data/records');
+const RECORDS_AS_ENERGY = require('./data/records_energy');
+const RECORDS_AS_ACCUMULATED_ENERGY = require('./data/records_accumulated_energy');
 
 
 module.exports = {
@@ -115,4 +117,6 @@ module.exports = {
   INVALID_OBJECTS,
   INVALID_STRINGS,
   RECORDS,
+  RECORDS_AS_ENERGY,
+  RECORDS_AS_ACCUMULATED_ENERGY,
 };

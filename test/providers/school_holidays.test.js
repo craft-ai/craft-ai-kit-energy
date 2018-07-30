@@ -114,6 +114,7 @@ function isHoliday(record, holidays) {
 
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const DATE = Constants.DATE_FEATURE;
+const LOAD = Constants.LOAD_FEATURE;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const PARIS_HOLIDAYS = [
   [[2017, 7, 31], [2017, 9, 4]],
@@ -145,4 +146,4 @@ const WINDOW_START = DateTime.local(...PARIS_HOLIDAYS[0][0]).plus({ days: 1 });
 const WINDOW_END = DateTime.local(...PARIS_HOLIDAYS[PARIS_HOLIDAYS.length - 1][1]);
 const WINDOW = new Array(WINDOW_END.diff(WINDOW_START).as('days'))
   .fill(null)
-  .map((_, days) => ({ date: WINDOW_START.plus({ days }) }));
+  .map((_, days) => ({ [DATE]: WINDOW_START.plus({ days }), [LOAD]: 0 }));

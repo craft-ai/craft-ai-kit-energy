@@ -27,10 +27,10 @@ async function initialize(provider) {
     if (!POSSIBLE_REFRESH_VALUES.includes(refresh))
       throw new RangeError(`The "refresh" option of the weather provider must be one of: "${POSSIBLE_REFRESH_VALUES.join('", "')}". Received "${refresh}".`);
 
-    provider.refresh.timeout = { [refresh === 'hourly' ? 'hours' : 'days']: 1 };
+    provider.refresh.period = { [refresh === 'hourly' ? 'hours' : 'days']: 1 };
   } else {
     options.refresh = 'daily';
-    provider.refresh.timeout = { days: 1 };
+    provider.refresh.period = { days: 1 };
   }
 
   const properties = options.properties;

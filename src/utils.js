@@ -19,9 +19,15 @@ function formatTimezone(offset) {
     + [hours, offsetValue - hours * 60].map((value) => String(value).padStart(2, 0)).join(':');
 }
 
-function isNotUndefined(value) { return value !== undefined; }
+function getInterval(origin, period, date, previous) {
+  if (!previous) previous = date.set(origin).minus(period);
+
+  return previous.until(date);
+}
 
 function isNull(value) { return value === null; }
+
+function isNotNull(value) { return value !== null; }
 
 function isPredictiveModel(value) {
   return value !== null
@@ -45,6 +51,12 @@ function parseDate(value) {
       : typeof value === 'number' ? DateTime.fromMillis(value) : value;
 }
 
+function parseNumber(value) {
+  const result = value && typeof value === 'string' ? Number(value.replace(',', '.')) : value;
+
+  return Number.isFinite(result) ? result : undefined;
+}
+
 function parseTimestamp(value) {
   if (value === undefined || value === null) return;
 
@@ -55,6 +67,13 @@ function parseTimestamp(value) {
   throw new Error();
 }
 
+function roundDate(interval, period, previous) {
+  const intervals = interval.splitBy(period);
+  const lastInterval = intervals[intervals.length - 1];
+
+  return previous ? lastInterval.end : lastInterval.start;
+}
+
 
 const DateTime = luxon.DateTime;
 
@@ -62,10 +81,13 @@ const DateTime = luxon.DateTime;
 module.exports = {
   checkResponse,
   formatTimezone,
-  isNotUndefined,
+  getInterval,
+  isNotNull,
   isNull,
   isPredictiveModel,
   isNotString,
   parseDate,
+  parseNumber,
   parseTimestamp,
+  roundDate,
 };
