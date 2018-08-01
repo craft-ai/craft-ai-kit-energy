@@ -46,7 +46,7 @@ test('computes predictions', (t) => {
 
   return t.notThrows(Promise
     .all([
-      [TEST_RECORDS],
+      [TEST_RECORDS.map((record) => ({ ...record, [LOAD]: undefined }))],
       [Helpers.streamify(TEST_RECORDS)],
       [path.join(__dirname, '../helpers/data/records.csv'), { import: { from: INDEX } }],
     ].map((parameters) => endpoint.computePredictions(...parameters)))
@@ -394,6 +394,7 @@ function isReport(object) {
 
 
 const DATE = Constants.DATE_FEATURE;
+const LOAD = Constants.LOAD_FEATURE;
 const INVALID_DATES = Helpers.INVALID_DATES;
 const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS.filter((object) => object !== null);
