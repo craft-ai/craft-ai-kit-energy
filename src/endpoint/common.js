@@ -40,11 +40,11 @@ function mergeUntilFirstFullRecord(features, records) {
     .skipWhile(Utils.isNull);
 }
 
-function toRecordStream(values, options) {
+function toRecordStream(values, options, onlyRecords) {
   return Stream
     .from(values, options)
     .map(toRecord)
-    .filter(isValidRecord)
+    .filter(onlyRecords ? isValidRecord : isValidState)
     .thru(checkRecordsAreSorted);
 }
 
@@ -68,8 +68,12 @@ function checkRecordsAreSorted(records) {
 }
 
 function isValidRecord(record) {
-  return !isNaN(record[DATE])
+  return isValidState(record)
     && (record[LOAD] !== undefined || record[ENERGY] !== undefined);
+}
+
+function isValidState(state) {
+  return !isNaN(state[DATE]);
 }
 
 function toContextOperation(record) {
@@ -120,6 +124,7 @@ const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
 module.exports = {
   formatRecords,
+  isValidRecord,
   mergeUntilFirstFullRecord,
   toRecordStream,
 };

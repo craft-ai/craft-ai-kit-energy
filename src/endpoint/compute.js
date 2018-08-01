@@ -23,10 +23,11 @@ async function computeAnomalies(records, options, model) {
   const minAbsoluteDifference = options.minAbsoluteDifference === undefined ? 0 : options.minAbsoluteDifference;
   const minSigmaDifference = options.minSigmaDifference === undefined ? 2 : options.minSigmaDifference;
 
-  return retrieveRecords(this, records, options.import).then((records) => this
-    .computePredictions(records, options, model === undefined && records.length ? records[0][DATE] : model)
-    .then((predictions) => {
-      predictions.forEach((prediction) => prediction.actualLoad = prediction[ORIGINAL_CONTEXT][PARSED_RECORD][LOAD]);
+  return retrieveRecords(this, records, options.import).then((records) => {
+    if (model === undefined && records.length) model = records[0][DATE];
+
+    return predict(this, records, model, options, true).then((predictions) => {
+      predictions.forEach(setActualLoad);
 
       const values = predictions.filter((prediction) => {
         if (prediction.confidence < minConfidence) return false;
@@ -40,43 +41,18 @@ async function computeAnomalies(records, options, model) {
       this.debug('found %d anomalies among %d records', values.length, records.length);
 
       return { values, recordsCount: records.length };
-    }));
+    });
+  });
 }
 
 async function computePredictions(states, options, model) {
   this.debug('computing predictions');
 
-  const features = this.features.filter(featureIsLoad);
+  return predict(this, states, model, options).then((predictions) => {
+    this.debug('computed %d predictions', predictions.length);
 
-  return retrieveModel(this, model)
-    .then((model) => Common
-      .toRecordStream(states, options && options.import)
-      .thru(Common.mergeUntilFirstFullRecord.bind(null, features))
-      .thru(Common.formatRecords.bind(null, features))
-      .loop((previous, state) => {
-        const context = state.context;
-        const current = Object.assign(previous, context);
-        const result = interpreter.decide(model, current, new craftai.Time(state[TIMESTAMP]));
-        const output = result.output[LOAD];
-
-        return {
-          seed: current,
-          value: Object.defineProperty({
-            date: context[PARSED_RECORD][DATE].toJSDate(),
-            context: result.context,
-            predictedLoad: output.predicted_value,
-            confidence: output.confidence,
-            standardDeviation: output.standard_deviation,
-            decisionRules: output.decision_rules
-          }, ORIGINAL_CONTEXT, { value: context })
-        };
-      }, {})
-      .thru(Stream.toBuffer))
-    .then((predictions) => {
-      this.debug('computed %d predictions', predictions.length);
-
-      return predictions;
-    });
+    return predictions;
+  });
 }
 
 async function computeReport(records, options, model) {
@@ -100,6 +76,34 @@ async function computeReport(records, options, model) {
     });
 }
 
+
+async function predict(endpoint, values, model, options, onlyRecords) {
+  const features = endpoint.features.filter(isNotLoadFeature);
+
+  return retrieveModel(endpoint, model).then((model) => Common
+    .toRecordStream(values, options && options.import, onlyRecords)
+    .thru(Common.mergeUntilFirstFullRecord.bind(null, features))
+    .thru(Common.formatRecords.bind(null, features))
+    .loop((previous, state) => {
+      const context = state.context;
+      const current = Object.assign(previous, context);
+      const result = interpreter.decide(model, current, new craftai.Time(state[TIMESTAMP]));
+      const output = result.output[LOAD];
+
+      return {
+        seed: current,
+        value: Object.defineProperty({
+          date: context[PARSED_RECORD][DATE].toJSDate(),
+          context: result.context,
+          predictedLoad: output.predicted_value,
+          confidence: output.confidence,
+          standardDeviation: output.standard_deviation,
+          decisionRules: output.decision_rules
+        }, ORIGINAL_CONTEXT, { value: context })
+      };
+    }, {})
+    .thru(Stream.toBuffer));
+}
 
 async function retrieveModel(endpoint, value) {
   if (Utils.isPredictiveModel(value)) return value;
@@ -143,7 +147,11 @@ function computeAverages(values) {
   return counts;
 }
 
-function featureIsLoad(feature) { return feature !== LOAD; }
+function isNotLoadFeature(feature) { return feature !== LOAD; }
+
+function setActualLoad(prediction) {
+  prediction.actualLoad = prediction[ORIGINAL_CONTEXT][PARSED_RECORD][LOAD];
+}
 
 
 const DATE = Constants.DATE_FEATURE;
