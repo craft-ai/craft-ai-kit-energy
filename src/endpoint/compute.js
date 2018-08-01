@@ -6,23 +6,26 @@ const Provider = require('../provider');
 const Stream = require('../stream');
 const Utils = require('../utils');
 
+const COMPUTE_ANOMALIES_DEFAULTS = {
+  minConfidence: .4,
+  minAbsoluteDifference: 0,
+  minSigmaDifference: 2
+};
 
 async function computeAnomalies(records, options, model) {
   this.debug('computing anomalies');
 
-  if (options === null || options === undefined) options = {};
+  if (options === null || options === undefined) options = COMPUTE_ANOMALIES_DEFAULTS;
   else if (typeof options !== 'object')
     throw TypeError(`The "options" argument must be an "object". Received "${typeof options}".`);
+  else options = Object.assign({}, COMPUTE_ANOMALIES_DEFAULTS, options);
+
   if (options.minConfidence !== undefined && typeof options.minConfidence !== 'number')
     throw TypeError(`The "minConfidence" option must be a "number". Received "${typeof options.minConfidence}".`);
   if (options.minAbsoluteDifference !== undefined && typeof options.minAbsoluteDifference !== 'number')
     throw TypeError(`The "minAbsoluteDifference" option must be a "number". Received "${typeof options.minAbsoluteDifference}".`);
   if (options.minSigmaDifference !== undefined && typeof options.minSigmaDifference !== 'number')
     throw TypeError(`The "minSigmaDifference" option must be a "number". Received "${typeof options.minSigmaDifference}".`);
-
-  const minConfidence = options.minConfidence === undefined ? .4 : options.minConfidence;
-  const minAbsoluteDifference = options.minAbsoluteDifference === undefined ? 0 : options.minAbsoluteDifference;
-  const minSigmaDifference = options.minSigmaDifference === undefined ? 2 : options.minSigmaDifference;
 
   return retrieveRecords(this, records, options.import).then((records) => {
     if (model === undefined && records.length) model = records[0][DATE];
@@ -31,12 +34,12 @@ async function computeAnomalies(records, options, model) {
       predictions.forEach(setActualLoad);
 
       const values = predictions.filter((prediction) => {
-        if (prediction.confidence < minConfidence) return false;
+        if (prediction.confidence < options.minConfidence) return false;
 
         const absoluteDifference = Math.abs(prediction.predictedLoad - prediction.actualLoad);
 
-        return absoluteDifference >= minAbsoluteDifference
-          && absoluteDifference >= minSigmaDifference * prediction.standardDeviation;
+        return absoluteDifference >= options.minAbsoluteDifference
+          && absoluteDifference >= options.minSigmaDifference * prediction.standardDeviation;
       });
 
       this.debug('found %d anomalies among %d records', values.length, records.length);
@@ -56,11 +59,15 @@ async function computePredictions(states, options, model) {
   });
 }
 
+const COMPUTE_REPORT_DEFAULTS = {
+  minSigmaDifference: 0
+};
+
 async function computeReport(records, options, model) {
   this.debug('computing a report');
 
-  if (options === null || options === undefined) options = { minSigmaDifference: 0 };
-  else if (typeof options === 'object') options = Object.assign({ minSigmaDifference: 0 }, options);
+  if (options === null || options === undefined) options = COMPUTE_REPORT_DEFAULTS;
+  else if (typeof options === 'object') options = Object.assign({}, COMPUTE_REPORT_DEFAULTS, options);
 
   return this
     .computeAnomalies(records, options, model)
