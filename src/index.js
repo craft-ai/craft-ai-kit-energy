@@ -80,6 +80,7 @@ const ROOT_NAMESPACE = uuid.DNS;
 
 
 module.exports = {
+  craftai,
   initialize,
   import: {
     csv: CsvParser.stream,
