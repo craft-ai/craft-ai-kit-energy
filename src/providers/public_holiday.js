@@ -115,12 +115,13 @@ function isHoliday(date, region) {
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const DATE = Constants.DATE_FEATURE;
 // TODO: Accept custom context property name and labels
-const HOLIDAY = 'holiday';
+const HOLIDAY = 'public_holiday';
 const DateTime = luxon.DateTime;
 const Indexer = indexWith(true);
 
 
 module.exports = {
+  HOLIDAY,
   close,
   extendConfiguration,
   extendRecord,

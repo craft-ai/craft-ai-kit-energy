@@ -40,7 +40,7 @@ test('computes the record\'s extension', (t) => {
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
-        t.is(extension.holiday === 'YES', isHoliday(record, HOLIDAYS));
+        t.is(extension[HOLIDAY] === 'YES', isHoliday(record, HOLIDAYS));
       }))
     .awaitPromises()
     .drain();
@@ -54,7 +54,7 @@ test('computes the record\'s extension in Paris', (t) => {
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
-        t.is(extension.holiday === 'YES', isHoliday(record, HOLIDAYS));
+        t.is(extension[HOLIDAY] === 'YES', isHoliday(record, HOLIDAYS));
       }))
     .awaitPromises()
     .drain();
@@ -68,7 +68,7 @@ test('computes the record\'s extension in Réunion', (t) => {
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
-        t.is(extension.holiday === 'YES', isHoliday(record, REUNION_HOLIDAYS));
+        t.is(extension[HOLIDAY] === 'YES', isHoliday(record, REUNION_HOLIDAYS));
       }))
     .awaitPromises()
     .drain();
@@ -82,7 +82,7 @@ test('computes the record\'s extension in Moselle', (t) => {
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
-        t.is(extension.holiday === 'YES', isHoliday(record, MOSELLE_HOLIDAYS));
+        t.is(extension[HOLIDAY] === 'YES', isHoliday(record, MOSELLE_HOLIDAYS));
       }))
     .awaitPromises()
     .drain();
@@ -105,6 +105,7 @@ function isHoliday(record, holidays) {
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const DATE = Constants.DATE_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;
+const HOLIDAY = PublicHolidayProvider.HOLIDAY;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const HOLIDAYS = [
   [2018, 1, 1],
