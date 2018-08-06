@@ -40,7 +40,7 @@ test('computes the record\'s extension in Paris', (t) => {
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
-        t.is(extension.holiday === 'YES', isHoliday(record, PARIS_HOLIDAYS));
+        t.is(extension[HOLIDAY] === 'YES', isHoliday(record, PARIS_HOLIDAYS));
       }))
     .awaitPromises()
     .drain();
@@ -54,7 +54,7 @@ test('computes the record\'s extension in Lille', (t) => {
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
-        t.is(extension.holiday === 'YES', isHoliday(record, LILLE_HOLIDAYS));
+        t.is(extension[HOLIDAY] === 'YES', isHoliday(record, LILLE_HOLIDAYS));
       }))
     .awaitPromises()
     .drain();
@@ -68,7 +68,7 @@ test('computes the record\'s extension in Caen', (t) => {
       .then((extension) => {
         t.truthy(extension);
         t.is(typeof extension, 'object');
-        t.is(extension.holiday === 'YES', isHoliday(record, CAEN_HOLIDAYS));
+        t.is(extension[HOLIDAY] === 'YES', isHoliday(record, CAEN_HOLIDAYS));
       }))
     .awaitPromises()
     .drain();
@@ -82,7 +82,7 @@ test('handles computing the record\'s extension for an unknown region', (t) => {
     .observe((extension) => {
       t.truthy(extension);
       t.is(typeof extension, 'object');
-      t.is(extension.holiday, 'UNKNOWN');
+      t.is(extension[HOLIDAY], 'UNKNOWN');
     });
 });
 
@@ -95,7 +95,7 @@ test('handles computing the record\'s extension with no school holidays informat
     .observe((extension) => {
       t.truthy(extension);
       t.is(typeof extension, 'object');
-      t.is(extension.holiday, 'UNKNOWN');
+      t.is(extension[HOLIDAY], 'UNKNOWN');
     });
 });
 
@@ -115,6 +115,7 @@ function isHoliday(record, holidays) {
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const DATE = Constants.DATE_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;
+const HOLIDAY = SchoolHolidaysProvider.HOLIDAY;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const PARIS_HOLIDAYS = [
   [[2017, 7, 31], [2017, 9, 4]],
