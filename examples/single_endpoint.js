@@ -1,6 +1,8 @@
 require('dotenv').load();
 
 const EnergyKit = require('../src');
+const PublicHolidayProvider = require('../src/providers/public_holiday');
+const SchoolHolidaysProvider = require('../src/providers/school_holidays');
 const debug = require('debug');
 const path = require('path');
 
@@ -13,7 +15,17 @@ const interpreter = EnergyKit.craftai.interpreter;
 
 log('Initializing the energy kit...');
 EnergyKit.initialize({
-  token: process.env.CRAFT_TOKEN
+  token: process.env.CRAFT_TOKEN,
+  providers: [
+    {
+      provider: PublicHolidayProvider,
+      options: { country: 'fr' }
+    },
+    {
+      provider: SchoolHolidaysProvider,
+      options: { country: 'fr' }
+    }
+  ]
 })
   .then((kit) => {
     return kit.loadEndpoint({
