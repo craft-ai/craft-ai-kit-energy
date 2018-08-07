@@ -91,7 +91,7 @@ function extendRecords(endpoint, records) {
 
         return record && provider.extendRecord(endpoint, record);
       }))
-      .then((extensions) => Object.assign({}, ...extensions, data[0]))));
+      .then((extensions) => Object.assign(data[0], ...extensions, data[0]))));
 }
 
 
