@@ -1,9 +1,11 @@
 const test = require('ava');
 const seedrandom = require('seedrandom');
 
+const Constants = require('../src/constants');
 const EnergyKit = require('../src/index');
-const Provider = require('./helpers/provider');
 const Helpers = require('./helpers');
+const Is = require('./helpers/is');
+const Provider = require('./helpers/provider');
 
 
 test.before(require('dotenv').load);
@@ -26,15 +28,14 @@ test('uses a provider to extend records', async(t) => {
   return kit
     .loadEndpoint({ id: context.endpoint.register() })
     .then((endpoint) => endpoint.update(RECORDS))
-    .then((endpoint) => endpoint
-      .retrieveRecords()
-      .then((history) => {
-        t.true(Array.isArray(history));
-        t.is(history.length, RECORDS.length);
-        t.true(isExtended(history));
+    .then((endpoint) => endpoint.retrieveRecords())
+    .then((history) => {
+      t.true(Array.isArray(history));
+      t.is(history.length, RECORDS.length);
+      t.true(isExtended(history));
 
-        t.snapshot(history);
-      }));
+      t.snapshot(history);
+    });
 });
 
 test('uses a provider with options to extend records', async(t) => {
@@ -51,15 +52,33 @@ test('uses a provider with options to extend records', async(t) => {
   return kit
     .loadEndpoint({ id: context.endpoint.register(), metadata: { averageMin: 15, averageMax: 24 } })
     .then((endpoint) => endpoint.update(RECORDS))
-    .then((endpoint) => endpoint
-      .retrieveRecords()
-      .then((history) => {
-        t.true(Array.isArray(history));
-        t.is(history.length, RECORDS.length);
-        t.true(isExtended(history));
+    .then((endpoint) => endpoint.retrieveRecords())
+    .then((history) => {
+      t.true(Array.isArray(history));
+      t.is(history.length, RECORDS.length);
+      t.true(isExtended(history));
 
-        t.snapshot(history);
-      }));
+      t.snapshot(history);
+    });
+});
+
+test('uses a provider to compute predictions', async(t) => {
+  await Helpers.createEndpointContext(t, { providers: [Provider] });
+
+  const context = t.context;
+  const kit = context.kit;
+
+  return kit
+    .loadEndpoint({ id: context.endpoint.register() })
+    .then((endpoint) => endpoint.update(RECORDS))
+    .then((endpoint) => endpoint.computePredictions(STATES))
+    .then((predictions) => {
+      t.true(Array.isArray(predictions));
+      t.is(predictions.length, STATES.length);
+      t.true(Is.predictions(predictions));
+
+      t.snapshot(predictions);
+    });
 });
 
 
@@ -70,7 +89,9 @@ function isExtended(history) {
 }
 
 
+const DATE = Constants.DATE_FEATURE;
 const FEATURES = Provider.FEATURES;
 const INVALID_ARRAYS = Helpers.INVALID_ARRAYS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const RECORDS = Helpers.RECORDS.slice(0, 500);
+const STATES = Helpers.RECORDS.slice(500, 1000).map((record) => ({ [DATE]: record[DATE] }));

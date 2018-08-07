@@ -3,6 +3,7 @@ const test = require('ava');
 
 const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
+const Is = require('../helpers/is');
 
 
 test.before(require('dotenv').load);
@@ -53,7 +54,7 @@ test('computes predictions', (t) => {
     .then((values) => {
       const predictions = values[0];
 
-      t.true(isPredictions(predictions));
+      t.true(Is.predictions(predictions));
       t.is(predictions.length, TEST_RECORDS.length);
 
       values.slice(1).forEach((current) => t.deepEqual(predictions, current));
@@ -74,7 +75,7 @@ test('computes predictions given a model', (t) => {
     .then((values) => {
       const predictions = values[0];
 
-      t.true(isPredictions(predictions));
+      t.true(Is.predictions(predictions));
       t.is(predictions.length, TEST_RECORDS.length);
 
       values.slice(1).forEach((current) => t.deepEqual(predictions, current));
@@ -115,7 +116,7 @@ test('merges states with the same date', (t) => {
       endpoint.computePredictions(TEST_RECORDS),
     ])
     .then((results) => {
-      results.forEach((predictions) => t.true(isPredictions(predictions)));
+      results.forEach((predictions) => t.true(Is.predictions(predictions)));
       // The duplicate state should be omitted
       t.deepEqual(results[0], results[1]);
     }));
@@ -131,7 +132,7 @@ test('merges partial states until first full state', (t) => {
   return t.notThrows(endpoint
     .computePredictions(states)
     .then((predictions) => {
-      t.true(isPredictions(predictions));
+      t.true(Is.predictions(predictions));
       // The added empty states should be omitted
       t.is(predictions.length, TEST_RECORDS.length);
       t.snapshot(predictions);
@@ -175,7 +176,7 @@ test('computes anomalies', (t) => {
     .then((values) => {
       const anomalies = values[0];
 
-      t.true(isAnomalies(anomalies));
+      t.true(Is.anomalies(anomalies));
       t.is(anomalies.recordsCount, TEST_RECORDS.length);
 
       values.slice(1).forEach((current) => t.deepEqual(anomalies, current));
@@ -196,7 +197,7 @@ test('computes anomalies given a model', (t) => {
     .then((values) => {
       const anomalies = values[0];
 
-      t.true(isAnomalies(anomalies));
+      t.true(Is.anomalies(anomalies));
       t.is(anomalies.recordsCount, TEST_RECORDS.length);
 
       values.slice(1).forEach((current) => t.deepEqual(anomalies, current));
@@ -218,7 +219,7 @@ test('computes anomalies from a window', (t) => {
     .then((values) => {
       const anomalies = values[0];
 
-      t.true(isAnomalies(anomalies));
+      t.true(Is.anomalies(anomalies));
       t.is(anomalies.recordsCount, WINDOW_LENGTH);
 
       values.slice(1).forEach((current) => t.deepEqual(anomalies, current));
@@ -238,7 +239,7 @@ test('filters out anomalies given custom thresholds', (t) => {
       [TEST_RECORDS, { minSigmaDifference: Infinity }],
     ].map((parameters) => endpoint.computeAnomalies(...parameters)))
     .then((values) => values.forEach((anomalies) => {
-      t.true(isAnomalies(anomalies));
+      t.true(Is.anomalies(anomalies));
       t.is(anomalies.values.length, 0);
     })));
 });
@@ -279,7 +280,7 @@ test('computes a report', (t) => {
     .then((values) => {
       const report = values[0];
 
-      t.true(isReport(report));
+      t.true(Is.report(report));
       t.is(report.recordsCount, TEST_RECORDS.length);
 
       values.slice(1).forEach((current) => t.deepEqual(report, current));
@@ -300,7 +301,7 @@ test('computes a report given a model', (t) => {
     .then((values) => {
       const report = values[0];
 
-      t.true(isReport(report));
+      t.true(Is.report(report));
       t.is(report.recordsCount, TEST_RECORDS.length);
 
       values.slice(1).forEach((current) => t.deepEqual(report, current));
@@ -322,7 +323,7 @@ test('computes a report from a window', (t) => {
     .then((values) => {
       const report = values[0];
 
-      t.true(isReport(report));
+      t.true(Is.report(report));
       t.is(report.recordsCount, WINDOW_LENGTH);
 
       values.slice(1).forEach((current) => t.deepEqual(report, current));
@@ -342,55 +343,11 @@ test('computes a report with no values', (t) => {
       [TEST_RECORDS, { minSigmaDifference: Infinity }],
     ].map((parameters) => endpoint.computeReport(...parameters)))
     .then((values) => values.forEach((report) => {
-      t.true(isReport(report));
+      t.true(Is.report(report));
       t.falsy(report.values.length);
       t.true(Object.values(report.average).every(isNaN));
     })));
 });
-
-
-function isAnomaly(value) {
-  return isPrediction(value) && typeof value.actualLoad === 'number';
-}
-
-function isAnomalies(object) {
-  return object
-    && typeof object === 'object'
-    && typeof object.recordsCount === 'number'
-    && object.recordsCount >= 0
-    && Array.isArray(object.values)
-    && object.values.every(isAnomaly)
-    && object.values.length <= object.recordsCount;
-}
-
-function isPrediction(value) {
-  return value
-    && typeof value === 'object'
-    && value.context
-    && typeof value.context === 'object'
-    && value.date instanceof Date
-    && typeof value.predictedLoad === 'number'
-    && typeof value.confidence === 'number'
-    && value.confidence > 0 && value.confidence < 1
-    && typeof value.standardDeviation === 'number'
-    && Array.isArray(value.decisionRules);
-}
-
-function isPredictions(values) {
-  return Array.isArray(values) && values.every(isPrediction);
-}
-
-function isReport(object) {
-  return isAnomalies(object)
-    && object.average
-    && typeof object.average === 'object'
-    && typeof object.average.actualLoad === 'number'
-    && typeof object.average.predictedLoad === 'number'
-    && typeof object.average.predictedStandardDeviation === 'number'
-    && (isNaN(object.average.predictedStandardDeviation) || object.average.predictedStandardDeviation >= 0)
-    && typeof object.average.absoluteDifference === 'number'
-    && (isNaN(object.average.absoluteDifference) || object.average.absoluteDifference >= 0);
-}
 
 
 const DATE = Constants.DATE_FEATURE;
