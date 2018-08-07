@@ -17,8 +17,20 @@ EnergyKit.initialize({
 })
   .then((kit) => {
     return kit.loadEndpoint({
-      id: 'single_endpoint_global'
-    });
+      id: 'single_endpoint_global',
+      metadata: {
+        region: '91'
+      }
+    })
+      .then((endpoint) => {
+        endpoint.destroy();
+        return kit.loadEndpoint({
+          id: 'single_endpoint_global',
+          metadata: {
+            region: '91'
+          }
+        });
+      });
   })
   .then((endpoint) => {
     return endpoint.update(DATASET_PATH, {
