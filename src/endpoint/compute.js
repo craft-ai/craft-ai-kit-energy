@@ -2,6 +2,7 @@ const craftai = require('craft-ai');
 
 const Common = require('./common');
 const Constants = require('../constants');
+const Provider = require('../provider');
 const Stream = require('../stream');
 const Utils = require('../utils');
 
@@ -82,6 +83,7 @@ async function predict(endpoint, values, model, options, onlyRecords) {
 
   return retrieveModel(endpoint, model).then((model) => Common
     .toRecordStream(values, options && options.import, onlyRecords)
+    .thru(Provider.extendRecords.bind(null, endpoint))
     .thru(Common.mergeUntilFirstFullRecord.bind(null, features))
     .thru(Common.formatRecords.bind(null, features))
     .loop((previous, state) => {
