@@ -93,6 +93,8 @@ async function extendRecord(endpoint, record) {
 
   if (cache.has(resource)) return cache.get(resource);
 
+  this.log('Weather not in cache, querying DarkSkyAPI...');
+
   const query = context.baseUrl + resource + context.queryOptions;
 
   return retry(() => fetch(query).then(Utils.checkResponse), RETRY_OPTIONS)
@@ -120,6 +122,7 @@ async function extendRecord(endpoint, record) {
         return result;
       });
 
+      cache.set(resource, results[0]); // Also caching the exact requested timestamp
       return results[0];
     });
 }
@@ -127,7 +130,11 @@ async function extendRecord(endpoint, record) {
 async function close() {
   const cache = this.context.cache;
 
-  if (cache.save) await cache.save(cache.values);
+  if (cache.save) {
+    const values = cache.values;
+    const serializedValues = Array.from(values.keys()).map((key) => [key, values.get(key)]);
+    await cache.save(serializedValues);
+  }
 
   // Clear the cache
   cache.values.clear();
