@@ -1,14 +1,16 @@
 const luxon = require('luxon');
-const retry = require('p-retry');
 
 
 async function checkResponse(response) {
   const status = response.status;
 
   /* istanbul ignore next */
-  return status < 500
-    ? status < 400 ? response : retry.AbortError(response)
-    : Promise.reject(response);
+  return status < 500 ? response : Promise.reject(response);
+}
+
+async function handleResponse(response) {
+  /* istanbul ignore next */
+  return response.status < 400 ? response : Promise.reject(response);
 }
 
 function formatTimezone(offset) {
@@ -82,6 +84,7 @@ module.exports = {
   checkResponse,
   formatTimezone,
   getInterval,
+  handleResponse,
   isNotNull,
   isNull,
   isPredictiveModel,
