@@ -69,7 +69,8 @@ async function extendRecord(endpoint, record) {
   const query = context.baseUrl + resource + context.queryOptions;
 
   return retry(() => fetch(query).then(Utils.checkResponse), RETRY_OPTIONS)
-    .then(handleResponse)
+    .then(Utils.handleResponse)
+    .then(formatResponse)
     .then((data) => {
       const options = this.options;
       const key = options.refresh;
@@ -102,9 +103,8 @@ async function close() {
 }
 
 
-async function handleResponse(response) {
-  /* istanbul ignore next */
-  return response.status < 400 ? response.json() : Promise.reject(response);
+async function formatResponse(response) {
+  return response.json();
 }
 
 function generateConfiguration(extension, property) {
