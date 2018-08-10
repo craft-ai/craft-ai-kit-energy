@@ -20,6 +20,7 @@ The signature of the method `endpoint.computePredictions()` has been changed to 
 - Checking the optional field `metadata` of the endpoints.
 - Supporting additional embedded context properties.
 - Handle records with consumption as energy and accumulated energy.
+- Exposing options to load and save the internal cache of the `WeatherProvider`.
 
 ### Changed ###
 
