@@ -1,6 +1,5 @@
 const buffer = require('most-buffer');
 const fs = require('fs');
-const lru = require('quick-lru');
 const luxon = require('luxon');
 const most = require('most');
 const nock = require('nock');
@@ -16,13 +15,15 @@ const WeatherProvider = require('../../src/providers/weather');
 
 
 test.before(require('dotenv').load);
-test.beforeEach((t) => Helpers.createProviderContext(t, WeatherProvider, { token: process.env.DARK_SKY_TOKEN }));
+test.beforeEach((t) => t.context.token = process.env.DARK_SKY_TOKEN);
 test.afterEach.always(Helpers.destroyProviderContext);
 
 
-test('fails initializing the provider with invalid options', (t) => {
+test('fails initializing the provider with invalid options', async(t) => {
   const INVALID_TOKENS = [undefined].concat(INVALID_STRINGS, ['']);
   const INVALID_REFRESH_OPTIONS = INVALID_STRINGS.concat(['', 'never']);
+  const INVALID_LOAD_FUNCTIONS = INVALID_FUNCTIONS
+    .concat([() => ({ key: 'value' }), () => new Map(['key', 'value'])]);
 
   const token = '*'.repeat(12);
 
@@ -31,17 +32,24 @@ test('fails initializing the provider with invalid options', (t) => {
     .concat(INVALID_REFRESH_OPTIONS.map((refresh) => ({ token, refresh })))
     .concat(INVALID_ARRAYS.map((properties) => ({ token, properties })))
     .concat(INVALID_STRINGS.map((property) => ({ token, properties: [property] })))
+    .concat(INVALID_OBJECTS.map((cache) => ({ token, cache })))
+    .concat(INVALID_NUMBERS.map((size) => ({ token, cache: { size } })))
+    .concat(INVALID_FUNCTIONS.map((save) => ({ token, cache: { save } })))
+    .concat(INVALID_LOAD_FUNCTIONS.map((load) => ({ token, cache: { load } })))
     .map((options) => t.throws(Provider.initialize({ provider: WeatherProvider, options }, 0))))
     .then((a) => t.snapshot(a));
 });
 
 test('initializes the provider', (t) => {
-  return t.snapshot(t.context.provider);
+  return Helpers
+    .createProviderContext(t, WeatherProvider, { token: t.context.token })
+    .then(() => t.snapshot(t.context.provider));
 });
 
 test('computes the configuration\'s extension', (t) => {
-  return t.context.provider
-    .extendConfiguration()
+  return Helpers
+    .createProviderContext(t, WeatherProvider, { token: t.context.token })
+    .then(() => t.context.provider.extendConfiguration())
     .then((extension) => {
       t.truthy(extension);
       t.is(typeof extension, 'object');
@@ -49,13 +57,13 @@ test('computes the configuration\'s extension', (t) => {
     });
 });
 
-test('computes the configuration\'s extension with custom properties', (t) => {
-  return Provider
-    .initialize({
-      provider: WeatherProvider,
-      options: { token: t.context.provider.options.token, properties: ['icon'] }
-    }, 0)
-    .then((provider) => provider.extendConfiguration())
+test('computes the configuration\'s extension with custom properties', async(t) => {
+  return Helpers
+    .createProviderContext(t, WeatherProvider, {
+      token: t.context.token,
+      properties: ['icon']
+    })
+    .then(() => t.context.provider.extendConfiguration())
     .then((extension) => {
       t.truthy(extension);
       t.is(typeof extension, 'object');
@@ -63,7 +71,9 @@ test('computes the configuration\'s extension with custom properties', (t) => {
     });
 });
 
-test('computes the record\'s extension in Paris', (t) => {
+test('computes the record\'s extension in Paris', async(t) => {
+  await Helpers.createProviderContext(t, WeatherProvider, { token: t.context.token });
+
   const provider = t.context.provider;
 
   interceptWeatherRequest(provider, t.title);
@@ -79,23 +89,19 @@ test('computes the record\'s extension in Paris', (t) => {
         return extension;
       })))
     .thru(buffer())
-    .observe((records) => {
-      t.snapshot(records);
-      persistWeatherCache(provider.context.cache, t.title);
-    });
+    .observe((records) => t.snapshot(records));
 });
 
 test('computes the record\'s extension in Annecy daily', async(t) => {
-  const provider = await Provider.initialize({
-    provider: WeatherProvider,
-    options: {
-      token: t.context.provider.options.token,
-      refresh: 'daily'
-    }
-  }, 0);
+  await Helpers.createProviderContext(t, WeatherProvider, {
+    token: t.context.token,
+    refresh: 'daily',
+    cache: { save: saveCache.bind(null, t.title) }
+  });
+
+  const provider = t.context.provider;
 
   interceptWeatherRequest(provider, t.title);
-  t.context.provider = provider;
 
   return Common
     .toRecordStream(DAILY_WINDOW)
@@ -108,22 +114,21 @@ test('computes the record\'s extension in Annecy daily', async(t) => {
         return extension;
       })))
     .thru(buffer())
-    .observe((records) => t.snapshot(records))
-    .then(() => persistWeatherCache(provider.context.cache, t.title));
+    .observe((records) => t.snapshot(records));
 });
 
 test('computes the record\'s extension in Angers hourly with cache', async(t) => {
-  const provider = await Provider.initialize({
-    provider: WeatherProvider,
-    options: {
-      token: t.context.provider.options.token,
-      properties: ['icon', 'temperature'],
-      refresh: 'hourly'
+  await Helpers.createProviderContext(t, WeatherProvider, {
+    token: t.context.token,
+    properties: ['icon', 'temperature'],
+    refresh: 'hourly',
+    cache: {
+      load: loadCache.bind(null, t.title),
+      save: saveCache.bind(null, t.title)
     }
-  }, 0);
+  });
 
-  provider.context.cache = loadWeatherCache(t.title);
-  t.context.provider = provider;
+  const provider = t.context.provider;
 
   return Common
     .toRecordStream(WINDOW)
@@ -136,16 +141,17 @@ test('computes the record\'s extension in Angers hourly with cache', async(t) =>
         return extension;
       })))
     .thru(buffer())
-    .observe((records) => t.snapshot(records))
-    .then(() => persistWeatherCache(provider.context.cache, t.title));
+    .observe((records) => t.snapshot(records));
 });
 
 test('closes the provider', (t) => {
-  return t.notThrows(t.context.provider.close());
+  return Provider
+    .initialize({ provider: WeatherProvider, options: { token: t.context.token } }, 0)
+    .then((provider) => t.notThrows(provider.close()));
 });
 
 
-async function persistWeatherCache(cache, title) {
+async function saveCache(title, cache) {
   const keys = [...cache.keys()];
 
   if (!keys.length) return;
@@ -156,38 +162,33 @@ async function persistWeatherCache(cache, title) {
   fs.writeFileSync(filepath, JSON.stringify(entries));
 }
 
-function loadWeatherCache(title) {
+function loadCache(title) {
   try {
-    const entries = require(`../helpers/cache/${getCacheName(title)}.json`);
-    const cache = new lru({ maxSize: 10000 });
-
-    entries.forEach((entry) => cache.set(...entry));
-
-    return cache;
+    return require(`../helpers/cache/${getCacheName(title)}.json`);
   } catch (error) {
     if (error.code !== 'MODULE_NOT_FOUND') throw error;
   }
 }
 
 function interceptWeatherRequest(provider, title) {
-  const cache = loadWeatherCache(title);
+  const cache = loadCache(title);
 
-  if (!cache) return;
-
-  const resources = [...cache.keys()];
-
-  if (!resources.length) return;
+  if (!cache || !cache.length) return;
 
   const urlParts = provider.context.baseUrl.replace('https://', '').split('/');
   const hostname = `https://${urlParts.shift()}`;
   const basePath = `/${urlParts.join('/')}`;
   const refresh = provider.options.refresh;
-  const scope = nock(hostname, { allowUnmocked: true });
 
-  resources.forEach((resource) => scope
-    .get(basePath + resource)
-    .query(true)
-    .reply(200, { [refresh]: { data: [{ time: +resource.split(',').slice(-1)[0], ...cache.get(resource) }] } }));
+  cache.reduce((scope, entry) => {
+    const resource = entry[0];
+    const value = entry[1];
+
+    return scope
+      .get(basePath + resource)
+      .query(true)
+      .reply(200, { [refresh]: { data: [{ time: +resource.split(',').slice(-1)[0], ...value }] } });
+  }, nock(hostname, { allowUnmocked: true }));
 }
 
 function getCacheName(title) {
@@ -198,6 +199,8 @@ function getCacheName(title) {
 const DATE = Constants.DATE_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;
 const INVALID_ARRAYS = Helpers.INVALID_ARRAYS;
+const INVALID_FUNCTIONS = Helpers.INVALID_FUNCTIONS;
+const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const INVALID_STRINGS = Helpers.INVALID_STRINGS;
 const WINDOW_START = luxon.DateTime.local(2018, 4);
