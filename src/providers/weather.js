@@ -42,12 +42,39 @@ async function initialize(provider) {
       throw new TypeError(`The "properties" option of the weather provider must only contain "string" value (see https://darksky.net/dev/docs#data-block for a list of available properties). Received ${JSON.stringify(JSON.stringify(properties))}.`);
   } else options.properties = ['temperatureLow', 'temperatureHigh'];
 
+  const cache = options.cache;
+
+  if (cache !== undefined) {
+    if (cache === null || typeof cache !== 'object')
+      throw new TypeError(`The "cache" option of the weather provider must be an "object". Received "${cache === null ? 'null' : typeof cache}".`);
+
+    const size = cache.size;
+
+    if (size !== undefined && typeof size !== 'number')
+      throw new TypeError(`The "size" property from the "cache" option of the weather provider must be a "number". Received "${typeof size}".`);
+
+    const load = cache.load;
+
+    if (load !== undefined && typeof load !== 'function')
+      throw new TypeError(`The "load" property from the "cache" option of the weather provider must be a "function". Received "${typeof load}".`);
+
+    const save = cache.save;
+
+    if (save !== undefined && typeof save !== 'function')
+      throw new TypeError(`The "save" property from the "cache" option of the weather provider must be a "function". Received "${typeof save}".`);
+
+    try {
+      context.cache = { load, save, values: createCache(size, load && await load()) };
+    } catch (error) {
+      throw new RangeError(`The "cache" option of the weather provider must be valid. Reason: ${error}.`);
+    }
+  } else context.cache = { values: createCache() };
+
   const exclude = POSSIBLE_REFRESH_VALUES
     .filter((value) => value !== options.refresh)
     .concat(['currently', 'minutely', 'flags', 'alerts'])
     .join(',');
 
-  context.cache = new lru({ maxSize: 10000 });
   context.baseUrl = `https://api.darksky.net/forecast/${token}/`;
   context.queryOptions = `?lang=en&units=si&exclude=${exclude}&extend=hourly`;
   context.enumProperties = ['icon', 'precipType'];
@@ -60,7 +87,7 @@ async function extendConfiguration() {
 async function extendRecord(endpoint, record) {
   const metadata = endpoint.metadata;
   const context = this.context;
-  const cache = context.cache;
+  const cache = context.cache.values;
   const position = `${metadata.latitude},${metadata.longitude}`;
   const resource = `${position},${record[DATE]}`;
 
@@ -98,13 +125,21 @@ async function extendRecord(endpoint, record) {
 }
 
 async function close() {
+  const cache = this.context.cache;
+
+  if (cache.save) await cache.save(cache.values);
+
   // Clear the cache
-  this.context.cache.clear();
+  cache.values.clear();
 }
 
 
 async function formatResponse(response) {
   return response.json();
+}
+
+function createCache(size = 10000, values = []) {
+  return values.reduce((cache, entry) => cache.set(...entry), new lru({ maxSize: size }));
 }
 
 function generateConfiguration(extension, property) {
