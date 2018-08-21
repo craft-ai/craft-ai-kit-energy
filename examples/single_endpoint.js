@@ -53,18 +53,7 @@ EnergyKit.initialize({
         latitude: 48.458570, // From https://www.latlong.net
         longitude: 2.156942
       }
-    })
-      .then((endpoint) => {
-        endpoint.destroy();
-        return kit.loadEndpoint({
-          id: 'single_endpoint_global',
-          metadata: {
-            region: '91',
-            latitude: 48.458570, // From https://www.latlong.net
-            longitude: 2.156942
-          }
-        });
-      })
+    }, true)
       .then((endpoint) => {
         log('Updating the endpoint with ~6 months of data...');
         return endpoint.update(DATASET_PATH, {
