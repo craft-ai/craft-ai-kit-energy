@@ -9,8 +9,8 @@
 2. At the root of your local clone, create a file named `.env` with the following content
 
   ```
-  CRAFT_TOKEN=<retrieved_token>
-  DARK_SKY_SECRET_KEY=<DarkSky-secret-key>
+  CRAFT_AI_TOKEN=<retrieved_token>
+  DARK_SKY_TOKEN=<Dark-Sky-API-secret-key>
   ```
 
 3. Install the dependencies.

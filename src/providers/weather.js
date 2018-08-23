@@ -93,7 +93,7 @@ async function extendRecord(endpoint, record) {
 
   if (cache.has(resource)) return cache.get(resource);
 
-  this.log('Weather not in cache, querying DarkSkyAPI...');
+  this.log('querying the resource "%s" on Dark Sky API', resource);
 
   const query = context.baseUrl + resource + context.queryOptions;
 
@@ -122,7 +122,9 @@ async function extendRecord(endpoint, record) {
         return result;
       });
 
-      cache.set(resource, results[0]); // Also caching the exact requested timestamp
+      // Also caching the exact requested timestamp
+      cache.set(resource, results[0]);
+
       return results[0];
     });
 }

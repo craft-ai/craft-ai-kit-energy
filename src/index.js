@@ -61,7 +61,7 @@ async function initialize(configuration = {}) {
 }
 
 
-function createClient(token, bulkSize = undefined) {
+function createClient(token, bulkSize) {
   try {
     return craftai.createClient({
       token,

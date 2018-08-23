@@ -18,7 +18,7 @@ const interpreter = EnergyKit.craftai.interpreter;
 
 log('Initializing the energy kit...');
 EnergyKit.initialize({
-  token: process.env.CRAFT_TOKEN,
+  token: process.env.CRAFT_AI_TOKEN || process.env.CRAFT_TOKEN,
   providers: [
     {
       provider: PublicHolidayProvider,
@@ -107,14 +107,14 @@ EnergyKit.initialize({
           });
       })
       .then(() => kit.close())
-      .catch((err) => {
+      .catch((error) => {
         kit.close();
-        throw err;
+        throw error;
       });
   })
   .then(() => {
     log('Success');
   })
-  .catch((err) => {
-    log('Error!', err);
+  .catch((error) => {
+    log('Error!', error);
   });

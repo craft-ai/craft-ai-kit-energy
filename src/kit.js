@@ -8,7 +8,7 @@ const Endpoint = require('./endpoint');
 const Provider = require('./provider');
 
 
-async function loadEndpoint(definition, forceRecreation = false) {
+async function loadEndpoint(definition, resetAgent = false) {
   if (definition === null || typeof definition !== 'object')
     throw new TypeError(`The endpoint's definition must be an "object". Received "${definition === null ? 'null' : typeof definition}".`);
 
@@ -30,7 +30,7 @@ async function loadEndpoint(definition, forceRecreation = false) {
   const agentId = definition.agentId || (namespace ? uuid(id, namespace) : id);
 
   return generateAgentConfiguration(log, this.configuration.providers, definition.learning)
-    .then((agentConfiguration) => retrieveAgent(log, this.client, agentId, agentConfiguration, forceRecreation))
+    .then((agentConfiguration) => retrieveAgent(log, this.client, agentId, agentConfiguration, resetAgent))
     .then((agent) => {
       const context = agent.configuration.context;
       const contextKeys = Object.keys(context);
@@ -100,13 +100,19 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
     }));
 }
 
-async function retrieveAgent(log, client, agentId, agentConfiguration, forceRecreation) {
+async function retrieveAgent(log, client, agentId, agentConfiguration, resetAgent) {
+  if (resetAgent) {
+    /* istanbul ignore if */
+    if (process.env.NODE_ENV === 'production')
+      console.warn('WARNING: The endpoint\'s agent is being forced to be resetted.');
 
-  if (forceRecreation) {
-    return client.deleteAgent(agentId)
+    return client
+      .deleteAgent(agentId)
       .then(() => createAgent(log, client, agentId, agentConfiguration));
   }
+
   log('retrieving the agent "%s"', agentId);
+
   return client
     .getAgent(agentId)
     // TODO: Check the configuration of the retrieved agent
