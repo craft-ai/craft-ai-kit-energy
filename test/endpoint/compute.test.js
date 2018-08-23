@@ -169,7 +169,7 @@ test('computes anomalies', (t) => {
 
   return t.notThrows(Promise
     .all([
-      [TEST_RECORDS],
+      [TEST_RECORDS, { minConfidence: undefined, minAbsoluteDifference: undefined, minSigmaDifference: undefined }],
       [Helpers.streamify(TEST_RECORDS)],
       [path.join(__dirname, '../helpers/data/records.csv'), { import: { from: INDEX } }],
     ].map((parameters) => endpoint.computeAnomalies(...parameters)))

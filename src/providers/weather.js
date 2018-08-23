@@ -93,6 +93,8 @@ async function extendRecord(endpoint, record) {
 
   if (cache.has(resource)) return cache.get(resource);
 
+  this.log('querying the resource "%s" on Dark Sky API', resource);
+
   const query = context.baseUrl + resource + context.queryOptions;
 
   return retry(() => fetch(query).then(Utils.checkResponse), RETRY_OPTIONS)
@@ -120,17 +122,22 @@ async function extendRecord(endpoint, record) {
         return result;
       });
 
+      // Also caching the exact requested timestamp
+      cache.set(resource, results[0]);
+
       return results[0];
     });
 }
 
 async function close() {
   const cache = this.context.cache;
+  const values = cache.values;
 
-  if (cache.save) await cache.save(cache.values);
+  if (cache.save)
+    await cache.save(Array.from(values.keys()).map((key) => [key, values.get(key)]));
 
   // Clear the cache
-  cache.values.clear();
+  values.clear();
 }
 
 

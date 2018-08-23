@@ -68,6 +68,28 @@ test('loads an endpoint', async(t) => {
   t.snapshot(endpointA);
 });
 
+test('loads an endpoint by forcing the recreation of the agent', async(t) => {
+  const context = t.context;
+  const kit = context.kit;
+  const client = kit.client;
+  const id = context.endpoint.register();
+
+  // Load a first endpoint
+  await kit.loadEndpoint({ id });
+
+  const existingAgent = await client.getAgent(id);
+
+  // Forces the load of a second endpoint with the same identifier
+  await kit.loadEndpoint({ id }, true);
+
+  const recreatedAgent = await client.getAgent(id);
+
+  // The agent should be recreated
+  t.true(existingAgent.creationDate < recreatedAgent.creationDate);
+  t.is(existingAgent.id, recreatedAgent.id);
+  t.deepEqual(existingAgent.configuration, recreatedAgent.configuration);
+});
+
 test('derives the agent\'s identifier when a secret is specified', async(t) => {
   await Helpers.createEndpointContext(t, { secret: 'a very strong secret' });
 

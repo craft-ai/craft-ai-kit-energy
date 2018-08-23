@@ -10,19 +10,27 @@ const Utils = require('../utils');
 async function computeAnomalies(records, options, model) {
   this.debug('computing anomalies');
 
-  if (options === null || options === undefined) options = {};
-  else if (typeof options !== 'object')
-    throw TypeError(`The "options" argument must be an "object". Received "${typeof options}".`);
-  if (options.minConfidence !== undefined && typeof options.minConfidence !== 'number')
-    throw TypeError(`The "minConfidence" option must be a "number". Received "${typeof options.minConfidence}".`);
-  if (options.minAbsoluteDifference !== undefined && typeof options.minAbsoluteDifference !== 'number')
-    throw TypeError(`The "minAbsoluteDifference" option must be a "number". Received "${typeof options.minAbsoluteDifference}".`);
-  if (options.minSigmaDifference !== undefined && typeof options.minSigmaDifference !== 'number')
-    throw TypeError(`The "minSigmaDifference" option must be a "number". Received "${typeof options.minSigmaDifference}".`);
+  if (options === null || options === undefined) options = COMPUTE_ANOMALIES_DEFAULTS;
+  else {
+    if (typeof options !== 'object')
+      throw TypeError(`The "options" argument must be an "object". Received "${typeof options}".`);
+    if (options.minConfidence !== undefined && typeof options.minConfidence !== 'number')
+      throw TypeError(`The "minConfidence" option must be a "number". Received "${typeof options.minConfidence}".`);
+    if (options.minAbsoluteDifference !== undefined && typeof options.minAbsoluteDifference !== 'number')
+      throw TypeError(`The "minAbsoluteDifference" option must be a "number". Received "${typeof options.minAbsoluteDifference}".`);
+    if (options.minSigmaDifference !== undefined && typeof options.minSigmaDifference !== 'number')
+      throw TypeError(`The "minSigmaDifference" option must be a "number". Received "${typeof options.minSigmaDifference}".`);
+  }
 
-  const minConfidence = options.minConfidence === undefined ? .4 : options.minConfidence;
-  const minAbsoluteDifference = options.minAbsoluteDifference === undefined ? 0 : options.minAbsoluteDifference;
-  const minSigmaDifference = options.minSigmaDifference === undefined ? 2 : options.minSigmaDifference;
+  const minConfidence = options.minConfidence === undefined
+    ? COMPUTE_ANOMALIES_DEFAULTS.minConfidence
+    : options.minConfidence;
+  const minAbsoluteDifference = options.minAbsoluteDifference === undefined
+    ? COMPUTE_ANOMALIES_DEFAULTS.minAbsoluteDifference
+    : options.minAbsoluteDifference;
+  const minSigmaDifference = options.minSigmaDifference === undefined
+    ? COMPUTE_ANOMALIES_DEFAULTS.minSigmaDifference
+    : options.minSigmaDifference;
 
   return retrieveRecords(this, records, options.import).then((records) => {
     if (model === undefined && records.length) model = records[0][DATE];
@@ -59,8 +67,8 @@ async function computePredictions(states, options, model) {
 async function computeReport(records, options, model) {
   this.debug('computing a report');
 
-  if (options === null || options === undefined) options = { minSigmaDifference: 0 };
-  else if (typeof options === 'object') options = Object.assign({ minSigmaDifference: 0 }, options);
+  if (options === null || options === undefined) options = COMPUTE_REPORT_DEFAULTS;
+  else if (typeof options === 'object') options = { ...COMPUTE_REPORT_DEFAULTS, ...options };
 
   return this
     .computeAnomalies(records, options, model)
@@ -161,6 +169,14 @@ const LOAD = Constants.LOAD_FEATURE;
 const ORIGINAL_CONTEXT = Constants.ORIGINAL_CONTEXT;
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const TIMESTAMP = Constants.TIMESTAMP_FEATURE;
+const COMPUTE_ANOMALIES_DEFAULTS = {
+  minConfidence: .4,
+  minAbsoluteDifference: 0,
+  minSigmaDifference: 2,
+};
+const COMPUTE_REPORT_DEFAULTS = {
+  minSigmaDifference: 0,
+};
 
 const interpreter = craftai.interpreter;
 

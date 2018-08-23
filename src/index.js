@@ -61,7 +61,7 @@ async function initialize(configuration = {}) {
 }
 
 
-function createClient(token, bulkSize = DEFAULT_RECORD_BULK_SIZE) {
+function createClient(token, bulkSize) {
   try {
     return craftai.createClient({
       token,
@@ -75,11 +75,11 @@ function createClient(token, bulkSize = DEFAULT_RECORD_BULK_SIZE) {
 
 
 const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
-const DEFAULT_RECORD_BULK_SIZE = Constants.DEFAULT_RECORD_BULK_SIZE;
 const ROOT_NAMESPACE = uuid.DNS;
 
 
 module.exports = {
+  craftai,
   initialize,
   import: {
     csv: CsvParser.stream,
