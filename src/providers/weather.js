@@ -129,15 +129,13 @@ async function extendRecord(endpoint, record) {
 
 async function close() {
   const cache = this.context.cache;
+  const values = cache.values;
 
-  if (cache.save) {
-    const values = cache.values;
-    const serializedValues = Array.from(values.keys()).map((key) => [key, values.get(key)]);
-    await cache.save(serializedValues);
-  }
+  if (cache.save)
+    await cache.save(Array.from(values.keys()).map((key) => [key, values.get(key)]));
 
   // Clear the cache
-  cache.values.clear();
+  values.clear();
 }
 
 

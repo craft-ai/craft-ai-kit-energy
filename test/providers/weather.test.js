@@ -151,13 +151,10 @@ test('closes the provider', (t) => {
 });
 
 
-async function saveCache(title, cache) {
-  const keys = [...cache.keys()];
-
-  if (!keys.length) return;
+async function saveCache(title, entries) {
+  if (!entries.length) return;
 
   const filepath = path.join(CACHE_DIRECTORY, `${getCacheName(title)}.json`);
-  const entries = keys.map((key) => [key, cache.get(key)]);
 
   fs.writeFileSync(filepath, JSON.stringify(entries));
 }
