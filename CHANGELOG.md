@@ -21,6 +21,7 @@ The signature of the method `endpoint.computePredictions()` has been changed to 
 - Supporting additional embedded context properties.
 - Handle records with consumption as energy and accumulated energy.
 - Exposing options to load and save the internal cache of the `WeatherProvider`.
+- Introducing an **examples** directory containing, for now, one simple example showcasing the kit using [UCI's Individual Household Electric Power Consumption Data Set](https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption).
 
 ### Changed ###
 

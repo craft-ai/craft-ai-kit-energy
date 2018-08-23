@@ -46,14 +46,17 @@ EnergyKit.initialize({
   ]
 })
   .then((kit) => {
-    return kit.loadEndpoint({
-      id: 'single_endpoint_global',
-      metadata: {
-        region: '91',
-        latitude: 48.458570, // From https://www.latlong.net
-        longitude: 2.156942
-      }
-    }, true)
+    return kit.loadEndpoint(
+      {
+        id: 'single_endpoint_global',
+        metadata: {
+          region: '91',
+          latitude: 48.458570,  // We consider a location in Essonne (France), near the dataset authors' workplace
+          longitude: 2.156942   // Latitude and longitude retrieved from https://www.latlong.net
+        }
+      },
+      true // For the purpose of this test we force the recreation of the endpoint's agent.
+    )
       .then((endpoint) => {
         log('Updating the endpoint with ~6 months of data...');
         return endpoint.update(DATASET_PATH, {

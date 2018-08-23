@@ -158,15 +158,23 @@ The kit uses the following environment variables for secrets and global configur
 
 ## Examples ##
 
-:construction:
-
 ### Data preparation ###
 
-The script in <`examples/download_and_prepare.js`> downloads and prepares the [UCI
-Individual Household Electric Power Consumption Data Set](https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption) to < `examples/data/uci_household_power_consumption.csv`> in order to use it in other examples.
+The script in <./examples/download_and_prepare.js> downloads and prepares the [UCI
+Individual Household Electric Power Consumption Data Set](https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption) to <./examples/data/uci_household_power_consumption.csv> in order to use it in other examples.
 
 ```console
 $ npm run examples:download_and_prepare
+```
+
+> This step is optional as the transformed dataset is included in this repository.
+
+### Single endpoint example ###
+
+The script is <./examples/single_endpoint.js> showcases most of the features of the kit using the aformentioned dataset. It builds an endpoint from the dataset, enrich its data with weather and holidays and uses the kit to compute anomalies, report and predictions.
+
+```console
+$ npm run examples:single_endpoint
 ```
 
 ## Attribution ##
