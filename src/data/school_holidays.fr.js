@@ -4,7 +4,7 @@ const memoize = require('mem');
 const retry = require('p-retry');
 const xml = require('fast-xml-parser');
 
-const Utils = require('../src/utils');
+const Utils = require('../utils');
 
 
 function close() {

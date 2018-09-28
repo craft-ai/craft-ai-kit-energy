@@ -15,7 +15,7 @@ async function initialize(provider) {
   const context = provider.context;
 
   try {
-    const holidays = require(`../../data/public_holiday.${country}.js`);
+    const holidays = require(`../data/public_holiday.${country}`);
     // Add an empty element to make array indexes match month
     const fixed = [null].concat(holidays.fixed.map(indexArray));
     const easterOffseted = indexArray(holidays.easterOffseted);

@@ -11,7 +11,7 @@ async function initialize(provider) {
   const context = provider.context;
 
   try {
-    context.holidays = require(`../../data/school_holidays.${country}.js`);
+    context.holidays = require(`../data/school_holidays.${country}`);
   } catch (error)/* istanbul ignore next */ {
     if (error.code === 'MODULE_NOT_FOUND')
       throw new RangeError(`The "country" option of the school holidays provider must be valid. Received "${country}".`);
