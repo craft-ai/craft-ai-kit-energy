@@ -62,8 +62,7 @@
     "unzipper": "latest"
   },
   "files": [
-    "lib",
-    "data"
+    "lib"
   ],
   "ava": {
     "babel": false,
