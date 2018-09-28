@@ -80,6 +80,16 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
 
   if (properties !== undefined && (properties === null || typeof properties !== 'object'))
     throw new TypeError(`The "properties" property of the endpoint's learning definition must be an "object". Received "${properties === null ? 'null' : typeof properties}".`);
+  
+  const tree_max_depth = learning.tree_max_depth;
+
+  if (tree_max_depth !== undefined && (tree_max_depth === null || typeof tree_max_depth !== 'number'))
+    throw new TypeError(`The "tree_max_depth" property of the endpoint's learning definition must be a number. Received "${tree_max_depth === null ? 'null' : typeof tree_max_depth}".`);
+  
+  const time_quantum = learning.time_quantum;
+
+  if (time_quantum !== undefined && (time_quantum === null || typeof time_quantum !== 'number'))
+    throw new TypeError(`The "time_quantum" property of the endpoint's learning definition must be a number. Received "${time_quantum === null ? 'null' : typeof time_quantum}".`);
 
   return Provider
     .extendConfiguration(providers, {
@@ -94,7 +104,7 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
       context,
       output: ['load'],
       operations_as_events: true,
-      tree_max_depth: 6,
+      tree_max_depth: tree_max_depth || 6,
       tree_max_operations: maxRecords || 50000,
       learning_period: maxRecordAge || 365 * 24 * 60 * 60
     }));

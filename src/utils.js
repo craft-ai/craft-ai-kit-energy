@@ -47,7 +47,8 @@ function parseDate(value) {
   if (value === null || value === undefined || typeof value === 'boolean') return;
 
   return typeof value === 'string'
-    ? DateTime.fromISO(value)
+    // ? DateTime.fromISO(value)
+    ? DateTime.fromMillis(value)
     : value instanceof Date
       ? DateTime.fromJSDate(value)
       : typeof value === 'number' ? DateTime.fromMillis(value) : value;
