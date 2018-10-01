@@ -21,8 +21,8 @@ const args = require('minimist')(process.argv.slice(2));
 // Add holidays provider ...
 
 
-// const TRAIN_DATASET_PATH = path.join(__dirname, "./data/ampds_power.csv");
-const DATA_PATH = path.join(__dirname, "./data/ampds_power_30T.csv")
+const TRAIN_DATASET_PATH = path.join(__dirname, "./data/ampds_power_30T.csv");
+const PREDICTIONS_STATES_PATH = path.join(__dirname, "./data/ampds_power_30T_states.csv");
 const WEATHER_CACHE_PATH = path.join(__dirname, './provider/weather_cache_ampds.json');
 //file to save predictions 
 const PREDICTIONS_SAVE_FILE_PATH = path.join(__dirname, 'ampds_predictions_temp.json');
