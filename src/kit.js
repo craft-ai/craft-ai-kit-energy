@@ -104,9 +104,10 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
       context,
       output: ['load'],
       operations_as_events: true,
-      tree_max_depth: tree_max_depth || 6,
+      tree_max_depth: tree_max_depth || 4,
       tree_max_operations: maxRecords || 50000,
-      learning_period: maxRecordAge || 365 * 24 * 60 * 60
+      learning_period: maxRecordAge || 365 * 24 * 60 * 60,
+      time_quantum: time_quantum || 10*60
     }));
 }
 
