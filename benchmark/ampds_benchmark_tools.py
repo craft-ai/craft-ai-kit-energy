@@ -13,8 +13,14 @@ from fbprophet import Prophet
 import imp
 import subprocess
 
+#configurating seaborn
+palette = sns.color_palette("Set2", 10, 0.9)
+sns.set_palette(palette)
+sns.set_style("dark")
 
 def split_data(data, last_train_index, last_test_index):
+    data_train= data.iloc[:last_train_index,:]
+    data_test = data.iloc[last_train_index:last_test_index,:]
     return data_train, data_test
 
 def compute_mae(gv, preds):
@@ -39,7 +45,7 @@ def compute_r2(gv, preds):
     '''
     input : 2 arrays with the same dims, output : r2 error
     '''  
-    return 1 - np.nansum(np.square(preds- gv))/np.nansum(np.square(np.mean(gv- gv)))
+    return 1 - np.nansum(np.square(preds- gv))/np.nansum(np.square(np.mean(gv)- gv))
 
 def compute_metric(gv, preds):
     if metric=='mape':
@@ -59,7 +65,7 @@ def get_features_from_index(df):
     return new_df
 
 def get_craft_preds(start_train =1, stop_train=2, start_pred=2, stop_pred=3, node_file = "load_benchmark_ampds"):
-    command = ['node', node_file, '--start_train', start_train, '--stop_train', stop_train, '--start_pred', start_pred, '--stop_pred', stop_pred]
+    command = ['node', node_file, '--start_train', str(start_train), '--stop_train', str(stop_train), '--start_pred', str(start_pred), '--stop_pred', str(stop_pred)]
     craft_preds = pd.read_json(subprocess.check_output(command), convert_dates=['date']).set_index('date')
     return craft_preds[['predictedLoad', 'standardDeviation']]
 
@@ -69,25 +75,25 @@ def get_scikit_preds(data_train, data_test):
     skTree = DecisionTreeRegressor(criterion = 'mse', max_depth=3, random_state=0)
     skTree.fit(sk_train[['hour', 'day', 'month', 'year', 'temp']], sk_train['load'])
     sk_results = skTree.predict(sk_test[['hour', 'day', 'month', 'year', 'temp']])
-    return scikit_preds
+    return sk_results
 
 def get_forest_preds(data_train, data_test):
     sk_train = get_features_from_index(data_train)
     sk_test = get_features_from_index(data_test)
-    skForest = RandomForestRegressor(n_estimators=i, criterion = 'mse', max_depth=j, random_state=0, bootstrap=True)
+    skForest = RandomForestRegressor(n_estimators=9, criterion = 'mse', max_depth=6, random_state=0, bootstrap=True)
     skForest.fit(sk_train[['hour', 'day', 'month', 'year', 'temp']], sk_train['load'])
     results = skForest.predict(sk_test[['hour', 'day', 'month', 'year', 'temp']])
-    return forest_preds
+    return results
 
-def get_prophet_preds(data_train, data_train):
-    prophet_train = prophet_train.reset_index().rename(columns={'date':'ds', 'load': 'y'})
+def get_prophet_preds(data_train, data_test):
+    prophet_train = data_train.reset_index().rename(columns={'date':'ds', 'load': 'y'})
     pm = Prophet()
     pm.add_regressor('temp')
     pm.fit(prophet_train)
     future = data_test.drop('load',1).reset_index().rename(columns={'date':'ds'})
     forecast = pm.predict(future)
 
-    return forecast[['yhat']]
+    return forecast['yhat'].values
 
 
 
@@ -102,7 +108,7 @@ def get_sarima_preds(data_train,data_test,week_unit, max_feed=3000):
                             enforce_stationarity=False, 
                             enforce_invertibility=False)
     sarima_results = model.fit()
-    sarima_pred = arima_results.get_prediction(data_test.index[0], data_test.index[-1], dynamic=False, exog = data_test['temp'])
+    sarima_pred = sarima_results.get_prediction(data_test.index[0], data_test.index[-1], dynamic=False, exog = data_test[['temp']])
 
     return sarima_pred.predicted_mean
 
@@ -127,7 +133,7 @@ def get_models_scores(data_test, predictions, idx):
         r2.append(compute_r2(gv,pred))
     
     scores = pd.DataFrame(data={
-        'ids': ids,
+        'ids': idx,
         'mae': maes,
         'mape': mapes,
         'rmse': rmse,
@@ -135,7 +141,7 @@ def get_models_scores(data_test, predictions, idx):
     })
     return scores 
 
-def plot_period_predictions(data_test, craft_preds, sk_preds, forest_preds, pm_preds, sarima_preds, standardDev = False, low_val=None,upper_val=None):
+def plot_period_predictions(data_test, craft_preds=None, sk_preds=None, forest_preds=None, pm_preds=None, sarima_preds=None, standardDev = False, low_val=None,upper_val=None):
     df_compare = data_test.copy(deep=True).drop('temp',1)
     
     try: 
@@ -153,11 +159,12 @@ def plot_period_predictions(data_test, craft_preds, sk_preds, forest_preds, pm_p
     try: 
         if sarima_preds.any(): df_compare['sarima'] = sarima_preds
     except: pass
-
+    
+    fig = plt.figure(figsize=(20,5))
     sns.lineplot(data=df_compare, dashes=False)
     
     if standardDev == True:
         try: 
             if (low_val.any() and  upper_val.any()):
-                plt.fill_between(x=df_compare.index, y1 = low_val, y2 =upper_val)
+                plt.fill_between(x=df_compare.index, y1 = low_val, y2 =upper_val, alpha=0.2, color=palette[1])
         except: pass

@@ -47,6 +47,7 @@ EnergyKit
                 //     JSON.stringify(cache, null, '  ')
                 //  );
                 // }
+                size:35040
             }
         }
     }
@@ -56,23 +57,19 @@ EnergyKit
 .then((kit) => {
     return kit.loadEndpoint(
     {
-        id: 'ampds_power_temp',
+        id: 'ampds_power_bench_test',
         metadata: {
-        // region: 'Delhi',
-        // latitude: 28.544494,  // Location of Indraprastha Institute of Information Technology, Delhi
-        // longitude: 77.2642364   // Latitude and longitude retrieved from https://www.latlong.net
         region: 'British Columbia',
-        latitude: 49.249444,  // We consider a location in Essonne (France), near the dataset authors' workplace
+        latitude: 49.249444,  // We consider a location in British Columbia (Canada), near the dataset authors' workplace
         longitude: -122.979722
       },
         time_quantum:30*60
     },
     false // True or False = recreation of the endpoint's agent.
     )
-    // utils.js dateparser a été modifié pour insérer zone: Asia/Kolkata, à changer si besoin & adapter à timestamp ou ISO Date
     .then((endpoint) => {
         log('Updating the endpoint with 2 years of train data ... ');
-        return endpoint.update(DATA_PATH, {
+        return endpoint.update(TRAIN_DATASET_PATH, {
           import: {
             from: args['start_train'] || 1,
             to: args['stop_train'] || 72,
@@ -83,7 +80,7 @@ EnergyKit
     .then((endpoint) => {
         log('Computing predictions ... ');
         return endpoint
-        .computePredictions(DATA_PATH, {
+        .computePredictions(PREDICTIONS_STATES_PATH, {
           import: {
             from: args['start_pred'] || 72,
             to: parseInt(args['stop_pred'] || 85),
@@ -91,17 +88,6 @@ EnergyKit
           }
         })
         .then((predictions)=>{
-            // console.log(JSON.stringify(predictions))
-            // console.log(Object.entries(predictions))
-
-            // // to print predictions
-            // predictions.forEach(function(item,index,array){
-            //     console.log('........')
-            //     for (let property in item){
-            //         console.log(property, ':', item[property])
-            //     }
-            // })
-
             let data = JSON.stringify(predictions);  
             // fs.writeFileSync(PREDICTIONS_SAVE_FILE_PATH, data); 
             console.log(data)
@@ -112,4 +98,5 @@ EnergyKit
       kit.close();
       throw error;
     })
+    .then(()=>process.exit());
   })

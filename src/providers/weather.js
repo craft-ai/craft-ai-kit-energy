@@ -94,6 +94,7 @@ async function extendRecord(endpoint, record) {
   if (cache.has(resource)) return cache.get(resource);
 
   this.log('querying the resource "%s" on Dark Sky API', resource);
+  console.log('querying the resource "%s" on Dark Sky API', resource);
 
   const query = context.baseUrl + resource + context.queryOptions;
 
