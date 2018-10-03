@@ -89,7 +89,9 @@ async function extendRecord(endpoint, record) {
   const context = this.context;
   const cache = context.cache.values;
   const position = `${metadata.latitude},${metadata.longitude}`;
-  const resource = `${position},${record[DATE]}`;
+  const resource = `${position},${this.refresh.period.hours
+    ? record[PARSED_RECORD][DATE].set({ minutes: 0, seconds: 0, milliseconds: 0 }).toMillis() / 1000
+    : record[DATE]}`;
 
   if (cache.has(resource)) return cache.get(resource);
 
@@ -158,6 +160,7 @@ function generateConfiguration(extension, property) {
 
 
 const DATE = Constants.DATE_FEATURE;
+const PARSED_RECORD = Constants.PARSED_RECORD;
 const RETRY_OPTIONS = { retries: 5, minTimeout: 100 };
 const POSSIBLE_REFRESH_VALUES = ['hourly', 'daily'];
 const ENUM_PROPERTIES = ['icon', 'precipType'];

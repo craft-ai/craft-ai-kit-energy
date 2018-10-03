@@ -47,7 +47,7 @@ def compute_r2(gv, preds):
     '''  
     return 1 - np.nansum(np.square(preds- gv))/np.nansum(np.square(np.mean(gv)- gv))
 
-def compute_metric(gv, preds):
+def compute_metric(gv, preds, metric):
     if metric=='mape':
         return compute_mape(gv, preds)
     if metric == 'rmse':
@@ -141,24 +141,17 @@ def get_models_scores(data_test, predictions, idx):
     })
     return scores 
 
-def plot_period_predictions(data_test, craft_preds=None, sk_preds=None, forest_preds=None, pm_preds=None, sarima_preds=None, standardDev = False, low_val=None,upper_val=None):
-    df_compare = data_test.copy(deep=True).drop('temp',1)
-    
-    try: 
-        if craft_preds.any(): df_compare['craft ai'] = craft_preds
-    except: pass
-    try: 
-        if sk_preds.any(): df_compare['scikit tree'] = sk_preds
-    except: pass
-    try: 
-        if forest_preds.any() : df_compare['scikit forest'] = forest_preds
-    except: pass
-    try: 
-        if pm_preds.any(): df_compare['prophet'] = pm_preds
-    except: pass
-    try: 
-        if sarima_preds.any(): df_compare['sarima'] = sarima_preds
-    except: pass
+def plot_period_predictions(data_test,  predictions, standardDev = False, low_val=None,upper_val=None):
+    """
+    data_test : DataFrame with the test data
+    predictions : dictionary with the names of the predictions as keys, and the predictions as values
+    """
+    df_compare = data_test.copy(deep=True)
+    assert type(predictions) == dict
+    for name, preds in predictions.items():
+        try: 
+            if preds.any(): df_compare[name] = preds
+        except: pass
     
     fig = plt.figure(figsize=(20,5))
     sns.lineplot(data=df_compare, dashes=False)

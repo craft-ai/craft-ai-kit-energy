@@ -48,7 +48,7 @@ function parseDate(value) {
 
   return typeof value === 'string'
     // ? DateTime.fromISO(value)
-    ? DateTime.fromMillis(parseInt(value)*1000)
+    ? DateTime.fromMillis(parseInt(value)*1000).setZone('America/Chicago')
     : value instanceof Date
       ? DateTime.fromJSDate(value)
       : typeof value === 'number' ? DateTime.fromMillis(value) : value;

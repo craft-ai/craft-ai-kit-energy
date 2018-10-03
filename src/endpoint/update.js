@@ -26,7 +26,7 @@ async function update(records, options) {
 
   return stream
     // Extend the record with providers
-    .thru(Provider.extendRecords.bind(null, this))
+    .thru(Provider.extendRecords.bind(null, this)) //.tap(val =>console.log(val)) 
     .thru(end === undefined
       ? Common.mergeUntilFirstFullRecord.bind(null, features)
       : ignoreOldRecords.bind(null, end))
