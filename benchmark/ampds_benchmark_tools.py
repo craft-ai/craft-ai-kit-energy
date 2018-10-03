@@ -149,15 +149,21 @@ def plot_period_predictions(data_test,  predictions, standardDev = False, low_va
     df_compare = data_test.copy(deep=True)
     assert type(predictions) == dict
     for name, preds in predictions.items():
-        try: 
-            if preds.any(): df_compare[name] = preds
-        except: pass
-    
+            try: 
+                if preds.predictedLoad.any():
+                    df_compare[name] = preds.predictedLoad 
+                    continue
+        
+            except : pass
+            if preds.any():
+                df_compare[name] = preds
+
     fig = plt.figure(figsize=(20,5))
     sns.lineplot(data=df_compare, dashes=False)
-    
     if standardDev == True:
         try: 
             if (low_val.any() and  upper_val.any()):
                 plt.fill_between(x=df_compare.index, y1 = low_val, y2 =upper_val, alpha=0.2, color=palette[1])
         except: pass
+    
+    plt.show()

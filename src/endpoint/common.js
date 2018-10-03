@@ -95,7 +95,6 @@ function toRecord(value) {
   if (date) {
     const parsed = {};
     const timezone = Utils.formatTimezone(date.offset);
-
     record[DATE] = Math.floor(date.valueOf() / 1000);
     record[TIMEZONE] = timezone;
     record[LOAD] = Utils.parseNumber(record[LOAD]);

@@ -17,7 +17,7 @@ function formatTimezone(offset) {
   const offsetValue = Math.abs(offset);
   const hours = Math.floor(offsetValue / 60);
 
-  return (Math.sign(offset) ? '+' : '-')
+  return (Math.sign(offset)>=0? '+' : '-')
     + [hours, offsetValue - hours * 60].map((value) => String(value).padStart(2, 0)).join(':');
 }
 
@@ -45,10 +45,9 @@ function isNotString(value) { return typeof value !== 'string'; }
 
 function parseDate(value) {
   if (value === null || value === undefined || typeof value === 'boolean') return;
-
   return typeof value === 'string'
-    // ? DateTime.fromISO(value)
-    ? DateTime.fromMillis(parseInt(value)*1000).setZone('America/Chicago')
+    ? DateTime.fromISO(value, {setZone: true})
+    // ? DateTime.fromMillis(parseInt(value)*1000).setZone('America/Chicago')
     : value instanceof Date
       ? DateTime.fromJSDate(value)
       : typeof value === 'number' ? DateTime.fromMillis(value) : value;
