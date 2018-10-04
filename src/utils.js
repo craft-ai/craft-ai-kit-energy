@@ -17,7 +17,7 @@ function formatTimezone(offset) {
   const offsetValue = Math.abs(offset);
   const hours = Math.floor(offsetValue / 60);
 
-  return (Math.sign(offset)>=0? '+' : '-')
+  return (Math.sign(offset) >= 0 ? '+' : '-')
     + [hours, offsetValue - hours * 60].map((value) => String(value).padStart(2, 0)).join(':');
 }
 
