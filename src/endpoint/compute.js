@@ -97,7 +97,8 @@ async function predict(endpoint, values, model, options, onlyRecords) {
     .loop((previous, state) => {
       const context = state.context;
       const current = Object.assign(previous, context);
-      const result = interpreter.decide(model, current, new craftai.Time(state[TIMESTAMP]));
+      const result = interpreter.decide(model, current, new craftai.Time(state[TIMESTAMP], current[TIMEZONE_FEATURE]));
+
       const output = result.output[LOAD];
 
       return {
@@ -166,6 +167,7 @@ function setActualLoad(prediction) {
 
 const DATE = Constants.DATE_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;
+const TIMEZONE_FEATURE = Constants.TIMEZONE_FEATURE;
 const ORIGINAL_CONTEXT = Constants.ORIGINAL_CONTEXT;
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const TIMESTAMP = Constants.TIMESTAMP_FEATURE;
