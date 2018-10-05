@@ -93,10 +93,17 @@ async function extendRecord(endpoint, record) {
     ? record[PARSED_RECORD][DATE].set({ minutes: 0, seconds: 0, milliseconds: 0 }).toMillis() / 1000
     : record[DATE]}`;
 
-  if (cache.has(resource)) return cache.get(resource);
+  if (cache.has(resource)) {
+    result = cache.get(resource);
+    if (result != null) {
+      return result;
+    }
+    else {
+      cache.delete(resource);
+    }
+  }
 
   this.log('querying the resource "%s" on Dark Sky API', resource);
-  console.log('querying the resource "%s" on Dark Sky API', resource);
 
   const query = context.baseUrl + resource + context.queryOptions;
 
@@ -120,12 +127,14 @@ async function extendRecord(endpoint, record) {
           return result;
         }, {});
 
+        console.log(`${position},${dataPoint.time}`, result);
         cache.set(`${position},${dataPoint.time}`, result);
 
         return result;
       });
 
       // Also caching the exact requested timestamp
+      console.log(resource, results[0]);
       cache.set(resource, results[0]);
 
       return results[0];
