@@ -25,7 +25,7 @@ async function loadEndpoint(definition, resetAgent = false) {
   if (metadata !== undefined && (metadata === null || typeof metadata !== 'object'))
     throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
 
-  const energy = parseEnergyArgument(definition.energy);
+  const energy = parseEnergyConfiguration(definition.energy);
   const namespace = this.configuration.namespace;
   const agentId = definition.agentId || (namespace ? uuid(id, namespace) : id);
 
@@ -157,7 +157,7 @@ async function createAgent(log, client, agentId, agentConfiguration) {
     });
 }
 
-function parseEnergyArgument(value) {
+function parseEnergyConfiguration(value) {
   const energy = {};
 
   if (value === undefined) return energy;
