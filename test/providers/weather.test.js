@@ -200,7 +200,7 @@ const INVALID_FUNCTIONS = Helpers.INVALID_FUNCTIONS;
 const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const INVALID_STRINGS = Helpers.INVALID_STRINGS;
-const WINDOW_START = luxon.DateTime.local(2018, 4);
+const WINDOW_START = luxon.DateTime.local(2018, 4, 1, 0, 15);
 const CACHE_DIRECTORY = path.join(__dirname, '../helpers/cache');
 const WINDOW = new Array(7 * 24)
   .fill(null)
