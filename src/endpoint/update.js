@@ -73,19 +73,20 @@ function convertAccumulatedEnergyToLoad(energy, records) {
   const origin = energy.origin;
 
   return records.loop((seed, record) => {
-    const date = record[PARSED_RECORD][DATE];
-    const interval = Utils.getInterval(origin, period, date, seed.date);
+    const previousDate = seed.date;
+    const currentDate = record[PARSED_RECORD][DATE];
 
-    if (seed.date && interval.toDuration() <= period) {
+    if (previousDate && previousDate >= currentDate) {
       const previous = seed.record;
       const hours = (record[DATE] - previous[DATE]) / 3600;
 
       if (record[LOAD] === undefined) record[LOAD] = (record[ENERGY] - previous[ENERGY]) / hours;
       else record[ENERGY] = previous[ENERGY] + record[LOAD] * hours;
     } else {
-      seed.date = Utils.roundDate(interval, period);
+      const interval = Utils.getDateWindow(currentDate, origin, period);
+      const hours = currentDate.diff(interval[0], 'hours').hours;
 
-      const hours = date.diff(seed.date, 'hours').hours;
+      seed.date = interval[1];
 
       if (record[LOAD] === undefined) record[LOAD] = record[ENERGY] / hours;
       else record[ENERGY] = record[LOAD] * hours;

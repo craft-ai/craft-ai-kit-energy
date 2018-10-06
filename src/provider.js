@@ -71,13 +71,11 @@ function extendRecords(endpoint, records) {
       const date = record[PARSED_RECORD][DATE];
 
       const values = states.map((previous, index) => {
+        if (previous && previous > date) return;
+
         const refresh = providers[index].refresh;
-        const period = refresh.period;
-        const interval = Utils.getInterval(refresh.origin, period, date, previous);
 
-        if (previous && interval.toDuration() < period) return;
-
-        states[index] = Utils.roundDate(interval, period, previous);
+        states[index] = Utils.getDateWindow(date, refresh.origin, refresh.period)[1];
 
         return record;
       });

@@ -21,10 +21,12 @@ function formatTimezone(offset) {
     + [hours, offsetValue - hours * 60].map((value) => String(value).padStart(2, 0)).join(':');
 }
 
-function getInterval(origin, period, date, previous) {
-  if (!previous) previous = date.set(origin).minus(period);
+function getDateWindow(date, origin, period) {
+  const rounded = date.set(origin);
 
-  return previous.until(date);
+  return rounded > date
+    ? [rounded.minus(period), rounded]
+    : [rounded, rounded.plus(period)];
 }
 
 function isNull(value) { return value === null; }
@@ -69,13 +71,6 @@ function parseTimestamp(value) {
   throw new Error();
 }
 
-function roundDate(interval, period, previous) {
-  const intervals = interval.splitBy(period);
-  const lastInterval = intervals[intervals.length - 1];
-
-  return previous ? lastInterval.end : lastInterval.start;
-}
-
 
 const DateTime = luxon.DateTime;
 
@@ -83,7 +78,7 @@ const DateTime = luxon.DateTime;
 module.exports = {
   checkResponse,
   formatTimezone,
-  getInterval,
+  getDateWindow,
   handleResponse,
   isNotNull,
   isNull,
@@ -92,5 +87,4 @@ module.exports = {
   parseDate,
   parseNumber,
   parseTimestamp,
-  roundDate,
 };
