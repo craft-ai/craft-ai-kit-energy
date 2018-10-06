@@ -15,7 +15,7 @@ test.afterEach.always(Helpers.destroyProviderContext);
 test('fails initializing the provider with invalid options', (t) => {
   return Promise.all(INVALID_OBJECTS
     .concat(INVALID_OBJECTS.map((option) => ({ country: option })))
-    .map((options) => t.throws(Provider.initialize({ provider: SchoolHolidaysProvider, options }, 0))));
+    .map((options) => t.throwsAsync(Provider.initialize({ provider: SchoolHolidaysProvider, options }, 0))));
 });
 
 test('initializes the provider', (t) => {
@@ -100,7 +100,7 @@ test('handles computing the record\'s extension with no school holidays informat
 });
 
 test('closes the provider', (t) => {
-  return t.notThrows(t.context.provider.close());
+  return t.notThrowsAsync(t.context.provider.close());
 });
 
 

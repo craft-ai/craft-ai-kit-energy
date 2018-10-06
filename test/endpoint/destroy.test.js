@@ -17,5 +17,5 @@ test('destroys the endpoint\'s related agent', (t) => {
     .then((endpoint) => endpoint
       .destroy()
       .then((result) => t.falsy(result))
-      .then(() => t.throws(kit.client.getAgent(endpoint.agentId))));
+      .then(() => t.throwsAsync(kit.client.getAgent(endpoint.agentId))));
 });

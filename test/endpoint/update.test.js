@@ -19,7 +19,7 @@ test('fails updating the endpoint with invalid records', (t) => {
     .then((endpoint) => Promise.all([{}]
       .concat(INVALID_OBJECTS)
       .concat(INVALID_OBJECTS.map((record) => [record]))
-      .map((records) => t.throws(endpoint.update(records)))));
+      .map((records) => t.throwsAsync(endpoint.update(records)))));
 });
 
 test('fails updating the endpoint with records not passed in chronological order', (t) => {
@@ -31,7 +31,7 @@ test('fails updating the endpoint with records not passed in chronological order
 
   return kit
     .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => t.throws(endpoint.update(records)));
+    .then((endpoint) => t.throwsAsync(endpoint.update(records)));
 });
 
 test('updates the endpoint', (t) => {
@@ -39,7 +39,7 @@ test('updates the endpoint', (t) => {
   const kit = context.kit;
   const client = kit.client;
 
-  return t.notThrows(Promise
+  return t.notThrowsAsync(Promise
     .all([
       [[[]], [RECORDS]],
       [[Helpers.streamify([])], [Helpers.streamify(RECORDS)]],
@@ -74,7 +74,7 @@ test('filters out records which precede the endpoint\'s last sent record', (t) =
   const kit = context.kit;
   const client = kit.client;
 
-  return t.notThrows(kit
+  return t.notThrowsAsync(kit
     .loadEndpoint({ id: context.endpoint.register() })
     .then((endpoint) => endpoint.update(RECORDS))
     .then((endpoint) => client
@@ -103,7 +103,7 @@ test('filters out records with invalid date formats', (t) => {
     .slice(0, dates.length)
     .map((record, index) => ({ ...record, [DATE]: dates[index] }));
 
-  return t.notThrows(kit
+  return t.notThrowsAsync(kit
     .loadEndpoint({ id: context.endpoint.register() })
     .then((endpoint) => endpoint.update(records))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
@@ -127,7 +127,7 @@ test('merges records with the same date', (t) => {
 
   records.splice(index + 1, 0, { [DATE]: RECORDS[index][DATE], [LOAD]: SEED });
 
-  return t.notThrows(kit
+  return t.notThrowsAsync(kit
     .loadEndpoint({ id: context.endpoint.register() })
     .then((endpoint) => endpoint.update(records))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
@@ -154,7 +154,7 @@ test('removes unknown keys from records', (t) => {
   // Add an unknown property to every records
   const records = RECORDS.map((record) => ({ ...record, [UNKNOWN]: true }));
 
-  return t.notThrows(kit
+  return t.notThrowsAsync(kit
     .loadEndpoint({ id: context.endpoint.register() })
     .then((endpoint) => endpoint.update(records))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
@@ -172,7 +172,7 @@ test('reduces the size of the records by dropping successive identical values', 
   const kit = context.kit;
   const client = kit.client;
 
-  return t.notThrows(kit
+  return t.notThrowsAsync(kit
     .loadEndpoint({ id: context.endpoint.register() })
     .then((endpoint) => endpoint.update(RECORDS))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
@@ -196,7 +196,7 @@ test('supports additional embedded context properties', (t) => {
 
   const records = RECORDS.map((record, index) => ({ ...record, index }));
 
-  return t.notThrows(kit
+  return t.notThrowsAsync(kit
     .loadEndpoint({
       id: context.endpoint.register(),
       learning: { properties: { index: { type: 'continuous' } } }
@@ -222,7 +222,7 @@ test('merges partial records until first full record', (t) => {
     .map((date, index) => ({ [DATE]: date - index * 3600 * 1000, [LOAD]: 0 }));
   const records = timestamps.slice(1).reverse().concat(RECORDS.map((record, index) => ({ ...record, index })));
 
-  return t.notThrows(kit
+  return t.notThrowsAsync(kit
     .loadEndpoint({
       id: context.endpoint.register(),
       learning: { properties: { index: { type: 'continuous' } } }
@@ -242,7 +242,7 @@ test('converts energy values to mean electrical loads', (t) => {
   const kit = context.kit;
   const client = kit.client;
 
-  return t.notThrows(kit
+  return t.notThrowsAsync(kit
     .loadEndpoint({
       id: context.endpoint.register(),
       energy: { period: { minutes: 30 } }
@@ -261,7 +261,7 @@ test('converts accumulated energy values to mean electrical loads', (t) => {
   const kit = context.kit;
   const client = kit.client;
 
-  return t.notThrows(kit
+  return t.notThrowsAsync(kit
     .loadEndpoint({
       id: context.endpoint.register(),
       energy: {

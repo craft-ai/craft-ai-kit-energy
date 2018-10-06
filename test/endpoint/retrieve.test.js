@@ -16,8 +16,8 @@ test('fails retrieving the records\' history of an endpoint with invalid paramat
   return kit
     .loadEndpoint({ id: context.endpoint.register() })
     .then((endpoint) => Promise.all(INVALID_DATES.map((date) => Promise.all([
-      t.throws(endpoint.retrieveRecords(date)),
-      t.throws(endpoint.retrieveRecords(undefined, date))
+      t.throwsAsync(endpoint.retrieveRecords(date)),
+      t.throwsAsync(endpoint.retrieveRecords(undefined, date))
     ]))));
 });
 
@@ -33,7 +33,7 @@ test('retrieves the records\' history of an endpoint', (t) => {
   const start = RECORDS[firstIndex][DATE];
   const end = RECORDS[secondIndex - 1][DATE];
 
-  return t.notThrows(kit
+  return t.notThrowsAsync(kit
     .loadEndpoint({ id: t.context.endpoint.register() })
     .then((endpoint) => endpoint
       .retrieveRecords()
@@ -69,14 +69,14 @@ test('fails retrieving the predictive model of an endpoint with invalid paramate
 
   return kit
     .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => Promise.all(INVALID_DATES.map((date) => t.throws(endpoint.retrievePredictiveModel(date)))));
+    .then((endpoint) => Promise.all(INVALID_DATES.map((date) => t.throwsAsync(endpoint.retrievePredictiveModel(date)))));
 });
 
 test('retrieves the predictive model of an endpoint', (t) => {
   const context = t.context;
   const kit = context.kit;
 
-  return t.notThrows(kit
+  return t.notThrowsAsync(kit
     .loadEndpoint({ id: t.context.endpoint.register() })
     .then((endpoint) => endpoint
       .update(RECORDS)

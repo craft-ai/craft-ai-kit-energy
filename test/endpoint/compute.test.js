@@ -28,7 +28,7 @@ test('fails computing predictions with invalid parameters', (t) => {
   const endpoint = context.endpoint.current;
 
   return Promise.all(INVALID_DATES
-    .map((date) => t.throws(endpoint.computePredictions([], null, date))));
+    .map((date) => t.throwsAsync(endpoint.computePredictions([], null, date))));
 });
 
 test('fails computing predictions with states not passed in chronological order', (t) => {
@@ -38,14 +38,14 @@ test('fails computing predictions with states not passed in chronological order'
   // Shuffle the states
   const states = context.shuffle(TEST_RECORDS);
 
-  return t.throws(endpoint.computePredictions(states));
+  return t.throwsAsync(endpoint.computePredictions(states));
 });
 
 test('computes predictions', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
 
-  return t.notThrows(Promise
+  return t.notThrowsAsync(Promise
     .all([
       [TEST_RECORDS.map((record) => ({ ...record, [LOAD]: undefined }))],
       [Helpers.streamify(TEST_RECORDS)],
@@ -66,7 +66,7 @@ test('computes predictions given a model', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
 
-  return t.notThrows(endpoint
+  return t.notThrowsAsync(endpoint
     .retrievePredictiveModel()
     .then((model) => Promise.all([
       endpoint.computePredictions(TEST_RECORDS),
@@ -92,7 +92,7 @@ test('filters out states with invalid date formats', (t) => {
     .slice(0, dates.length)
     .map((state, index) => ({ ...state, [DATE]: dates[index] }));
 
-  return t.notThrows(endpoint
+  return t.notThrowsAsync(endpoint
     .computePredictions(states)
     .then((predictions) => {
       t.true(Array.isArray(predictions));
@@ -110,7 +110,7 @@ test('merges states with the same date', (t) => {
 
   states.splice(index + 1, 0, { ...TEST_RECORDS[index] });
 
-  return t.notThrows(Promise
+  return t.notThrowsAsync(Promise
     .all([
       endpoint.computePredictions(states),
       endpoint.computePredictions(TEST_RECORDS),
@@ -129,7 +129,7 @@ test('merges partial states until first full state', (t) => {
   // Add some empty states
   const states = [{}, {}, {}].concat(TEST_RECORDS);
 
-  return t.notThrows(endpoint
+  return t.notThrowsAsync(endpoint
     .computePredictions(states)
     .then((predictions) => {
       t.true(Is.predictions(predictions));
@@ -150,7 +150,7 @@ test('fails computing anomalies with invalid parameters', (t) => {
     .concat(INVALID_NUMBERS.map((value) => [[], { minAbsoluteDifference: value }]))
     .concat(INVALID_NUMBERS.map((value) => [[], { minSigmaDifference: value }]))
     .concat(INVALID_DATES.map((date) => [[], null, date]))
-    .map((parameters) => t.throws(endpoint.computeAnomalies(...parameters))));
+    .map((parameters) => t.throwsAsync(endpoint.computeAnomalies(...parameters))));
 });
 
 test('fails computing anomalies with records not passed in chronological order', (t) => {
@@ -160,14 +160,14 @@ test('fails computing anomalies with records not passed in chronological order',
   // Shuffle the records
   const records = context.shuffle(TEST_RECORDS);
 
-  return t.throws(endpoint.computeAnomalies(records));
+  return t.throwsAsync(endpoint.computeAnomalies(records));
 });
 
 test('computes anomalies', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
 
-  return t.notThrows(Promise
+  return t.notThrowsAsync(Promise
     .all([
       [TEST_RECORDS, { minConfidence: undefined, minAbsoluteDifference: undefined, minSigmaDifference: undefined }],
       [Helpers.streamify(TEST_RECORDS)],
@@ -188,7 +188,7 @@ test('computes anomalies given a model', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
 
-  return t.notThrows(endpoint
+  return t.notThrowsAsync(endpoint
     .retrievePredictiveModel()
     .then((model) => Promise.all([
       [TEST_RECORDS],
@@ -209,7 +209,7 @@ test('computes anomalies from a window', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
 
-  return t.notThrows(endpoint
+  return t.notThrowsAsync(endpoint
     .update(RECORDS)
     .then(() => endpoint.retrievePredictiveModel(WINDOW.from))
     .then((model) => Promise.all([
@@ -231,7 +231,7 @@ test('filters out anomalies given custom thresholds', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
 
-  return t.notThrows(Promise
+  return t.notThrowsAsync(Promise
     .all([
       [[], {}],
       [TEST_RECORDS, { minConfidence: 1 }],
@@ -254,7 +254,7 @@ test('fails computing a report with invalid parameters', (t) => {
     .concat(INVALID_NUMBERS.map((value) => [[], { minAbsoluteDifference: value }]))
     .concat(INVALID_NUMBERS.map((value) => [[], { minSigmaDifference: value }]))
     .concat(INVALID_DATES.map((date) => [[], null, date]))
-    .map((parameters) => t.throws(endpoint.computeReport(...parameters))));
+    .map((parameters) => t.throwsAsync(endpoint.computeReport(...parameters))));
 });
 
 test('fails computing a report with records not passed in chronological order', (t) => {
@@ -264,14 +264,14 @@ test('fails computing a report with records not passed in chronological order', 
   // Shuffle the records
   const records = context.shuffle(TEST_RECORDS);
 
-  return t.throws(endpoint.computeReport(records));
+  return t.throwsAsync(endpoint.computeReport(records));
 });
 
 test('computes a report', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
 
-  return t.notThrows(Promise
+  return t.notThrowsAsync(Promise
     .all([
       [TEST_RECORDS],
       [Helpers.streamify(TEST_RECORDS)],
@@ -292,7 +292,7 @@ test('computes a report given a model', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
 
-  return t.notThrows(endpoint
+  return t.notThrowsAsync(endpoint
     .retrievePredictiveModel()
     .then((model) => Promise.all([
       [TEST_RECORDS],
@@ -313,7 +313,7 @@ test('computes a report from a window', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
 
-  return t.notThrows(endpoint
+  return t.notThrowsAsync(endpoint
     .update(RECORDS)
     .then(() => endpoint.retrievePredictiveModel(WINDOW.from))
     .then((model) => Promise.all([
@@ -335,7 +335,7 @@ test('computes a report with no values', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
 
-  return t.notThrows(Promise
+  return t.notThrowsAsync(Promise
     .all([
       [[], {}],
       [TEST_RECORDS, { minConfidence: 1 }],
