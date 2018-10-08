@@ -26,7 +26,7 @@ test('fails streaming a CSV file with invalid parameters', (t) => {
       [[FILEPATH, { columns: 'not_an_array' }], TypeError],
       [[FILEPATH, { columns: ['not_only_strings', []] }], TypeError],
       [[FILEPATH, { columns: ['not_matching_column_number'] }], Error],
-    ].map((parameters) => t.throws(CsvHelper.stream(...parameters[0]).drain(), parameters[1])))
+    ].map((parameters) => t.throwsAsync(CsvHelper.stream(...parameters[0]).drain(), parameters[1])))
     .then((errors) => t.snapshot(errors));
 });
 

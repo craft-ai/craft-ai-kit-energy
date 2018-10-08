@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.2.1...HEAD) ##
 
+### Fixed ###
+
+- Caching issue with the `WeatherProvider` while extending records on a hourly basis with offseted times.
+- Shifted Easter based holidays when given a non-UTC date to the `PublicHolidayProvier`.
+
 ## [0.2.1](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.2.0...v0.2.1) - 2018-09-28 ##
 
 ### Fixed ###

@@ -33,6 +33,8 @@ async function initialize(provider) {
     provider.refresh.period = { days: 1 };
   }
 
+  if (options.refresh === 'hourly') delete provider.refresh.origin.hours;
+
   const properties = options.properties;
 
   if (properties !== undefined) {
@@ -89,7 +91,7 @@ async function extendRecord(endpoint, record) {
   const context = this.context;
   const cache = context.cache.values;
   const position = `${metadata.latitude},${metadata.longitude}`;
-  const resource = `${position},${record[DATE]}`;
+  const resource = `${position},${record[PARSED_RECORD][DATE].set(this.refresh.origin).toMillis() / 1000}`;
 
   if (cache.has(resource)) return cache.get(resource);
 
@@ -157,8 +159,9 @@ function generateConfiguration(extension, property) {
 
 
 const DATE = Constants.DATE_FEATURE;
-const RETRY_OPTIONS = { retries: 5, minTimeout: 100 };
+const PARSED_RECORD = Constants.PARSED_RECORD;
 const POSSIBLE_REFRESH_VALUES = ['hourly', 'daily'];
+const RETRY_OPTIONS = { retries: 5, minTimeout: 100 };
 const ENUM_PROPERTIES = ['icon', 'precipType'];
 
 

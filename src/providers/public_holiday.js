@@ -106,7 +106,8 @@ function isHoliday(date, region) {
   if (holidays.fixed[date.month][date.day]) return true;
 
   const easterDate = this.context.easter(date.year);
-  const easterOffset = Math.floor(date.diff(easterDate, 'days').days);
+  // Comparison between easter and the current date needs to be done in the same timezone
+  const easterOffset = Math.floor(date.setZone('utc', KEEP_LOCAL_TIME).diff(easterDate, 'days').days);
 
   return holidays.easterOffseted[easterOffset];
 }
@@ -114,6 +115,7 @@ function isHoliday(date, region) {
 
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const DATE = Constants.DATE_FEATURE;
+const KEEP_LOCAL_TIME = { keepLocalTime: true };
 // TODO: Accept custom context property name and labels
 const HOLIDAY = 'public_holiday';
 const DateTime = luxon.DateTime;

@@ -16,7 +16,7 @@ test('fails initializing a kit with invalid providers', (t) => {
   return Promise.all(INVALID_ARRAYS
     .concat(INVALID_OBJECTS.map((value) => [value]))
     .concat(INVALID_OBJECTS.map((value) => [{ provider: value }]))
-    .map((value) => t.throws(EnergyKit.initialize({ providers: value }))));
+    .map((value) => t.throwsAsync(EnergyKit.initialize({ providers: value }))));
 });
 
 test('uses a provider to extend records', async(t) => {

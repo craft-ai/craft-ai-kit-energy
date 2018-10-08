@@ -15,7 +15,7 @@ test.afterEach.always(Helpers.destroyProviderContext);
 test('fails initializing the provider with invalid options', (t) => {
   return Promise.all(INVALID_OBJECTS
     .concat(INVALID_OBJECTS.map((option) => ({ country: option })))
-    .map((options) => t.throws(Provider.initialize({ provider: PublicHolidayProvider, options }, 0))));
+    .map((options) => t.throwsAsync(Provider.initialize({ provider: PublicHolidayProvider, options }, 0))));
 });
 
 test('initializes the provider', (t) => {
@@ -89,7 +89,7 @@ test('computes the record\'s extension in Moselle', (t) => {
 });
 
 test('closes the provider', (t) => {
-  return t.notThrows(t.context.provider.close());
+  return t.notThrowsAsync(t.context.provider.close());
 });
 
 
@@ -108,6 +108,14 @@ const LOAD = Constants.LOAD_FEATURE;
 const HOLIDAY = PublicHolidayProvider.HOLIDAY;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const HOLIDAYS = [
+  [2017, 1, 1],
+  [2017, 4, 16], [2017, 4, 17],
+  [2017, 5, 1], [2017, 5, 8], [2017, 5, 25],
+  [2017, 6, 4], [2017, 6, 5],
+  [2017, 7, 14],
+  [2017, 8, 15],
+  [2017, 11, 1], [2017, 11, 11],
+  [2017, 12, 25],
   [2018, 1, 1],
   [2018, 4, 1], [2018, 4, 2],
   [2018, 5, 1], [2018, 5, 8], [2018, 5, 10], [2018, 5, 20], [2018, 5, 21],
@@ -125,17 +133,20 @@ const HOLIDAYS = [
   [2019, 12, 25],
 ];
 const MOSELLE_HOLIDAYS = [
+  [2017, 4, 14],
+  [2017, 12, 26],
   [2018, 3, 30],
   [2018, 12, 26],
   [2019, 4, 19],
   [2019, 12, 26],
 ].concat(HOLIDAYS);
 const REUNION_HOLIDAYS = [
+  [2017, 12, 20],
   [2018, 12, 20],
   [2019, 12, 20],
 ].concat(HOLIDAYS);
-const WINDOW_START = luxon.DateTime.utc(...HOLIDAYS[0]).startOf('year');
-const WINDOW_END = luxon.DateTime.utc(...HOLIDAYS[HOLIDAYS.length - 1]).plus({ years: 1 }).startOf('year');
+const WINDOW_START = luxon.DateTime.local(...HOLIDAYS[0]).startOf('year');
+const WINDOW_END = luxon.DateTime.local(...HOLIDAYS[HOLIDAYS.length - 1]).plus({ years: 1 }).startOf('year');
 const WINDOW = new Array(WINDOW_END.diff(WINDOW_START).as('days'))
   .fill(null)
   .map((_, days) => ({ [DATE]: WINDOW_START.plus({ days }), [LOAD]: 0 }));

@@ -18,15 +18,15 @@ test.serial('fails initializing the kit with invalid configurations', async(t) =
   const INVALID_TOKENS = [undefined].concat(INVALID_STRINGS, 'very bad token');
   const INVALID_SECRETS = INVALID_STRINGS.concat(['']);
 
-  await Promise.all(INVALID_OBJECTS.map((configuration) => t.throws(EnergyKit.initialize(configuration))));
+  await Promise.all(INVALID_OBJECTS.map((configuration) => t.throwsAsync(EnergyKit.initialize(configuration))));
 
   // Invalid secrets, valid token passed through an environment variable
-  await Promise.all(INVALID_SECRETS.map((secret) => t.throws(EnergyKit.initialize({ secret }))));
+  await Promise.all(INVALID_SECRETS.map((secret) => t.throwsAsync(EnergyKit.initialize({ secret }))));
 
   // Invalid tokens passed through an environment variable
   for (const token of INVALID_TOKENS) {
     process.env.CRAFT_AI_TOKEN = token;
-    await t.throws(EnergyKit.initialize());
+    await t.throwsAsync(EnergyKit.initialize());
   }
 
   // Other cases, tokens passed as a property of the kit's configuration
@@ -35,7 +35,7 @@ test.serial('fails initializing the kit with invalid configurations', async(t) =
   await Promise.all([EnergyKit.initialize()]
     .concat(INVALID_TOKENS.map((token) => EnergyKit.initialize({ token })))
     .concat(INVALID_SECRETS.map((secret) => EnergyKit.initialize({ token: t.context.token, secret })))
-    .map((promise) => t.throws(promise)));
+    .map((promise) => t.throwsAsync(promise)));
 
 });
 
@@ -45,10 +45,10 @@ test('initializes the kit', async(t) => {
   const promise = EnergyKit.initialize();
 
   await Promise.all([
-    t.notThrows(promise),
-    t.notThrows(EnergyKit.initialize({ secret: SECRET })),
-    t.notThrows(EnergyKit.initialize({ token: t.context.token })),
-    t.notThrows(EnergyKit.initialize({ token: t.context.token, secret: SECRET })),
+    t.notThrowsAsync(promise),
+    t.notThrowsAsync(EnergyKit.initialize({ secret: SECRET })),
+    t.notThrowsAsync(EnergyKit.initialize({ token: t.context.token })),
+    t.notThrowsAsync(EnergyKit.initialize({ token: t.context.token, secret: SECRET })),
   ]);
 
   const kit = await promise;

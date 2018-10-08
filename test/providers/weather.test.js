@@ -36,7 +36,7 @@ test('fails initializing the provider with invalid options', async(t) => {
     .concat(INVALID_NUMBERS.map((size) => ({ token, cache: { size } })))
     .concat(INVALID_FUNCTIONS.map((save) => ({ token, cache: { save } })))
     .concat(INVALID_LOAD_FUNCTIONS.map((load) => ({ token, cache: { load } })))
-    .map((options) => t.throws(Provider.initialize({ provider: WeatherProvider, options }, 0))))
+    .map((options) => t.throwsAsync(Provider.initialize({ provider: WeatherProvider, options }, 0))))
     .then((a) => t.snapshot(a));
 });
 
@@ -147,7 +147,7 @@ test('computes the record\'s extension in Angers hourly with cache', async(t) =>
 test('closes the provider', (t) => {
   return Provider
     .initialize({ provider: WeatherProvider, options: { token: t.context.token } }, 0)
-    .then((provider) => t.notThrows(provider.close()));
+    .then((provider) => t.notThrowsAsync(provider.close()));
 });
 
 
@@ -200,7 +200,7 @@ const INVALID_FUNCTIONS = Helpers.INVALID_FUNCTIONS;
 const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const INVALID_STRINGS = Helpers.INVALID_STRINGS;
-const WINDOW_START = luxon.DateTime.local(2018, 4);
+const WINDOW_START = luxon.DateTime.local(2018, 4, 1, 0, 15);
 const CACHE_DIRECTORY = path.join(__dirname, '../helpers/cache');
 const WINDOW = new Array(7 * 24)
   .fill(null)

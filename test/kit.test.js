@@ -28,7 +28,7 @@ test('fails loading an endpoint with invalid definition', (t) => {
     .concat(INVALID_ORIGINS.map((value) => ({ id: 'id', energy: { origin: value } })))
     .concat(VALID_ORIGINS.map((value) => ({ id: 'id', energy: { origin: value } })))
     .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', metadata: value })))
-    .map((definition) => t.throws(kit.loadEndpoint(definition))));
+    .map((definition) => t.throwsAsync(kit.loadEndpoint(definition))));
 });
 
 test('loads an endpoint', async(t) => {
@@ -38,11 +38,11 @@ test('loads an endpoint', async(t) => {
   const id = context.endpoint.register();
 
   // The agent should not exist
-  await t.throws(client.getAgent(id));
+  await t.throwsAsync(client.getAgent(id));
 
   const created = kit.loadEndpoint({ id });
 
-  await t.notThrows(created);
+  await t.notThrowsAsync(created);
 
   const endpointA = await created;
   const agentA = client.getAgent(id);
@@ -50,11 +50,11 @@ test('loads an endpoint', async(t) => {
   // The agent should be created
   t.truthy(endpointA);
   t.is(endpointA.agentId, id);
-  t.notThrows(agentA);
+  t.notThrowsAsync(agentA);
 
   const retrieved = kit.loadEndpoint({ id });
 
-  await t.notThrows(retrieved);
+  await t.notThrowsAsync(retrieved);
 
   const endpointB = await retrieved;
   const agentB = client.getAgent(id);
@@ -63,7 +63,7 @@ test('loads an endpoint', async(t) => {
   t.truthy(endpointB);
   t.is(endpointB.agentId, id);
   t.deepEqual(endpointA, endpointB);
-  t.notThrows(agentB);
+  t.notThrowsAsync(agentB);
   t.deepEqual(await agentA, await agentB);
   t.snapshot(endpointA);
 });
@@ -141,7 +141,7 @@ test('configures the agent\'s learning configuration', (t) => {
 test('closes the kit', (t) => {
   const kit = t.context.kit;
 
-  return t.notThrows(kit
+  return t.notThrowsAsync(kit
     .close()
     .then((result) => t.is(result, undefined)));
 });
