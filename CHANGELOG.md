@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.2.1...HEAD) ##
 
+### Fixed ###
+
+- Unable to parse dates with negative time offsets
+- Unable to compute predictions on states with non local timezones
+
 ## [0.2.1](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.2.0...v0.2.1) - 2018-09-28 ##
 
 ### Fixed ###
