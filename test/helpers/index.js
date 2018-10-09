@@ -79,7 +79,7 @@ class Stream extends stream.Readable {
 
 function registerEndpoint() {
   if (!this.seed) {
-    const suite = new Error().stack.match(/\/(craft-ai-kit-energy\/.*)\.test\.js/)[1];
+    const suite = new Error().stack.match(/\\(craft-ai-kit-energy\\.*)\.test\.js/)[1];
 
     this.seed = `${suite}\n${this.id}`;
   }
@@ -119,6 +119,7 @@ module.exports = {
   INVALID_NUMBERS,
   INVALID_OBJECTS,
   INVALID_STRINGS,
+  NONLOCAL_TIMEZONES,
   RECORDS,
   RECORDS_AS_ENERGY,
   RECORDS_AS_ACCUMULATED_ENERGY,
