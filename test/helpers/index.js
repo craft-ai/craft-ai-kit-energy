@@ -79,7 +79,7 @@ class Stream extends stream.Readable {
 
 function registerEndpoint() {
   if (!this.seed) {
-    const suite = new Error().stack.match(/\\(craft-ai-kit-energy\\.*)\.test\.js/)[1];
+    const suite = new Error().stack.match(/\/(craft-ai-kit-energy\/.*)\.test\.js/)[1];
 
     this.seed = `${suite}\n${this.id}`;
   }
