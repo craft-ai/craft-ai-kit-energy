@@ -28,12 +28,13 @@ async function retrieveRecords(from, to) {
 
       return history.map((operation) => {
         Object.assign(operation, operation.sample);
-        operation[DATE] = DateTime.fromMillis(operation[TIMESTAMP] * 1000).toJSDate();
+        const date = DateTime.fromMillis(operation[TIMESTAMP] * 1000, { zone: operation[TIMEZONE] });
+        Object.defineProperty(operation, PARSED_RECORD, { value: { [DATE]: date } });
+        operation[DATE] = date.toJSDate();
         generated.forEach((key) => delete operation[key]);
         delete operation[TIMESTAMP];
         delete operation[TIMEZONE];
         delete operation.sample;
-
         return operation;
       });
     })
@@ -65,6 +66,7 @@ async function retrievePredictiveModel(modelDate) {
 
 
 const DATE = Constants.DATE_FEATURE;
+const PARSED_RECORD = Constants.PARSED_RECORD;
 const TIMESTAMP = Constants.TIMESTAMP_FEATURE;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
