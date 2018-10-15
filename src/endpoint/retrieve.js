@@ -28,10 +28,11 @@ async function retrieveRecords(from, to) {
 
       return history.map((operation) => {
         Object.assign(operation, operation.sample);
-        const date = DateTime.fromMillis(operation[TIMESTAMP] * 1000, { zone: operation[TIMEZONE] });
+        const date = DateTime.fromMillis(operation[TIMESTAMP] * 1000, { zone: 'utc'+parseInt(operation[TIMEZONE]).toString() });
         Object.defineProperty(operation, PARSED_RECORD, { value: { [DATE]: date } });
         operation[DATE] = date.toJSDate();
         generated.forEach((key) => delete operation[key]);
+        // console.log('timezone', typeof operation[TIMEZONE], operation[TIMEZONE], 'utc'+parseInt(operation[TIMEZONE]).toString())
         delete operation[TIMESTAMP];
         delete operation[TIMEZONE];
         delete operation.sample;

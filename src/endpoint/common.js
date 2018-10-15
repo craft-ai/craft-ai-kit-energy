@@ -88,8 +88,7 @@ function toContextOperation(record) {
 function toRecord(value) {
   if (value === null || typeof value !== 'object')
     throw new TypeError(`A record must be an "object". Received "${value === null ? 'null' : typeof value}".`);
-
-  const date = value[PARSED_RECORD] ? value[PARSED_RECORD][DATE] : Utils.parseDate(value)[DATE];
+  const date = value[PARSED_RECORD] ? value[PARSED_RECORD][DATE] : Utils.parseDate(value[DATE]);
   const record = { ...value };
 
   if (date) {
@@ -104,7 +103,6 @@ function toRecord(value) {
     parsed[TIMEZONE] = timezone;
     parsed[LOAD] = record[LOAD];
     parsed[ENERGY] = record[ENERGY];
-
     Object.defineProperty(record, ORIGINAL_RECORD, { value });
     Object.defineProperty(record, PARSED_RECORD, { value: parsed });
   } else record[DATE] = NaN;
