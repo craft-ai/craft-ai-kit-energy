@@ -160,11 +160,11 @@ The kit uses the following environment variables for secrets and global configur
 
 ### Data preparation ###
 
-The script in <./examples/download_and_prepare.js> downloads and prepares the [UCI
+The script in <./examples/retrieve_uci_household_power_consumption.js> downloads and prepares the [UCI
 Individual Household Electric Power Consumption Data Set](https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption) to <./examples/data/uci_household_power_consumption.csv> in order to use it in other examples.
 
 ```console
-$ npm run examples:download_and_prepare
+$ npm run examples:retrieve_uci_household_power_consumption
 ```
 
 > This step is optional as the transformed dataset is included in this repository.
