@@ -160,14 +160,24 @@ The kit uses the following environment variables for secrets and global configur
 
 ### Data preparation ###
 
+#### UCI Individual Household Electric Power Consumption Data Set ####
+
 The script in <./examples/retrieve_uci_household_power_consumption.js> downloads and prepares the [UCI
-Individual Household Electric Power Consumption Data Set](https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption) to <./examples/data/uci_household_power_consumption.csv> in order to use it in other examples.
+Individual Household Electric Power Consumption Data Set](https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption) to <./examples/data/uci_household_power_consumption.csv> in order to use it in other examples. On a good internet connection it should last ~10 minutes.
 
 ```console
 $ npm run examples:retrieve_uci_household_power_consumption
 ```
 
-> This step is optional as the transformed dataset is included in this repository.
+#### AMPds2: The Almanac of Minutely Power dataset (Version 2) ####
+
+The script in <./examples/prepare_ampds2.js> downloads and prepares [AMPds2: The Almanac of Minutely Power dataset (Version 2)](https://doi.org/10.7910/DVN/FIE0S4) to <./examples/data/ampds2.csv> in order to use it in other examples. On a good internet connection it should last ~10 minutes.
+
+```console
+$ npm run examples:retrieve_ampds2
+```
+
+> Theses steps are optional as the transformed dataset is included in this repository.
 
 ### Single endpoint example ###
 
@@ -181,5 +191,11 @@ $ npm run examples:single_endpoint
 
 [![Powered By Dark Sky](./poweredby_dark_sky.png)](https://darksky.net/poweredby/)
 
+> Dua, D. and Karra Taniskidou, E. (2017). UCI Machine Learning Repository \[http://archive.ics.uci.edu/ml\]. Irvine, CA: University of California, School of Information and Computer Science.
+
+
+> Hébrail, Georges and Bérard, Alice, 2012 "Individual household electric power consumption Data Set", https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption
+
+> Makonin, Stephen, 2016, "AMPds2: The Almanac of Minutely Power dataset (Version 2)", https://doi.org/10.7910/DVN/FIE0S4, Harvard Dataverse, V1, UNF:6:0uqZaBkSWdyv27JqTHFWPg==\[fileUNF\]
 
 [craft ai]: http://www.craft.ai
