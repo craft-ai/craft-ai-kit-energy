@@ -1,10 +1,12 @@
+const buffer = require('most-buffer');
+const nth = require('most-nth');
 const path = require('path');
 const test = require('ava');
 
 const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
 const Is = require('../helpers/is');
-const Common = require('../../src/endpoint/common')
+const Common = require('../../src/endpoint/common');
 
 test.before(require('dotenv').load);
 
@@ -65,11 +67,17 @@ test('computes predictions', (t) => {
 test('computes predictions with accurate non local timezone', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
-  const records = TEST_RECORDS.map(Common.toRecord)
-  return endpoint
-    .computePredictions(TEST_RECORDS)
-    .then((predictions)=> {
-      predictions.forEach((prediction, idx) => t.is(prediction.context.timezone, records[idx].timezone))
+  
+  return Common
+    .toRecordStream(TEST_RECORDS)
+    .thru(buffer())
+    .thru(nth.last)
+    .then((records) => {
+      return endpoint
+        .computePredictions(TEST_RECORDS)
+        .then((predictions) => {
+          predictions.forEach((prediction, idx) => t.is(prediction.context.timezone, records[idx].timezone));
+        });
     });
 });
 

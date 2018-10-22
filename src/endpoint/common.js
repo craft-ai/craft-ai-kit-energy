@@ -127,5 +127,4 @@ module.exports = {
   isValidRecord,
   mergeUntilFirstFullRecord,
   toRecordStream,
-  toRecord,
 };

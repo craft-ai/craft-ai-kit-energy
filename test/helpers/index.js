@@ -79,7 +79,7 @@ class Stream extends stream.Readable {
 
 function registerEndpoint() {
   if (!this.seed) {
-    const suite = new Error().stack.match(/\/(craft-ai-kit-energy\/.*)\.test\.js/)[1];
+    const suite = new Error().stack.match(/\\(craft-ai-kit-energy\\.*)\.test\.js/)[1];
 
     this.seed = `${suite}\n${this.id}`;
   }
@@ -99,7 +99,7 @@ const INVALID_FUNCTIONS = [null, {}, 'abc', Boolean(), Array.from(2), new Date(2
 const INVALID_NUMBERS = [null, {}, '12', true, new Date(2018), () => {}];
 const INVALID_OBJECTS = [null, 0, true, 'string', Symbol(), () => {}];
 const INVALID_STRINGS = [null, {}, [false], true, new Date(2018), Promise.resolve('string'), () => {}];
-const NONLOCAL_TIMEZONES = ["America/Adak", "America/Chihuahua", 	"America/St_Johns", "Europe/Paris", "Asia/Kolkata", "Antarctica/South_Pole" ];
+const IANA_ZONES = ['America/Adak', 'America/Chihuahua', 'America/St_Johns', 'Europe/Paris', 'Asia/Kolkata', 'Antarctica/South_Pole'];
 const RECORDS = require('./data/records');
 const RECORDS_AS_ENERGY = require('./data/records_energy');
 const RECORDS_AS_ACCUMULATED_ENERGY = require('./data/records_accumulated_energy');
@@ -113,13 +113,13 @@ module.exports = {
   destroyProviderContext,
   identity,
   streamify,
+  IANA_ZONES,
   INVALID_ARRAYS,
   INVALID_DATES,
   INVALID_FUNCTIONS,
   INVALID_NUMBERS,
   INVALID_OBJECTS,
   INVALID_STRINGS,
-  NONLOCAL_TIMEZONES,
   RECORDS,
   RECORDS_AS_ENERGY,
   RECORDS_AS_ACCUMULATED_ENERGY,
