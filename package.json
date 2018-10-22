@@ -21,7 +21,8 @@
     "test:unit": "npx ava",
     "test:update": "npm run test:coverage -- --update-snapshots",
     "test:watch": "npm run test:unit -- --watch",
-    "examples:download_and_prepare": "node ./examples/download_and_prepare.js",
+    "examples:retrieve_uci_household_power_consumption": "node ./examples/retrieve_uci_household_power_consumption.js",
+    "examples:retrieve_ampds2": "node ./examples/retrieve_ampds2.js",
     "examples:single_endpoint": "node ./examples/single_endpoint.js"
   },
   "engines": {
