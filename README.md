@@ -160,18 +160,27 @@ The kit uses the following environment variables for secrets and global configur
 
 ### Data preparation ###
 
-The script in <./examples/download_and_prepare.js> downloads and prepares the [UCI
-Individual Household Electric Power Consumption Data Set](https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption) to <./examples/data/uci_household_power_consumption.csv> in order to use it in other examples.
+> The following steps are optional as the prepared datasets are included on the repository.
+
+#### [AMPds2: The Almanac of Minutely Power dataset (Version 2)] ####
+
+The script [`./examples/retrieve_ampds2.js`](examples/retrieve_ampds2.js) downloads and prepares the dataset to [`./examples/data/ampds2.csv`](examples/data/ampds2.csv) in order to use it in other examples. On a good internet connection it should last ~10 minutes.
 
 ```console
-$ npm run examples:download_and_prepare
+$ npm run examples:retrieve_ampds2
 ```
 
-> This step is optional as the transformed dataset is included in this repository.
+#### [UCI Individual Household Electric Power Consumption Data Set] ####
+
+The script [`./examples/retrieve_uci_household_power_consumption.js`](examples/retrieve_uci_household_power_consumption.js) downloads and prepares the dataset to [`./examples/data/uci_household_power_consumption.csv`](examples/data/uci_household_power_consumption.csv) in order to use it in other examples. On a good internet connection it should last ~10 minutes.
+
+```console
+$ npm run examples:retrieve_uci_household_power_consumption
+```
 
 ### Single endpoint example ###
 
-The script is <./examples/single_endpoint.js> showcases most of the features of the kit using the aformentioned dataset. It builds an endpoint from the dataset, enrich its data with weather and holidays and uses the kit to compute anomalies, report and predictions.
+The script [`./examples/single_endpoint.js`](examples/single_endpoint.js) showcases most of the features of the kit using the aformentioned [UCI Individual Household Electric Power Consumption Data Set]. It builds an endpoint from the dataset, enrich its data with weather and holidays information and uses the kit to compute anomalies, report and predictions.
 
 ```console
 $ npm run examples:single_endpoint
@@ -181,5 +190,13 @@ $ npm run examples:single_endpoint
 
 [![Powered By Dark Sky](./poweredby_dark_sky.png)](https://darksky.net/poweredby/)
 
+> Dua, D. and Karra Taniskidou, E. (2017). UCI Machine Learning Repository \[http://archive.ics.uci.edu/ml\]. Irvine, CA: University of California, School of Information and Computer Science.
+
+
+> Hébrail, Georges and Bérard, Alice, 2012 "Individual household electric power consumption Data Set", https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption
+
+> Makonin, Stephen, 2016, "AMPds2: The Almanac of Minutely Power dataset (Version 2)", https://doi.org/10.7910/DVN/FIE0S4, Harvard Dataverse, V1, UNF:6:0uqZaBkSWdyv27JqTHFWPg==\[fileUNF\]
 
 [craft ai]: http://www.craft.ai
+[AMPds2: The Almanac of Minutely Power dataset (Version 2)]: https://doi.org/10.7910/DVN/FIE0S4
+[UCI Individual Household Electric Power Consumption Data Set]: https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption

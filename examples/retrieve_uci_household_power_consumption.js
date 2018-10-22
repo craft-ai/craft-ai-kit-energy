@@ -10,7 +10,7 @@ const path = require('path');
 const stream = require('stream');
 const unzipper = require('unzipper');
 
-const log = debug('craft-ai:kit-energy:examples:download_and_prepare');
+const log = debug('craft-ai:kit-energy:examples:retrieve_uci_household_power_consumption');
 log.enabled = true;
 
 const DATASET_URL = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00235/household_power_consumption.zip';
