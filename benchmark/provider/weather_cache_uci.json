@@ -1,0 +1,1682 @@
+[
+  [
+    "48.45857,2.156942,1179871200",
+    {
+      "temperatureLow": 13.47,
+      "temperatureHigh": 22.2
+    }
+  ],
+  [
+    "48.45857,2.156942,1179957600",
+    {
+      "temperatureLow": 15.3,
+      "temperatureHigh": 26.86
+    }
+  ],
+  [
+    "48.45857,2.156942,1180044000",
+    {
+      "temperatureLow": 14,
+      "temperatureHigh": 27.23
+    }
+  ],
+  [
+    "48.45857,2.156942,1180130400",
+    {
+      "temperatureLow": 9.08,
+      "temperatureHigh": 20.61
+    }
+  ],
+  [
+    "48.45857,2.156942,1180216800",
+    {
+      "temperatureLow": 9.06,
+      "temperatureHigh": 13.24
+    }
+  ],
+  [
+    "48.45857,2.156942,1180303200",
+    {
+      "temperatureLow": 6.78,
+      "temperatureHigh": 13.58
+    }
+  ],
+  [
+    "48.45857,2.156942,1180389600",
+    {
+      "temperatureLow": 8.32,
+      "temperatureHigh": 16.28
+    }
+  ],
+  [
+    "48.45857,2.156942,1180476000",
+    {
+      "temperatureLow": 9.23,
+      "temperatureHigh": 15.98
+    }
+  ],
+  [
+    "48.45857,2.156942,1180562400",
+    {
+      "temperatureLow": 8.68,
+      "temperatureHigh": 18.92
+    }
+  ],
+  [
+    "48.45857,2.156942,1180648800",
+    {
+      "temperatureLow": 11.29,
+      "temperatureHigh": 17.74
+    }
+  ],
+  [
+    "48.45857,2.156942,1180735200",
+    {
+      "temperatureLow": 13.53,
+      "temperatureHigh": 23.78
+    }
+  ],
+  [
+    "48.45857,2.156942,1182376800",
+    {
+      "temperatureLow": 14.12,
+      "temperatureHigh": 21.64
+    }
+  ],
+  [
+    "48.45857,2.156942,1179903840",
+    {
+      "temperatureLow": 13.47,
+      "temperatureHigh": 22.2
+    }
+  ],
+  [
+    "48.45857,2.156942,1179964800",
+    {
+      "temperatureLow": 15.3,
+      "temperatureHigh": 26.86
+    }
+  ],
+  [
+    "48.45857,2.156942,1182407400",
+    {
+      "temperatureLow": 14.12,
+      "temperatureHigh": 21.64
+    }
+  ],
+  [
+    "48.45857,2.156942,1166223600",
+    {
+      "temperatureLow": 0.12,
+      "temperatureHigh": 8.35
+    }
+  ],
+  [
+    "48.45857,2.156942,1166289840",
+    {
+      "temperatureLow": 0.12,
+      "temperatureHigh": 8.35
+    }
+  ],
+  [
+    "48.45857,2.156942,1166310000",
+    {
+      "temperatureLow": 2.66,
+      "temperatureHigh": 7.19
+    }
+  ],
+  [
+    "48.45857,2.156942,1166396400",
+    {
+      "temperatureLow": 0.44,
+      "temperatureHigh": 5.27
+    }
+  ],
+  [
+    "48.45857,2.156942,1166482800",
+    {
+      "temperatureLow": 0.52,
+      "temperatureHigh": 5.26
+    }
+  ],
+  [
+    "48.45857,2.156942,1166569200",
+    {
+      "temperatureLow": 0.47,
+      "temperatureHigh": 5.66
+    }
+  ],
+  [
+    "48.45857,2.156942,1166655600",
+    {
+      "temperatureLow": 3.43,
+      "temperatureHigh": 8.32
+    }
+  ],
+  [
+    "48.45857,2.156942,1166742000",
+    {
+      "temperatureLow": 0.56,
+      "temperatureHigh": 6.88
+    }
+  ],
+  [
+    "48.45857,2.156942,1166828400",
+    {
+      "temperatureLow": 1.46,
+      "temperatureHigh": 3.97
+    }
+  ],
+  [
+    "48.45857,2.156942,1166914800",
+    {
+      "temperatureLow": 1.35,
+      "temperatureHigh": 2.45
+    }
+  ],
+  [
+    "48.45857,2.156942,1167001200",
+    {
+      "temperatureLow": -0.53,
+      "temperatureHigh": 1.64
+    }
+  ],
+  [
+    "48.45857,2.156942,1167087600",
+    {
+      "temperatureLow": -0.01,
+      "temperatureHigh": 0.41
+    }
+  ],
+  [
+    "48.45857,2.156942,1167174000",
+    {
+      "temperatureLow": -0.99,
+      "temperatureHigh": 0.39
+    }
+  ],
+  [
+    "48.45857,2.156942,1167260400",
+    {
+      "temperatureLow": -3.16,
+      "temperatureHigh": -0.87
+    }
+  ],
+  [
+    "48.45857,2.156942,1167346800",
+    {
+      "temperatureLow": 6.41,
+      "temperatureHigh": 6.76
+    }
+  ],
+  [
+    "48.45857,2.156942,1167433200",
+    {
+      "temperatureLow": 7.36,
+      "temperatureHigh": 11.13
+    }
+  ],
+  [
+    "48.45857,2.156942,1167519600",
+    {
+      "temperatureLow": 10.24,
+      "temperatureHigh": 11.88
+    }
+  ],
+  [
+    "48.45857,2.156942,1167606000",
+    {
+      "temperatureLow": 5.22,
+      "temperatureHigh": 10.67
+    }
+  ],
+  [
+    "48.45857,2.156942,1167692400",
+    {
+      "temperatureLow": 4.01,
+      "temperatureHigh": 8.16
+    }
+  ],
+  [
+    "48.45857,2.156942,1167778800",
+    {
+      "temperatureLow": 7.34,
+      "temperatureHigh": 7.83
+    }
+  ],
+  [
+    "48.45857,2.156942,1167865200",
+    {
+      "temperatureLow": 8.64,
+      "temperatureHigh": 10.86
+    }
+  ],
+  [
+    "48.45857,2.156942,1167951600",
+    {
+      "temperatureLow": 10.61,
+      "temperatureHigh": 11.02
+    }
+  ],
+  [
+    "48.45857,2.156942,1168038000",
+    {
+      "temperatureLow": 5.4,
+      "temperatureHigh": 12.65
+    }
+  ],
+  [
+    "48.45857,2.156942,1168124400",
+    {
+      "temperatureLow": 9.17,
+      "temperatureHigh": 10.52
+    }
+  ],
+  [
+    "48.45857,2.156942,1168210800",
+    {
+      "temperatureLow": 11.51,
+      "temperatureHigh": 11.27
+    }
+  ],
+  [
+    "48.45857,2.156942,1168297200",
+    {
+      "temperatureLow": 9.83,
+      "temperatureHigh": 13.83
+    }
+  ],
+  [
+    "48.45857,2.156942,1168383600",
+    {
+      "temperatureLow": 4.19,
+      "temperatureHigh": 12.77
+    }
+  ],
+  [
+    "48.45857,2.156942,1168470000",
+    {
+      "temperatureLow": 7,
+      "temperatureHigh": 11.13
+    }
+  ],
+  [
+    "48.45857,2.156942,1168556400",
+    {
+      "temperatureLow": 10.32,
+      "temperatureHigh": 12.34
+    }
+  ],
+  [
+    "48.45857,2.156942,1168642800",
+    {
+      "temperatureLow": 5.66,
+      "temperatureHigh": 11.33
+    }
+  ],
+  [
+    "48.45857,2.156942,1168729200",
+    {
+      "temperatureLow": 0.4,
+      "temperatureHigh": 11.66
+    }
+  ],
+  [
+    "48.45857,2.156942,1168815600",
+    {
+      "temperatureLow": 6.08,
+      "temperatureHigh": 8.36
+    }
+  ],
+  [
+    "48.45857,2.156942,1168902000",
+    {
+      "temperatureLow": 8.86,
+      "temperatureHigh": 9.43
+    }
+  ],
+  [
+    "48.45857,2.156942,1168988400",
+    {
+      "temperatureLow": 11.38,
+      "temperatureHigh": 12.71
+    }
+  ],
+  [
+    "48.45857,2.156942,1169074800",
+    {
+      "temperatureLow": 12.87,
+      "temperatureHigh": 14.74
+    }
+  ],
+  [
+    "48.45857,2.156942,1169161200",
+    {
+      "temperatureLow": 12.35,
+      "temperatureHigh": 14.56
+    }
+  ],
+  [
+    "48.45857,2.156942,1169247600",
+    {
+      "temperatureLow": 6.36,
+      "temperatureHigh": 13.68
+    }
+  ],
+  [
+    "48.45857,2.156942,1169334000",
+    {
+      "temperatureLow": 2.3,
+      "temperatureHigh": 9.96
+    }
+  ],
+  [
+    "48.45857,2.156942,1169420400",
+    {
+      "temperatureLow": 0.46,
+      "temperatureHigh": 7.51
+    }
+  ],
+  [
+    "48.45857,2.156942,1169506800",
+    {
+      "temperatureLow": -0.27,
+      "temperatureHigh": 2.18
+    }
+  ],
+  [
+    "48.45857,2.156942,1169593200",
+    {
+      "temperatureLow": -2.38,
+      "temperatureHigh": 3.41
+    }
+  ],
+  [
+    "48.45857,2.156942,1169679600",
+    {
+      "temperatureLow": -4.61,
+      "temperatureHigh": -0.24
+    }
+  ],
+  [
+    "48.45857,2.156942,1169766000",
+    {
+      "temperatureLow": 1.73,
+      "temperatureHigh": 2.54
+    }
+  ],
+  [
+    "48.45857,2.156942,1169852400",
+    {
+      "temperatureLow": 1.43,
+      "temperatureHigh": 7.69
+    }
+  ],
+  [
+    "48.45857,2.156942,1169938800",
+    {
+      "temperatureLow": 5.46,
+      "temperatureHigh": 6.57
+    }
+  ],
+  [
+    "48.45857,2.156942,1170025200",
+    {
+      "temperatureLow": 4.07,
+      "temperatureHigh": 9.55
+    }
+  ],
+  [
+    "48.45857,2.156942,1170111600",
+    {
+      "temperatureLow": 6.64,
+      "temperatureHigh": 8.83
+    }
+  ],
+  [
+    "48.45857,2.156942,1170198000",
+    {
+      "temperatureLow": 5.47,
+      "temperatureHigh": 8.83
+    }
+  ],
+  [
+    "48.45857,2.156942,1170284400",
+    {
+      "temperatureLow": 9.16,
+      "temperatureHigh": 10.73
+    }
+  ],
+  [
+    "48.45857,2.156942,1170370800",
+    {
+      "temperatureLow": 4.37,
+      "temperatureHigh": 9.93
+    }
+  ],
+  [
+    "48.45857,2.156942,1170457200",
+    {
+      "temperatureLow": 2.94,
+      "temperatureHigh": 10.12
+    }
+  ],
+  [
+    "48.45857,2.156942,1170543600",
+    {
+      "temperatureLow": 4.07,
+      "temperatureHigh": 10.71
+    }
+  ],
+  [
+    "48.45857,2.156942,1170630000",
+    {
+      "temperatureLow": 3.87,
+      "temperatureHigh": 6.18
+    }
+  ],
+  [
+    "48.45857,2.156942,1170716400",
+    {
+      "temperatureLow": 0.49,
+      "temperatureHigh": 6.91
+    }
+  ],
+  [
+    "48.45857,2.156942,1170802800",
+    {
+      "temperatureLow": 0.71,
+      "temperatureHigh": 3.55
+    }
+  ],
+  [
+    "48.45857,2.156942,1170889200",
+    {
+      "temperatureLow": 3.5,
+      "temperatureHigh": 9.89
+    }
+  ],
+  [
+    "48.45857,2.156942,1170975600",
+    {
+      "temperatureLow": 5.74,
+      "temperatureHigh": 9.53
+    }
+  ],
+  [
+    "48.45857,2.156942,1171062000",
+    {
+      "temperatureLow": 8.57,
+      "temperatureHigh": 12.14
+    }
+  ],
+  [
+    "48.45857,2.156942,1171148400",
+    {
+      "temperatureLow": 8.64,
+      "temperatureHigh": 12.57
+    }
+  ],
+  [
+    "48.45857,2.156942,1171234800",
+    {
+      "temperatureLow": 7.36,
+      "temperatureHigh": 11.32
+    }
+  ],
+  [
+    "48.45857,2.156942,1171321200",
+    {
+      "temperatureLow": 6.5,
+      "temperatureHigh": 10.42
+    }
+  ],
+  [
+    "48.45857,2.156942,1171407600",
+    {
+      "temperatureLow": 1.17,
+      "temperatureHigh": 10.78
+    }
+  ],
+  [
+    "48.45857,2.156942,1171494000",
+    {
+      "temperatureLow": 2.79,
+      "temperatureHigh": 10.48
+    }
+  ],
+  [
+    "48.45857,2.156942,1171580400",
+    {
+      "temperatureLow": 5.87,
+      "temperatureHigh": 12.44
+    }
+  ],
+  [
+    "48.45857,2.156942,1171666800",
+    {
+      "temperatureLow": 6.11,
+      "temperatureHigh": 17.38
+    }
+  ],
+  [
+    "48.45857,2.156942,1171753200",
+    {
+      "temperatureLow": 5.74,
+      "temperatureHigh": 16.19
+    }
+  ],
+  [
+    "48.45857,2.156942,1171839600",
+    {
+      "temperatureLow": 3.61,
+      "temperatureHigh": 9.97
+    }
+  ],
+  [
+    "48.45857,2.156942,1171926000",
+    {
+      "temperatureLow": 8.88,
+      "temperatureHigh": 13.66
+    }
+  ],
+  [
+    "48.45857,2.156942,1172012400",
+    {
+      "temperatureLow": 3.98,
+      "temperatureHigh": 12.89
+    }
+  ],
+  [
+    "48.45857,2.156942,1172098800",
+    {
+      "temperatureLow": 7.38,
+      "temperatureHigh": 12.08
+    }
+  ],
+  [
+    "48.45857,2.156942,1172185200",
+    {
+      "temperatureLow": 9.43,
+      "temperatureHigh": 11.13
+    }
+  ],
+  [
+    "48.45857,2.156942,1172271600",
+    {
+      "temperatureLow": 6.43,
+      "temperatureHigh": 11.96
+    }
+  ],
+  [
+    "48.45857,2.156942,1172358000",
+    {
+      "temperatureLow": 7.74,
+      "temperatureHigh": 9.37
+    }
+  ],
+  [
+    "48.45857,2.156942,1172444400",
+    {
+      "temperatureLow": 5.48,
+      "temperatureHigh": 11.53
+    }
+  ],
+  [
+    "48.45857,2.156942,1172530800",
+    {
+      "temperatureLow": 9.47,
+      "temperatureHigh": 12.76
+    }
+  ],
+  [
+    "48.45857,2.156942,1172617200",
+    {
+      "temperatureLow": 9.33,
+      "temperatureHigh": 12.89
+    }
+  ],
+  [
+    "48.45857,2.156942,1172703600",
+    {
+      "temperatureLow": 3.89,
+      "temperatureHigh": 11.13
+    }
+  ],
+  [
+    "48.45857,2.156942,1172790000",
+    {
+      "temperatureLow": 8.29,
+      "temperatureHigh": 11.17
+    }
+  ],
+  [
+    "48.45857,2.156942,1172876400",
+    {
+      "temperatureLow": 4.64,
+      "temperatureHigh": 13.23
+    }
+  ],
+  [
+    "48.45857,2.156942,1172962800",
+    {
+      "temperatureLow": 7.76,
+      "temperatureHigh": 15.54
+    }
+  ],
+  [
+    "48.45857,2.156942,1173049200",
+    {
+      "temperatureLow": 8.78,
+      "temperatureHigh": 13.13
+    }
+  ],
+  [
+    "48.45857,2.156942,1173135600",
+    {
+      "temperatureLow": 6.43,
+      "temperatureHigh": 9.87
+    }
+  ],
+  [
+    "48.45857,2.156942,1173222000",
+    {
+      "temperatureLow": 3.39,
+      "temperatureHigh": 11.67
+    }
+  ],
+  [
+    "48.45857,2.156942,1173308400",
+    {
+      "temperatureLow": 6.59,
+      "temperatureHigh": 12.84
+    }
+  ],
+  [
+    "48.45857,2.156942,1173394800",
+    {
+      "temperatureLow": 3.45,
+      "temperatureHigh": 11.79
+    }
+  ],
+  [
+    "48.45857,2.156942,1173481200",
+    {
+      "temperatureLow": 2.18,
+      "temperatureHigh": 14.73
+    }
+  ],
+  [
+    "48.45857,2.156942,1173567600",
+    {
+      "temperatureLow": 2.33,
+      "temperatureHigh": 15.52
+    }
+  ],
+  [
+    "48.45857,2.156942,1173654000",
+    {
+      "temperatureLow": 3.37,
+      "temperatureHigh": 16.05
+    }
+  ],
+  [
+    "48.45857,2.156942,1173740400",
+    {
+      "temperatureLow": 5,
+      "temperatureHigh": 14.51
+    }
+  ],
+  [
+    "48.45857,2.156942,1173826800",
+    {
+      "temperatureLow": 3.57,
+      "temperatureHigh": 14.73
+    }
+  ],
+  [
+    "48.45857,2.156942,1173913200",
+    {
+      "temperatureLow": 2.06,
+      "temperatureHigh": 15.25
+    }
+  ],
+  [
+    "48.45857,2.156942,1173999600",
+    {
+      "temperatureLow": 6.71,
+      "temperatureHigh": 13.12
+    }
+  ],
+  [
+    "48.45857,2.156942,1174086000",
+    {
+      "temperatureLow": 9.28,
+      "temperatureHigh": 10.83
+    }
+  ],
+  [
+    "48.45857,2.156942,1174172400",
+    {
+      "temperatureLow": 1.93,
+      "temperatureHigh": 9.87
+    }
+  ],
+  [
+    "48.45857,2.156942,1174258800",
+    {
+      "temperatureLow": 0.62,
+      "temperatureHigh": 6.49
+    }
+  ],
+  [
+    "48.45857,2.156942,1174345200",
+    {
+      "temperatureLow": 1.77,
+      "temperatureHigh": 7.68
+    }
+  ],
+  [
+    "48.45857,2.156942,1174431600",
+    {
+      "temperatureLow": 3.77,
+      "temperatureHigh": 7.49
+    }
+  ],
+  [
+    "48.45857,2.156942,1174518000",
+    {
+      "temperatureLow": 0.17,
+      "temperatureHigh": 8.94
+    }
+  ],
+  [
+    "48.45857,2.156942,1174604400",
+    {
+      "temperatureLow": 2.26,
+      "temperatureHigh": 5.71
+    }
+  ],
+  [
+    "48.45857,2.156942,1174690800",
+    {
+      "temperatureLow": 6.14,
+      "temperatureHigh": 6.74
+    }
+  ],
+  [
+    "48.45857,2.156942,1174777200",
+    {
+      "temperatureLow": 2.77,
+      "temperatureHigh": 9.52
+    }
+  ],
+  [
+    "48.45857,2.156942,1174860000",
+    {
+      "temperatureLow": 3.79,
+      "temperatureHigh": 15.3
+    }
+  ],
+  [
+    "48.45857,2.156942,1174863600",
+    {
+      "temperatureLow": 3.79,
+      "temperatureHigh": 15.3
+    }
+  ],
+  [
+    "48.45857,2.156942,1174946400",
+    {
+      "temperatureLow": 4.63,
+      "temperatureHigh": 17.58
+    }
+  ],
+  [
+    "48.45857,2.156942,1174950000",
+    {
+      "temperatureLow": 4.63,
+      "temperatureHigh": 17.58
+    }
+  ],
+  [
+    "48.45857,2.156942,1175032800",
+    {
+      "temperatureLow": 7.22,
+      "temperatureHigh": 17.59
+    }
+  ],
+  [
+    "48.45857,2.156942,1175036400",
+    {
+      "temperatureLow": 7.22,
+      "temperatureHigh": 17.59
+    }
+  ],
+  [
+    "48.45857,2.156942,1175119200",
+    {
+      "temperatureLow": 3.65,
+      "temperatureHigh": 12.06
+    }
+  ],
+  [
+    "48.45857,2.156942,1175122800",
+    {
+      "temperatureLow": 3.65,
+      "temperatureHigh": 12.06
+    }
+  ],
+  [
+    "48.45857,2.156942,1175205600",
+    {
+      "temperatureLow": 2.53,
+      "temperatureHigh": 7.62
+    }
+  ],
+  [
+    "48.45857,2.156942,1175209200",
+    {
+      "temperatureLow": 2.53,
+      "temperatureHigh": 7.62
+    }
+  ],
+  [
+    "48.45857,2.156942,1175292000",
+    {
+      "temperatureLow": 6.42,
+      "temperatureHigh": 8.06
+    }
+  ],
+  [
+    "48.45857,2.156942,1175295600",
+    {
+      "temperatureLow": 6.42,
+      "temperatureHigh": 8.06
+    }
+  ],
+  [
+    "48.45857,2.156942,1175378400",
+    {
+      "temperatureLow": 8.96,
+      "temperatureHigh": 16.25
+    }
+  ],
+  [
+    "48.45857,2.156942,1175382000",
+    {
+      "temperatureLow": 8.96,
+      "temperatureHigh": 16.25
+    }
+  ],
+  [
+    "48.45857,2.156942,1175464800",
+    {
+      "temperatureLow": 8.31,
+      "temperatureHigh": 19.46
+    }
+  ],
+  [
+    "48.45857,2.156942,1175468400",
+    {
+      "temperatureLow": 8.31,
+      "temperatureHigh": 19.46
+    }
+  ],
+  [
+    "48.45857,2.156942,1175551200",
+    {
+      "temperatureLow": 4.04,
+      "temperatureHigh": 14.01
+    }
+  ],
+  [
+    "48.45857,2.156942,1175554800",
+    {
+      "temperatureLow": 4.04,
+      "temperatureHigh": 14.01
+    }
+  ],
+  [
+    "48.45857,2.156942,1175637600",
+    {
+      "temperatureLow": 3.62,
+      "temperatureHigh": 12.14
+    }
+  ],
+  [
+    "48.45857,2.156942,1175641200",
+    {
+      "temperatureLow": 3.62,
+      "temperatureHigh": 12.14
+    }
+  ],
+  [
+    "48.45857,2.156942,1175724000",
+    {
+      "temperatureLow": 5.82,
+      "temperatureHigh": 16.21
+    }
+  ],
+  [
+    "48.45857,2.156942,1175727600",
+    {
+      "temperatureLow": 5.82,
+      "temperatureHigh": 16.21
+    }
+  ],
+  [
+    "48.45857,2.156942,1175810400",
+    {
+      "temperatureLow": 5.98,
+      "temperatureHigh": 19.81
+    }
+  ],
+  [
+    "48.45857,2.156942,1175814000",
+    {
+      "temperatureLow": 5.98,
+      "temperatureHigh": 19.81
+    }
+  ],
+  [
+    "48.45857,2.156942,1175896800",
+    {
+      "temperatureLow": 5.82,
+      "temperatureHigh": 16.31
+    }
+  ],
+  [
+    "48.45857,2.156942,1175900400",
+    {
+      "temperatureLow": 5.82,
+      "temperatureHigh": 16.31
+    }
+  ],
+  [
+    "48.45857,2.156942,1175983200",
+    {
+      "temperatureLow": 4.51,
+      "temperatureHigh": 16.84
+    }
+  ],
+  [
+    "48.45857,2.156942,1175986800",
+    {
+      "temperatureLow": 4.51,
+      "temperatureHigh": 16.84
+    }
+  ],
+  [
+    "48.45857,2.156942,1176069600",
+    {
+      "temperatureLow": 6.64,
+      "temperatureHigh": 19.49
+    }
+  ],
+  [
+    "48.45857,2.156942,1176073200",
+    {
+      "temperatureLow": 6.64,
+      "temperatureHigh": 19.49
+    }
+  ],
+  [
+    "48.45857,2.156942,1176156000",
+    {
+      "temperatureLow": 8.45,
+      "temperatureHigh": 19.7
+    }
+  ],
+  [
+    "48.45857,2.156942,1176159600",
+    {
+      "temperatureLow": 8.45,
+      "temperatureHigh": 19.7
+    }
+  ],
+  [
+    "48.45857,2.156942,1176242400",
+    {
+      "temperatureLow": 8.66,
+      "temperatureHigh": 19.97
+    }
+  ],
+  [
+    "48.45857,2.156942,1176246000",
+    {
+      "temperatureLow": 8.66,
+      "temperatureHigh": 19.97
+    }
+  ],
+  [
+    "48.45857,2.156942,1176328800",
+    {
+      "temperatureLow": 13.63,
+      "temperatureHigh": 23.43
+    }
+  ],
+  [
+    "48.45857,2.156942,1176332400",
+    {
+      "temperatureLow": 13.63,
+      "temperatureHigh": 23.43
+    }
+  ],
+  [
+    "48.45857,2.156942,1176415200",
+    {
+      "temperatureLow": 13.33,
+      "temperatureHigh": 23.97
+    }
+  ],
+  [
+    "48.45857,2.156942,1176418800",
+    {
+      "temperatureLow": 13.33,
+      "temperatureHigh": 23.97
+    }
+  ],
+  [
+    "48.45857,2.156942,1176501600",
+    {
+      "temperatureLow": 12.72,
+      "temperatureHigh": 26.06
+    }
+  ],
+  [
+    "48.45857,2.156942,1176505200",
+    {
+      "temperatureLow": 12.72,
+      "temperatureHigh": 26.06
+    }
+  ],
+  [
+    "48.45857,2.156942,1176588000",
+    {
+      "temperatureLow": 12.17,
+      "temperatureHigh": 26.84
+    }
+  ],
+  [
+    "48.45857,2.156942,1176591600",
+    {
+      "temperatureLow": 12.17,
+      "temperatureHigh": 26.84
+    }
+  ],
+  [
+    "48.45857,2.156942,1176674400",
+    {
+      "temperatureLow": 10.66,
+      "temperatureHigh": 25.27
+    }
+  ],
+  [
+    "48.45857,2.156942,1176678000",
+    {
+      "temperatureLow": 10.66,
+      "temperatureHigh": 25.27
+    }
+  ],
+  [
+    "48.45857,2.156942,1176760800",
+    {
+      "temperatureLow": 7.43,
+      "temperatureHigh": 20.22
+    }
+  ],
+  [
+    "48.45857,2.156942,1176764400",
+    {
+      "temperatureLow": 7.43,
+      "temperatureHigh": 20.22
+    }
+  ],
+  [
+    "48.45857,2.156942,1176847200",
+    {
+      "temperatureLow": 5.23,
+      "temperatureHigh": 17.18
+    }
+  ],
+  [
+    "48.45857,2.156942,1176850800",
+    {
+      "temperatureLow": 5.23,
+      "temperatureHigh": 17.18
+    }
+  ],
+  [
+    "48.45857,2.156942,1176933600",
+    {
+      "temperatureLow": 6.92,
+      "temperatureHigh": 19.6
+    }
+  ],
+  [
+    "48.45857,2.156942,1176937200",
+    {
+      "temperatureLow": 6.92,
+      "temperatureHigh": 19.6
+    }
+  ],
+  [
+    "48.45857,2.156942,1177020000",
+    {
+      "temperatureLow": 8.31,
+      "temperatureHigh": 20.31
+    }
+  ],
+  [
+    "48.45857,2.156942,1177023600",
+    {
+      "temperatureLow": 8.31,
+      "temperatureHigh": 20.31
+    }
+  ],
+  [
+    "48.45857,2.156942,1177106400",
+    {
+      "temperatureLow": 5.72,
+      "temperatureHigh": 21.23
+    }
+  ],
+  [
+    "48.45857,2.156942,1177110000",
+    {
+      "temperatureLow": 5.72,
+      "temperatureHigh": 21.23
+    }
+  ],
+  [
+    "48.45857,2.156942,1177192800",
+    {
+      "temperatureLow": 10.61,
+      "temperatureHigh": 24.54
+    }
+  ],
+  [
+    "48.45857,2.156942,1177196400",
+    {
+      "temperatureLow": 10.61,
+      "temperatureHigh": 24.54
+    }
+  ],
+  [
+    "48.45857,2.156942,1177279200",
+    {
+      "temperatureLow": 11.82,
+      "temperatureHigh": 25.74
+    }
+  ],
+  [
+    "48.45857,2.156942,1177282800",
+    {
+      "temperatureLow": 11.82,
+      "temperatureHigh": 25.74
+    }
+  ],
+  [
+    "48.45857,2.156942,1177365600",
+    {
+      "temperatureLow": 13.21,
+      "temperatureHigh": 25.89
+    }
+  ],
+  [
+    "48.45857,2.156942,1177369200",
+    {
+      "temperatureLow": 13.21,
+      "temperatureHigh": 25.89
+    }
+  ],
+  [
+    "48.45857,2.156942,1177452000",
+    {
+      "temperatureLow": 12.43,
+      "temperatureHigh": 27.09
+    }
+  ],
+  [
+    "48.45857,2.156942,1177455600",
+    {
+      "temperatureLow": 12.43,
+      "temperatureHigh": 27.09
+    }
+  ],
+  [
+    "48.45857,2.156942,1177538400",
+    {
+      "temperatureLow": 13.63,
+      "temperatureHigh": 24.72
+    }
+  ],
+  [
+    "48.45857,2.156942,1177542000",
+    {
+      "temperatureLow": 13.63,
+      "temperatureHigh": 24.72
+    }
+  ],
+  [
+    "48.45857,2.156942,1177624800",
+    {
+      "temperatureLow": 13.72,
+      "temperatureHigh": 26.11
+    }
+  ],
+  [
+    "48.45857,2.156942,1177628400",
+    {
+      "temperatureLow": 13.72,
+      "temperatureHigh": 26.11
+    }
+  ],
+  [
+    "48.45857,2.156942,1177711200",
+    {
+      "temperatureLow": 13.74,
+      "temperatureHigh": 26.01
+    }
+  ],
+  [
+    "48.45857,2.156942,1177714800",
+    {
+      "temperatureLow": 13.74,
+      "temperatureHigh": 26.01
+    }
+  ],
+  [
+    "48.45857,2.156942,1177884000",
+    {
+      "temperatureLow": 12.17,
+      "temperatureHigh": 23.02
+    }
+  ],
+  [
+    "48.45857,2.156942,1177943040",
+    {
+      "temperatureLow": 12.17,
+      "temperatureHigh": 23.02
+    }
+  ],
+  [
+    "48.45857,2.156942,1177970400",
+    {
+      "temperatureLow": 11.83,
+      "temperatureHigh": 23.05
+    }
+  ],
+  [
+    "48.45857,2.156942,1178029440",
+    {
+      "temperatureLow": 11.83,
+      "temperatureHigh": 23.05
+    }
+  ],
+  [
+    "48.45857,2.156942,1178056800",
+    {
+      "temperatureLow": 8.83,
+      "temperatureHigh": 21.15
+    }
+  ],
+  [
+    "48.45857,2.156942,1178115840",
+    {
+      "temperatureLow": 8.83,
+      "temperatureHigh": 21.15
+    }
+  ],
+  [
+    "48.45857,2.156942,1178143200",
+    {
+      "temperatureLow": 9.7,
+      "temperatureHigh": 21.28
+    }
+  ],
+  [
+    "48.45857,2.156942,1178202240",
+    {
+      "temperatureLow": 9.7,
+      "temperatureHigh": 21.28
+    }
+  ],
+  [
+    "48.45857,2.156942,1178229600",
+    {
+      "temperatureLow": 9.81,
+      "temperatureHigh": 20.37
+    }
+  ],
+  [
+    "48.45857,2.156942,1178288640",
+    {
+      "temperatureLow": 9.81,
+      "temperatureHigh": 20.37
+    }
+  ],
+  [
+    "48.45857,2.156942,1178316000",
+    {
+      "temperatureLow": 6.42,
+      "temperatureHigh": 15.74
+    }
+  ],
+  [
+    "48.45857,2.156942,1178375040",
+    {
+      "temperatureLow": 6.42,
+      "temperatureHigh": 15.74
+    }
+  ],
+  [
+    "48.45857,2.156942,1178402400",
+    {
+      "temperatureLow": 12.76,
+      "temperatureHigh": 19.21
+    }
+  ],
+  [
+    "48.45857,2.156942,1178461440",
+    {
+      "temperatureLow": 12.76,
+      "temperatureHigh": 19.21
+    }
+  ],
+  [
+    "48.45857,2.156942,1178488800",
+    {
+      "temperatureLow": 12.9,
+      "temperatureHigh": 18.82
+    }
+  ],
+  [
+    "48.45857,2.156942,1178547840",
+    {
+      "temperatureLow": 12.9,
+      "temperatureHigh": 18.82
+    }
+  ],
+  [
+    "48.45857,2.156942,1178575200",
+    {
+      "temperatureLow": 14.71,
+      "temperatureHigh": 19.61
+    }
+  ],
+  [
+    "48.45857,2.156942,1178634240",
+    {
+      "temperatureLow": 14.71,
+      "temperatureHigh": 19.61
+    }
+  ],
+  [
+    "48.45857,2.156942,1178661600",
+    {
+      "temperatureLow": 12.13,
+      "temperatureHigh": 18.51
+    }
+  ],
+  [
+    "48.45857,2.156942,1178720640",
+    {
+      "temperatureLow": 12.13,
+      "temperatureHigh": 18.51
+    }
+  ],
+  [
+    "48.45857,2.156942,1178748000",
+    {
+      "temperatureLow": 11.92,
+      "temperatureHigh": 23.32
+    }
+  ],
+  [
+    "48.45857,2.156942,1178807040",
+    {
+      "temperatureLow": 11.92,
+      "temperatureHigh": 23.32
+    }
+  ],
+  [
+    "48.45857,2.156942,1178834400",
+    {
+      "temperatureLow": 12.49,
+      "temperatureHigh": 17.27
+    }
+  ],
+  [
+    "48.45857,2.156942,1178893440",
+    {
+      "temperatureLow": 12.49,
+      "temperatureHigh": 17.27
+    }
+  ],
+  [
+    "48.45857,2.156942,1178920800",
+    {
+      "temperatureLow": 11.25,
+      "temperatureHigh": 19.68
+    }
+  ],
+  [
+    "48.45857,2.156942,1178979840",
+    {
+      "temperatureLow": 11.25,
+      "temperatureHigh": 19.68
+    }
+  ],
+  [
+    "48.45857,2.156942,1179007200",
+    {
+      "temperatureLow": 12.36,
+      "temperatureHigh": 23.14
+    }
+  ],
+  [
+    "48.45857,2.156942,1179066240",
+    {
+      "temperatureLow": 12.36,
+      "temperatureHigh": 23.14
+    }
+  ],
+  [
+    "48.45857,2.156942,1179093600",
+    {
+      "temperatureLow": 8.47,
+      "temperatureHigh": 17.05
+    }
+  ],
+  [
+    "48.45857,2.156942,1179152640",
+    {
+      "temperatureLow": 8.47,
+      "temperatureHigh": 17.05
+    }
+  ],
+  [
+    "48.45857,2.156942,1179180000",
+    {
+      "temperatureLow": 11.34,
+      "temperatureHigh": 16.13
+    }
+  ],
+  [
+    "48.45857,2.156942,1179239040",
+    {
+      "temperatureLow": 11.34,
+      "temperatureHigh": 16.13
+    }
+  ],
+  [
+    "48.45857,2.156942,1179266400",
+    {
+      "temperatureLow": 11.83,
+      "temperatureHigh": 17.04
+    }
+  ],
+  [
+    "48.45857,2.156942,1179325440",
+    {
+      "temperatureLow": 11.83,
+      "temperatureHigh": 17.04
+    }
+  ],
+  [
+    "48.45857,2.156942,1179352800",
+    {
+      "temperatureLow": 14.61,
+      "temperatureHigh": 16.76
+    }
+  ],
+  [
+    "48.45857,2.156942,1179411840",
+    {
+      "temperatureLow": 14.61,
+      "temperatureHigh": 16.76
+    }
+  ],
+  [
+    "48.45857,2.156942,1179439200",
+    {
+      "temperatureLow": 13.66,
+      "temperatureHigh": 23.93
+    }
+  ],
+  [
+    "48.45857,2.156942,1179498240",
+    {
+      "temperatureLow": 13.66,
+      "temperatureHigh": 23.93
+    }
+  ],
+  [
+    "48.45857,2.156942,1179525600",
+    {
+      "temperatureLow": 11.59,
+      "temperatureHigh": 19.87
+    }
+  ],
+  [
+    "48.45857,2.156942,1179584640",
+    {
+      "temperatureLow": 11.59,
+      "temperatureHigh": 19.87
+    }
+  ],
+  [
+    "48.45857,2.156942,1179612000",
+    {
+      "temperatureLow": 12.84,
+      "temperatureHigh": 14.74
+    }
+  ],
+  [
+    "48.45857,2.156942,1179671040",
+    {
+      "temperatureLow": 12.84,
+      "temperatureHigh": 14.74
+    }
+  ],
+  [
+    "48.45857,2.156942,1179698400",
+    {
+      "temperatureLow": 13.23,
+      "temperatureHigh": 23.73
+    }
+  ],
+  [
+    "48.45857,2.156942,1179757440",
+    {
+      "temperatureLow": 13.23,
+      "temperatureHigh": 23.73
+    }
+  ],
+  [
+    "48.45857,2.156942,1179784800",
+    {
+      "temperatureLow": 13.61,
+      "temperatureHigh": 21.03
+    }
+  ],
+  [
+    "48.45857,2.156942,1179843840",
+    {
+      "temperatureLow": 13.61,
+      "temperatureHigh": 21.03
+    }
+  ],
+  [
+    "48.45857,2.156942,1179930240",
+    {
+      "temperatureLow": 13.47,
+      "temperatureHigh": 22.2
+    }
+  ],
+  [
+    "48.45857,2.156942,1180016640",
+    {
+      "temperatureLow": 15.3,
+      "temperatureHigh": 26.86
+    }
+  ],
+  [
+    "48.45857,2.156942,1180103040",
+    {
+      "temperatureLow": 14,
+      "temperatureHigh": 27.23
+    }
+  ],
+  [
+    "48.45857,2.156942,1180189440",
+    {
+      "temperatureLow": 9.08,
+      "temperatureHigh": 20.61
+    }
+  ],
+  [
+    "48.45857,2.156942,1180275840",
+    {
+      "temperatureLow": 9.06,
+      "temperatureHigh": 13.24
+    }
+  ],
+  [
+    "48.45857,2.156942,1180362240",
+    {
+      "temperatureLow": 6.78,
+      "temperatureHigh": 13.58
+    }
+  ],
+  [
+    "48.45857,2.156942,1180448640",
+    {
+      "temperatureLow": 8.32,
+      "temperatureHigh": 16.28
+    }
+  ],
+  [
+    "48.45857,2.156942,1180535040",
+    {
+      "temperatureLow": 9.23,
+      "temperatureHigh": 15.98
+    }
+  ],
+  [
+    "48.45857,2.156942,1180621440",
+    {
+      "temperatureLow": 8.68,
+      "temperatureHigh": 18.92
+    }
+  ],
+  [
+    "48.45857,2.156942,1180707840",
+    {
+      "temperatureLow": 11.29,
+      "temperatureHigh": 17.74
+    }
+  ]
+]
