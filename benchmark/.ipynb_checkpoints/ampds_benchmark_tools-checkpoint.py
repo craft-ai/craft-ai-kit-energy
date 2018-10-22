@@ -12,7 +12,6 @@ import seaborn as sns
 from fbprophet import Prophet
 import imp
 import subprocess
-from sklearn.metrics import r2_score
 
 #configurating seaborn
 palette = sns.color_palette("Set2", 10, 0.9)
@@ -20,52 +19,47 @@ sns.set_palette(palette)
 sns.set_style("dark")
 
 def split_data(data, last_train_index, last_test_index):
-    data_train = data.iloc[:last_train_index,:]
+    data_train= data.iloc[:last_train_index,:]
     data_test = data.iloc[last_train_index:last_test_index,:]
     return data_train, data_test
 
-def MAE(gv, preds):
+def compute_mae(gv, preds):
     '''
     input : 2 arrays with the same dims, output : mean absolute error
     '''  
-    return np.round(np.nansum(np.abs(preds - gv)) / len(preds),2)
+    return np.round(np.nansum(np.abs(preds- gv))/len(preds))
 
-def RMSE(gv, preds):
+def compute_rmse(gv, preds):
     '''
     input : 2 arrays with the same dims, output : root mean square error
     '''  
-    return np.round(np.sqrt(np.nansum(np.square(preds - gv)) / len(preds)),2)
+    return np.round(np.sqrt(np.nansum(np.square(preds- gv))/len(preds)))
 
-def MAPE(gv, preds):
+def compute_mape(gv, preds):
     '''
     input : 2 arrays with the same dims, output : mean absolute percentage error
     '''  
-    mape = np.nansum(np.abs((preds - gv) / gv)) / len(preds) * 100
-    return np.round(mape, 2)
+    return np.round(np.nansum(np.abs(preds- gv)/gv)/len(preds),4)*100
 
-def R2(gv, preds):
+def compute_r2(gv, preds):
     '''
     input : 2 arrays with the same dims, output : r2 error
-    ''' 
-    # residual sum of squares
-    ss_res = np.nansum(np.square(preds - gv))
-    # total sum of squares
-    ss_tot = np.nansum(np.square(gv - np.nanmean(gv)))
-    return 1 - ss_res / ss_tot
+    '''  
+    return 1 - np.nansum(np.square(preds- gv))/np.nansum(np.square(np.mean(gv)- gv))
 
-def compute_metric(gv, preds, metric):
-    if metric =='mape':
-        return MAPE(gv, preds)
-    elif metric == 'rmse':
-        return RMSE(gv, preds)
-    elif metric == 'r2':
-        return R2(gv, preds)
-    return MAE(gv, preds)
+def compute_metric(gv, preds):
+    if metric=='mape':
+        return compute_mape(gv, preds)
+    if metric == 'rmse':
+        return compute_rmse(gv, preds)
+    if metric == 'r2':
+        return compute_r2(gv, preds)
+    return compute_mae(gv, preds)
 
 def get_features_from_index(df):
     new_df = df.copy(deep=True).dropna()
     new_df['hour'] = new_df.index.hour
-    new_df['day'] = new_df.index.dayofweek
+    new_df['day'] = new_df.index.day
     new_df['month'] = new_df.index.month
     new_df['year'] = new_df.index.year
     return new_df
@@ -75,56 +69,57 @@ def get_craft_preds(start_train =1, stop_train=2, start_pred=2, stop_pred=3, nod
     craft_preds = pd.read_json(subprocess.check_output(command), convert_dates=['date']).set_index('date')
     return craft_preds[['predictedLoad', 'standardDeviation']]
 
-def get_scikit_preds(data_train, data_test, max_depth=8):
+def get_scikit_preds(data_train, data_test):
     sk_train = get_features_from_index(data_train)
     sk_test = get_features_from_index(data_test)
-    skTree = DecisionTreeRegressor(criterion = 'mse', max_depth=max_depth, random_state=0)
+    skTree = DecisionTreeRegressor(criterion = 'mse', max_depth=3, random_state=0)
     skTree.fit(sk_train[['hour', 'day', 'month', 'year', 'temp']], sk_train['load'])
     sk_results = skTree.predict(sk_test[['hour', 'day', 'month', 'year', 'temp']])
     return sk_results
 
-def get_forest_preds(data_train, data_test, n_estimators=6, max_depth=9):
+def get_forest_preds(data_train, data_test):
     sk_train = get_features_from_index(data_train)
     sk_test = get_features_from_index(data_test)
-    skForest = RandomForestRegressor(n_estimators=n_estimators, criterion='mse', max_depth=max_depth, random_state=0, bootstrap=True)
+    skForest = RandomForestRegressor(n_estimators=9, criterion = 'mse', max_depth=6, random_state=0, bootstrap=True)
     skForest.fit(sk_train[['hour', 'day', 'month', 'year', 'temp']], sk_train['load'])
     results = skForest.predict(sk_test[['hour', 'day', 'month', 'year', 'temp']])
     return results
 
 def get_prophet_preds(data_train, data_test):
-    prophet_train = data_train.copy(deep=True)
-    prophet_test = data_test.copy(deep=True)
-    prophet_train.index = prophet_train.index.tz_localize(None)
-    prophet_test.index = prophet_test.index.tz_localize(None)
-    prophet_train = prophet_train.reset_index().rename(columns={'date':'ds', 'load': 'y'})
+    prophet_train = data_train.reset_index().rename(columns={'date':'ds', 'load': 'y'})
     pm = Prophet()
     pm.add_regressor('temp')
     pm.fit(prophet_train)
-    future = prophet_test.drop('load', 1).reset_index().rename(columns={'date':'ds'})
+    future = data_test.drop('load',1).reset_index().rename(columns={'date':'ds'})
     forecast = pm.predict(future)
 
     return forecast['yhat'].values
 
-def get_sarima_preds(data_train, data_test, week_unit, params, seasonal_params, max_feed=3000):
+
+
+def get_sarima_preds(data_train,data_test,week_unit, max_feed=3000):
     #To avoid memory errors, let's train our sarima model on the last max_feed entries only
+    
     sarima_train = data_train if data_train.shape[0] < max_feed else data_train.iloc[-max_feed:,:]
-    model = SARIMAX(sarima_train.loc[:,'load'].values,
-                            order= params, 
-                            seasonal_order = seasonal_params,
-                            exog = sarima_train.iloc[:,1],
+    model = SARIMAX(sarima_train.loc[:,'load'].values[-5000:],
+                            order= (1,0,1), 
+                            seasonal_order = (0,1,1,48),
+                            exog = sarima_train.iloc[-5000:,1],
                             enforce_stationarity=False, 
                             enforce_invertibility=False)
     sarima_results = model.fit()
-    sarima_pred = sarima_results.get_prediction(data_test.index[0], data_test.index[-1], dynamic=False, exog=data_test[['temp']])
+    sarima_pred = sarima_results.get_prediction(data_test.index[0], data_test.index[-1], dynamic=False, exog = data_test[['temp']])
 
     return sarima_pred.predicted_mean
 
 def get_models_scores(data_test, predictions, idx):
-    """ data_test: ground values dataframe
-    predictions: array of arrays
+    """
+    data_test : ground values dataframe
+    predictions : array of arrays
     idx: array of names of diff models
-    Return dataframe of scores """
-    
+    Return dataframe of scores
+    """
+
     ground_values = data_test['load'].values
     maes=[]
     mapes=[]
@@ -132,10 +127,10 @@ def get_models_scores(data_test, predictions, idx):
     r2=[]
     for pred in predictions:
         gv = ground_values if len(pred) == len(ground_values) else ground_values[:len(pred)]
-        maes.append(MAE(gv,pred))
-        rmse.append(RMSE(gv,pred))
-        mapes.append(MAPE(gv,pred))
-        r2.append(r2_score(gv,pred))
+        maes.append(compute_mae(gv,pred))
+        rmse.append(compute_rmse(gv,pred))
+        mapes.append(compute_mape(gv,pred))
+        r2.append(compute_r2(gv,pred))
     
     scores = pd.DataFrame(data={
         'ids': idx,
@@ -144,31 +139,32 @@ def get_models_scores(data_test, predictions, idx):
         'rmse': rmse,
         'r2' :  r2
     })
-    return scores.set_index('ids')
+    return scores 
 
-def plot_period_predictions(data_test, predictions, standardDev=False, low_val=None, upper_val=None):
-    """
-    data_test : DataFrame with the test data
-    predictions : dictionary with the names of the predictions as keys, and the predictions as values
-    """
-    df_compare = data_test.copy(deep=True)
-    assert type(predictions) == dict
-    for name, preds in predictions.items():
-            try: 
-                if preds.predictedLoad.any():
-                    df_compare[name] = preds.predictedLoad 
-                    continue
-        
-            except : pass
-            if preds.any():
-                df_compare[name] = preds
-
+def plot_period_predictions(data_test, craft_preds=None, sk_preds=None, forest_preds=None, pm_preds=None, sarima_preds=None, standardDev = False, low_val=None,upper_val=None):
+    df_compare = data_test.copy(deep=True).drop('temp',1)
+    
+    try: 
+        if craft_preds.any(): df_compare['craft ai'] = craft_preds
+    except: pass
+    try: 
+        if sk_preds.any(): df_compare['scikit tree'] = sk_preds
+    except: pass
+    try: 
+        if forest_preds.any() : df_compare['scikit forest'] = forest_preds
+    except: pass
+    try: 
+        if pm_preds.any(): df_compare['prophet'] = pm_preds
+    except: pass
+    try: 
+        if sarima_preds.any(): df_compare['sarima'] = sarima_preds
+    except: pass
+    
     fig = plt.figure(figsize=(20,5))
     sns.lineplot(data=df_compare, dashes=False)
+    
     if standardDev == True:
         try: 
-            if (low_val.any() and upper_val.any()):
-                plt.fill_between(x=df_compare.index, y1=low_val, y2=upper_val, alpha=0.2, color=palette[1])
+            if (low_val.any() and  upper_val.any()):
+                plt.fill_between(x=df_compare.index, y1 = low_val, y2 =upper_val, alpha=0.2, color=palette[1])
         except: pass
-    
-    plt.show()

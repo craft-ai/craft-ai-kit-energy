@@ -6,10 +6,8 @@ const path = require('path');
 const Stream = require('../stream');
 const Utils = require('../utils');
 
-
 function stream(filepath, options = {}) {
   const error = validateArguments(filepath, options);
-
   if (error) return most.throwError(error);
 
   const file = fs.createReadStream(filepath);
@@ -45,7 +43,6 @@ function stream(filepath, options = {}) {
 
     throw error;
   });
-
   // Handling reading no line at all (`csv-parse` does not) while still checking the availability of the file
   return options.to === (options.from || 0) ? result.take(0) : result;
 }

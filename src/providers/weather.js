@@ -127,14 +127,14 @@ async function extendRecord(endpoint, record) {
           return result;
         }, {});
 
-        console.log(`${position},${dataPoint.time}`, result);
+        // console.log(`${position},${dataPoint.time}`, result);
         cache.set(`${position},${dataPoint.time}`, result);
 
         return result;
       });
 
       // Also caching the exact requested timestamp
-      console.log(resource, results[0]);
+      // console.log(resource, results[0]);
       cache.set(resource, results[0]);
 
       return results[0];
