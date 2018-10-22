@@ -4,7 +4,7 @@ const test = require('ava');
 const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
 const Is = require('../helpers/is');
-
+const Common = require('../../src/endpoint/common')
 
 test.before(require('dotenv').load);
 
@@ -60,6 +60,17 @@ test('computes predictions', (t) => {
       values.slice(1).forEach((current) => t.deepEqual(predictions, current));
       t.snapshot(predictions);
     }));
+});
+
+test('computes predictions with accurate non local timezone', (t) => {
+  const context = t.context;
+  const endpoint = context.endpoint.current;
+  const records = TEST_RECORDS.map(Common.toRecord)
+  return endpoint
+    .computePredictions(TEST_RECORDS)
+    .then((predictions)=> {
+      predictions.forEach((prediction, idx) => t.is(prediction.context.timezone, records[idx].timezone))
+    });
 });
 
 test('computes predictions given a model', (t) => {
