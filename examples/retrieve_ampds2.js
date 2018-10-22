@@ -33,11 +33,11 @@ return Promise.all([
     log(`Retrieving electricity dataset from '${ELECTRICITY_DATASET_URL}'...`);
     https.get(ELECTRICITY_DATASET_URL, (response) => {
       const electricityReadStream = response
-      // Parse it as a CSV file
+        // Parse it as a CSV file
         .pipe(csv({
           columns: true
         }))
-      // Select the data we are interested in
+        // Select the data we are interested in
         .pipe(stream.Transform({
           objectMode: true,
           transform: function(row, encoding, next) {
@@ -45,7 +45,7 @@ return Promise.all([
               .fromMillis(row['UNIX_TS'] * 1000, { zone: 'America/Vancouver' });
             const transformed = {
               date: datetime,
-              load: row['WHE'] * 1000 // from kW to W
+              load: row['WHE'] * 1000 // Convert from kW to W
             };
             this.push(transformed);
             next();
@@ -102,18 +102,18 @@ return Promise.all([
               }
             }
             const secondsToCurrentClimateRow = currentClimateRow.date.diff(row.date).as('seconds');
-            //console.log(`${row.date.toISO()} - ${currentClimateRow.date.toISO()} = ${secondsToCurrentClimateRow} seconds`);
             if (secondsToCurrentClimateRow > 0) {
-              // We didn't reach the expected time yet
+              // The electricity stream is lagging behind the climate stream.
+              // We skip the climate information for this record and keep reading to catch the climate stream.
               break;
             }
             if (secondsToCurrentClimateRow > -60) {
-              // Matching !
+              // Matching climate row found! Both streams are in sync.
               matchingClimateRow = currentClimateRow;
               currentClimateRow = climateReadStream.read();
-              //console.log(`Match !${row.date.toISO()} - ${matchingClimateRow.temperature}°C`);
               break;
             }
+            // The climate stream is lagging behind the electricity stream. We keep reading the climate stream.
             currentClimateRow = climateReadStream.read();
           }
           this.push({
