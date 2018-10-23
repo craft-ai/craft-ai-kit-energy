@@ -46,7 +46,7 @@ function isNotString(value) { return typeof value !== 'string'; }
 function parseDate(value) {
   if (value === null || value === undefined || typeof value === 'boolean') return;
   return typeof value === 'string'
-    ? DateTime.fromISO(value, {setZone: true})
+    ? DateTime.fromISO(value, { setZone: true })
     // ? DateTime.fromMillis(parseInt(value)*1000).setZone('America/Chicago')
     : value instanceof Date
       ? DateTime.fromJSDate(value)
