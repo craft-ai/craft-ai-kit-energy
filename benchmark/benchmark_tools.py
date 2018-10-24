@@ -93,8 +93,11 @@ def get_forest_preds(data_train, data_test, n_estimators=6, max_depth=9, exog = 
     results = skForest.predict(sk_test[features])
     return results
 
-def get_prophet_preds(data_train, data_test, exog = None):
-    prophet_train = data_train.copy(deep=True)
+def get_prophet_preds(data_train, data_test, exog = None, max_feed=None):
+    if max_feed and type(max_feed) == int :
+        prophet_train = data_train.copy(deep=True) if data_train.shape[0] < max_feed else data_train.iloc[-max_feed:,:].copy(deep=True)
+    else :
+        prophet_train = data_train.copy(deep=True)
     prophet_test = data_test.copy(deep=True)
     prophet_train.index = prophet_train.index.tz_localize(None)
     prophet_test.index = prophet_test.index.tz_localize(None)
