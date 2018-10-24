@@ -75,37 +75,41 @@ def get_craft_preds(start_train =1, stop_train=2, start_pred=2, stop_pred=3, nod
     craft_preds = pd.read_json(subprocess.check_output(command), convert_dates=['date']).set_index('date')
     return craft_preds[['predictedLoad', 'standardDeviation']]
 
-def get_scikit_preds(data_train, data_test, max_depth=8):
+def get_scikit_preds(data_train, data_test, max_depth=8, exog = None):
     sk_train = get_features_from_index(data_train)
     sk_test = get_features_from_index(data_test)
+    features = ['hour', 'day', 'month', 'year'] +  exog if exog else ['hour', 'day', 'month', 'year']
     skTree = DecisionTreeRegressor(criterion = 'mse', max_depth=max_depth, random_state=0)
-    skTree.fit(sk_train[['hour', 'day', 'month', 'year', 'temp']], sk_train['load'])
-    sk_results = skTree.predict(sk_test[['hour', 'day', 'month', 'year', 'temp']])
+    skTree.fit(sk_train[features], sk_train['load'])
+    sk_results = skTree.predict(sk_test[features])
     return sk_results
 
-def get_forest_preds(data_train, data_test, n_estimators=6, max_depth=9):
+def get_forest_preds(data_train, data_test, n_estimators=6, max_depth=9, exog = None):
     sk_train = get_features_from_index(data_train)
     sk_test = get_features_from_index(data_test)
+    features = ['hour', 'day', 'month', 'year'] +  exog if exog else ['hour', 'day', 'month', 'year']
     skForest = RandomForestRegressor(n_estimators=n_estimators, criterion='mse', max_depth=max_depth, random_state=0, bootstrap=True)
-    skForest.fit(sk_train[['hour', 'day', 'month', 'year', 'temp']], sk_train['load'])
-    results = skForest.predict(sk_test[['hour', 'day', 'month', 'year', 'temp']])
+    skForest.fit(sk_train[features], sk_train['load'])
+    results = skForest.predict(sk_test[features])
     return results
 
-def get_prophet_preds(data_train, data_test):
+def get_prophet_preds(data_train, data_test, exog = None):
     prophet_train = data_train.copy(deep=True)
     prophet_test = data_test.copy(deep=True)
     prophet_train.index = prophet_train.index.tz_localize(None)
     prophet_test.index = prophet_test.index.tz_localize(None)
     prophet_train = prophet_train.reset_index().rename(columns={'date':'ds', 'load': 'y'})
     pm = Prophet()
-    pm.add_regressor('temp')
+    if exog:
+        for ex in exog :
+            pm.add_regressor(ex)
     pm.fit(prophet_train)
     future = prophet_test.drop('load', 1).reset_index().rename(columns={'date':'ds'})
     forecast = pm.predict(future)
 
     return forecast['yhat'].values
 
-def get_sarima_preds(data_train, data_test, week_unit, params, seasonal_params, max_feed=3000):
+def get_sarima_preds(data_train, data_test, week_unit, params, seasonal_params, max_feed=3000, exog=None):
     #To avoid memory errors, let's train our sarima model on the last max_feed entries only
     sarima_train = data_train if data_train.shape[0] < max_feed else data_train.iloc[-max_feed:,:]
     model = SARIMAX(sarima_train.loc[:,'load'].values,
@@ -115,7 +119,7 @@ def get_sarima_preds(data_train, data_test, week_unit, params, seasonal_params, 
                             enforce_stationarity=False, 
                             enforce_invertibility=False)
     sarima_results = model.fit()
-    sarima_pred = sarima_results.get_prediction(data_test.index[0], data_test.index[-1], dynamic=False, exog=data_test[['temp']])
+    sarima_pred = sarima_results.get_prediction(data_test.index[0], data_test.index[-1], dynamic=False, exog=data_test[exog])
 
     return sarima_pred.predicted_mean
 

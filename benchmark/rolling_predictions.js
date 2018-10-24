@@ -7,13 +7,37 @@ const path = require('path');
 const WeatherProvider = require('../src/providers/weather');
 const { endpointPipeline } = require('./endpoint_pipeline');
 
-const log = debug('craft-ai:kit-energy:benchmark:uci:rolling_preds');
+const log = debug('craft-ai:kit-energy:benchmark:rolling_preds');
 log.enabled = true;
 
 const DATASET_PATH = path.join(__dirname, './data/uci/uci_household_power_consumption.csv');
-const [DEPTH, PRED_SIZE, START, INIT, STOP] = [args['depth'],  args['delta'], args['start'],  args['init'], args['stop']];
 const WEATHER_CACHE_PATH = path.join(__dirname, './provider/weather_cache_uci.json');
+
+const [DEPTH, PRED_SIZE, START, INIT, STOP] = [args['depth'],  args['window'], args['start'],  args['init'], args['stop']];
 const AGENT_ID = 'uci_'+DEPTH.toString();
+
+// const providers = [ 
+//     {
+//         provider: WeatherProvider,
+//         options:{
+//             // token: "j-utilise-le-cache",
+//             token: process.env.DARK_SKY_TOKEN,
+//             properties: ['temperature'],
+//             refresh: 'hourly',
+//             cache: {
+//                 load: () => require(WEATHER_CACHE_PATH),
+//                 size:35040,
+//                 save: (cache) => {
+//                     fs.writeFileSync(
+//                     WEATHER_CACHE_PATH,
+//                     JSON.stringify(cache, null, '  ')
+//                     );
+//                 }
+//             }
+//         }
+//     }
+// ]  
+
 
 const providers = [ 
     {
@@ -37,6 +61,18 @@ const providers = [
     }
 ]  
 
+// const metadata = {
+//     region: 'IA',
+//     latitude: 49.249444,  //Cedar Rapids, Iowa, retrieved from latlong.net
+//     longitude: -122.979722   // Latitude and longitude retrieved from https://www.latlong.net
+//   }
+
+const metadata = {
+region: '91',
+latitude: 48.45857,  //Essone 
+longitude: 2.156942   // Latitude and longitude retrieved from https://www.latlong.net
+}
+
 let kit = EnergyKit
     .initialize({
     token: process.env.CRAFT_AI_TOKEN || process.env.CRAFT_TOKEN,
@@ -46,7 +82,7 @@ let kit = EnergyKit
 async function rolling_pred (agent_id, depth, start_train, start_pred, stop, pred_size){
     const first_pred = start_pred;
     let last_pred = start_pred + pred_size;
-    const options = {agent_id, depth, providers}
+    const options = {agent_id, depth, metadata}
     while (last_pred <= stop){
             const indexes = [start_train, start_pred, last_pred];
             kit = await endpointPipeline(kit, DATASET_PATH, indexes, options)
@@ -59,8 +95,9 @@ async function rolling_pred (agent_id, depth, start_train, start_pred, stop, pre
 }
 
 rolling_pred(AGENT_ID, DEPTH, START*PRED_SIZE, INIT*PRED_SIZE, STOP*PRED_SIZE, PRED_SIZE)
+.then((kit)=>kit.close())
 .catch(error => {
-    log('Error: rolling predictions interrupted. See error message above. Closi');
+    log('Error: rolling predictions interrupted. See error message above.');
     return process.exit(1)
 
 });

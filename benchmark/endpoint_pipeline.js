@@ -31,7 +31,7 @@ async function prediction_dates (agent_id, path_to_dataset, prediction_start, pr
         .then(()=>[dates[0].date, dates[dates.length-1].date])
 }
 
-function endpointPipeline(kit, path_to_dataset, indexes, {agent_id, depth, providers, exog} ){
+function endpointPipeline(kit, path_to_dataset, indexes, {agent_id, depth, metadata, exog} ){
 
   if (exog !=undefined && !Array.isArray(exog)){
     throw (`exog must be an array, received ${typeof exog}`)
@@ -52,13 +52,8 @@ function endpointPipeline(kit, path_to_dataset, indexes, {agent_id, depth, provi
                 return kit.loadEndpoint(
                 {
                   id: agent_id,
-                  metadata: {
-                    region: '91',
-                    latitude: 48.458570,  //Cedar Rapids, Iowa, retrieved from latlong.net
-                    longitude: 2.156942   // Latitude and longitude retrieved from https://www.latlong.net
-                  },
+                  metadata: metadata,
                   learning:{
-                    time_quantum:60,
                     tree_max_depth: depth,
                     properties : exog ? {[exog[0]]: {type : 'enum'}} : undefined
                   },
