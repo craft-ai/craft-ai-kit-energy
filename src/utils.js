@@ -45,14 +45,15 @@ function isPredictiveModel(value) {
 
 function isNotString(value) { return typeof value !== 'string'; }
 
-function parseDate(value, timezone) {
+function parseDate(value, zone) {
   if (value === null || value === undefined || typeof value === 'boolean') return;
 
-  return typeof value === 'string'
-    ?  DateTime.fromISO(value, { zone : timezone })
+  const date = typeof value === 'string'
+    ? DateTime.fromISO(value, { setZone: true })
     : value instanceof Date
       ? DateTime.fromJSDate(value)
       : typeof value === 'number' ? DateTime.fromMillis(value) : value;
+  return zone && date.isValid ? date.setZone(zone) : date;
 }
 
 function parseNumber(value) {
@@ -61,10 +62,10 @@ function parseNumber(value) {
   return Number.isFinite(result) ? result : undefined;
 }
 
-function parseTimestamp(value, timezone) {
+function parseTimestamp(value) {
   if (value === undefined || value === null) return;
 
-  const date = parseDate(value, timezone);
+  const date = parseDate(value);
 
   if (date && date.isValid) return Math.floor(date.valueOf() / 1000);
 

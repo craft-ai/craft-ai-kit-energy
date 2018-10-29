@@ -14,9 +14,9 @@ async function update(records, options) {
   const client = this.kit.client;
   const energy = this.energy;
   const features = this.features;
-  const timezone = this.metadata.timezone || 'Europe/Paris';
   const end = agent.lastTimestamp;
-  let stream = Common.toRecordStream(records, options && options.import, true, timezone);
+
+  let stream = Common.toRecordStream(records, options && options.import, true, this.metadata.zone);
   let failed = false;
 
   if (energy.period) stream = energy.origin

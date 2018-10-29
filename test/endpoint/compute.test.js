@@ -17,7 +17,7 @@ test.beforeEach((t) => Helpers
     const kit = context.kit;
 
     return kit
-      .loadEndpoint({ id: context.endpoint.register() })
+      .loadEndpoint({ id: context.endpoint.register() , metadata: { zone : 'Europe/Paris' }})
       .then((endpoint) => endpoint.update(TRAINING_RECORDS))
       .then((endpoint) => t.context.endpoint.current = endpoint);
   }));
@@ -69,7 +69,7 @@ test('computes predictions with accurate non local timezone', (t) => {
   const endpoint = context.endpoint.current;
   
   return Common
-    .toRecordStream(TEST_RECORDS)
+    .toRecordStream(TEST_RECORDS, {}, false, 'Europe/Paris')
     .thru(buffer())
     .thru(nth.last)
     .then((records) => {

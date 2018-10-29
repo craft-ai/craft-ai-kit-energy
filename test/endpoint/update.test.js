@@ -173,7 +173,7 @@ test('reduces the size of the records by dropping successive identical values', 
   const client = kit.client;
 
   return t.notThrowsAsync(kit
-    .loadEndpoint({ id: context.endpoint.register() })
+    .loadEndpoint({ id: context.endpoint.register(), metadata: { zone : 'Europe/Paris' }})
     .then((endpoint) => endpoint.update(RECORDS))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
     .then((history) => {
@@ -245,7 +245,8 @@ test('converts energy values to mean electrical loads', (t) => {
   return t.notThrowsAsync(kit
     .loadEndpoint({
       id: context.endpoint.register(),
-      energy: { period: { minutes: 30 } }
+      energy: { period: { minutes: 30 },
+      metadata: { zone : 'Europe/Paris' }}
     })
     .then((endpoint) => endpoint.update(RECORDS_AS_ENERGY))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
@@ -267,7 +268,8 @@ test('converts accumulated energy values to mean electrical loads', (t) => {
       energy: {
         origin: { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 },
         period: { days: 1 }
-      }
+      },
+      metadata: { zone : 'Europe/Paris' }
     })
     .then((endpoint) => endpoint.update(RECORDS_AS_ACCUMULATED_ENERGY))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
