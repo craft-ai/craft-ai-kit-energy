@@ -40,9 +40,10 @@ function mergeUntilFirstFullRecord(features, records) {
     .skipWhile(Utils.isNull);
 }
 
-function toRecordStream(values, options, onlyRecords) {
+function toRecordStream(values, options, onlyRecords, timezone) {
   return Stream
     .from(values, options)
+    .map((records) => Object.assign(records, { [TIMEZONE] : timezone }))
     .map(toRecord)
     .filter(onlyRecords ? isValidRecord : isValidState)
     .thru(checkRecordsAreSorted);
@@ -88,8 +89,7 @@ function toContextOperation(record) {
 function toRecord(value) {
   if (value === null || typeof value !== 'object')
     throw new TypeError(`A record must be an "object". Received "${value === null ? 'null' : typeof value}".`);
-
-  const date = Utils.parseDate(value[DATE]);
+  const date = Utils.parseDate(value[DATE], value[TIMEZONE]);
   const record = { ...value };
 
   if (date) {
