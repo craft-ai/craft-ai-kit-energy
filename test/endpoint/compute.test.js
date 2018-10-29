@@ -17,7 +17,7 @@ test.beforeEach((t) => Helpers
     const kit = context.kit;
 
     return kit
-      .loadEndpoint({ id: context.endpoint.register() , metadata: { zone : 'Europe/Paris' }})
+      .loadEndpoint({ id: context.endpoint.register(), metadata: { zone : 'Europe/Paris' } })
       .then((endpoint) => endpoint.update(TRAINING_RECORDS))
       .then((endpoint) => t.context.endpoint.current = endpoint);
   }));

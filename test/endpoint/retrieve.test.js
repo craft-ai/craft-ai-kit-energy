@@ -77,7 +77,7 @@ test('retrieves the predictive model of an endpoint', (t) => {
   const kit = context.kit;
 
   return t.notThrowsAsync(kit
-    .loadEndpoint({ id: t.context.endpoint.register(), metadata: { zone: 'Europe/Paris' }})
+    .loadEndpoint({ id: t.context.endpoint.register(), metadata: { zone: 'Europe/Paris' } })
     .then((endpoint) => endpoint
       .update(RECORDS)
       .then(() => Promise.all([

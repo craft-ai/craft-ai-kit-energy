@@ -1,5 +1,4 @@
 const buffer = require('most-buffer');
-const luxon = require('luxon');
 const nth = require('most-nth');
 const test = require('ava');
 

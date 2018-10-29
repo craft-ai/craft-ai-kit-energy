@@ -26,7 +26,7 @@ test('uses a provider to extend records', async(t) => {
   const kit = context.kit;
 
   return kit
-    .loadEndpoint({ id: context.endpoint.register() })
+    .loadEndpoint({ id: context.endpoint.register(), metadata: { zone: 'Europe/Paris' } })
     .then((endpoint) => endpoint.update(RECORDS))
     .then((endpoint) => endpoint.retrieveRecords())
     .then((history) => {
@@ -50,7 +50,7 @@ test('uses a provider with options to extend records', async(t) => {
   const kit = context.kit;
 
   return kit
-    .loadEndpoint({ id: context.endpoint.register(), metadata: { averageMin: 15, averageMax: 24 } })
+    .loadEndpoint({ id: context.endpoint.register(), metadata: { averageMin: 15, averageMax: 24, zone: 'Europe/Paris' } })
     .then((endpoint) => endpoint.update(RECORDS))
     .then((endpoint) => endpoint.retrieveRecords())
     .then((history) => {
@@ -69,7 +69,7 @@ test('uses a provider to compute predictions', async(t) => {
   const kit = context.kit;
 
   return kit
-    .loadEndpoint({ id: context.endpoint.register() })
+    .loadEndpoint({ id: context.endpoint.register(), metadata: { zone: 'Europe/Paris' } })
     .then((endpoint) => endpoint.update(RECORDS))
     .then((endpoint) => endpoint.computePredictions(STATES))
     .then((predictions) => {
