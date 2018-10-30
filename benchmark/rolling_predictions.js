@@ -14,7 +14,7 @@ const DATASET_PATH = path.join(__dirname, './data/uci/uci_household_power_consum
 const WEATHER_CACHE_PATH = path.join(__dirname, './provider/weather_cache_uci.json');
 
 const [DEPTH, PRED_SIZE, START, INIT, STOP] = [args['depth'],  args['window'], args['start'],  args['init'], args['stop']];
-const AGENT_ID = 'uci_'+DEPTH.toString();
+const AGENT_ID = 'uci_test_'+DEPTH.toString();
 
 // const providers = [ 
 //     {
@@ -83,6 +83,7 @@ async function rolling_pred (agent_id, depth, start_train, start_pred, stop, pre
     const first_pred = start_pred;
     let last_pred = start_pred + pred_size;
     const options = {agent_id, depth, metadata}
+    console.log(last_pred, stop)
     while (last_pred <= stop){
             const indexes = [start_train, start_pred, last_pred];
             kit = await endpointPipeline(kit, DATASET_PATH, indexes, options)

@@ -13,3 +13,6 @@ benchmark/__pycache__
 bfg-1.13.0.jar
 benchmark/rolling_predictions_ampds.js
 test/helpers/index.js.rej
+benchmark/ampds_7_context_operations.json
+benchmark/pickles/preds_uci_bench.pickle
+benchmark/pickles/scores_uci_bench.pickle

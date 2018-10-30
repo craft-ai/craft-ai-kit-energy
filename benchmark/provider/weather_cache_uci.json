@@ -15013,5 +15013,19 @@
       "temperatureLow": 6.49,
       "temperatureHigh": 10.64
     }
+  ],
+  [
+    "48.45857,2.156942,1258219440",
+    {
+      "temperatureLow": 10.11,
+      "temperatureHigh": 14.27
+    }
+  ],
+  [
+    "48.45857,2.156942,1258824240",
+    {
+      "temperatureLow": 10.31,
+      "temperatureHigh": 15.73
+    }
   ]
 ]
