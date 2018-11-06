@@ -68,6 +68,15 @@ test('loads an endpoint', async(t) => {
   t.snapshot(endpointA);
 });
 
+
+test('loads endpoint with zone defined in kit', (t) => {
+  IANA_ZONES
+  .map((zone) => { console.log(zone, Object.assign(t.context.kit.configuration, { zone })) })
+  .map(
+    (configuration) => Helpers.createEndpointContext(configuration)
+  )
+
+});
 test('loads an endpoint by forcing the recreation of the agent', async(t) => {
   const context = t.context;
   const kit = context.kit;
@@ -147,6 +156,7 @@ test('closes the kit', (t) => {
 });
 
 
+const IANA_ZONES = Helpers.IANA_ZONES;
 const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const INVALID_STRINGS = Helpers.INVALID_STRINGS;
