@@ -45,6 +45,10 @@ function isPredictiveModel(value) {
 
 function isNotString(value) { return typeof value !== 'string'; }
 
+function isValidZone(zone) { 
+  return DateTime.fromJSDate(new Date()).setZone(zone).isValid;
+}
+
 function parseDate(value, zone) {
   if (value === null || value === undefined || typeof value === 'boolean') return;
 
@@ -85,6 +89,7 @@ module.exports = {
   isNull,
   isPredictiveModel,
   isNotString,
+  isValidZone,
   parseDate,
   parseNumber,
   parseTimestamp,

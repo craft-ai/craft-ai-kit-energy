@@ -6,6 +6,7 @@ const Constants = require('./constants');
 const CsvParser = require('./parsers/csv');
 const Kit = require('./kit');
 const Provider = require('./provider');
+const Utils = require('./utils');
 
 
 async function initialize(configuration = {}) {
@@ -37,6 +38,7 @@ async function initialize(configuration = {}) {
   } else if (process.env.NODE_ENV !== 'test') console.warn('WARNING: No secret was defined in the kit\'s configuration.');
 
   const providers = configuration.providers;
+  const zone = configuration.zone;
   const client = createClient(token, configuration.recordBulkSize);
   const kit = Object.create(Kit, {
     configuration: { value: configuration },
@@ -45,6 +47,15 @@ async function initialize(configuration = {}) {
   });
 
   log('created and linked to the project "%s/%s"', client.cfg.owner, client.cfg.project);
+
+  if (zone !== undefined) {
+    if (Utils.isNotString(zone)){
+      throw new TypeError(`The "zone" property of the kit's configuration must be a "string". Received "${typeof zone}".`);
+    }
+    else if (Utils.isValidZone(zone)){
+      throw new TypeError(`The "zone" property of the kit's configuration must be a valid IANA zone. Received invalid zone.`);
+    }
+  }
 
   if (providers !== undefined) {
     if (!Array.isArray(providers))
