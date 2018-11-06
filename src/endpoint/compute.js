@@ -88,7 +88,7 @@ async function computeReport(records, options, model) {
 
 async function predict(endpoint, values, model, options, onlyRecords) {
   const features = endpoint.features.filter(isNotLoadFeature);
-  
+
   return retrieveModel(endpoint, model).then((model) => Common
     .toRecordStream(values, options && options.import, onlyRecords, endpoint.metadata.zone)
     .thru(Provider.extendRecords.bind(null, endpoint))
