@@ -6,6 +6,7 @@ const uuid = require('uuid/v5');
 const Constants = require('./constants');
 const Endpoint = require('./endpoint');
 const Provider = require('./provider');
+const Utils = require('./utils');
 
 
 async function loadEndpoint(definition, resetAgent = false) {
@@ -28,7 +29,7 @@ async function loadEndpoint(definition, resetAgent = false) {
   const globalZone = this.configuration.zone;
   let zone = metadata ? metadata.zone : undefined;
 
-  if (zone == undefined && globalZone !== undefined){
+  if ((zone == undefined  || !Utils.isValidZone(zone)) && globalZone !== undefined){
     zone = globalZone;
     if (metadata) metadata.zone = zone;
     else metadata = { zone };

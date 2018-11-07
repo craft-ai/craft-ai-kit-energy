@@ -70,12 +70,12 @@ test('loads an endpoint', async(t) => {
 });
 
 test('loads endpoint with zone defined in kit', async(t) => {
-  const METADATA_OBJECTS = [{}, undefined];
+  const METADATA_OBJECTS = [{}, undefined, { zone : 'Alaska' }];
   const index = Math.floor(Math.random() * IANA_ZONES.length);
   const kitZone = IANA_ZONES[ index ];
   const endpointZone = index == 0 ? IANA_ZONES[ IANA_ZONES.length - 1 ] : IANA_ZONES[ index - 1 ];
 
-  // kit with zone, metadata without zone
+  // kit with zone, metadata without zone or with invalid zone 
   await EnergyKit
     .initialize({ zone : kitZone, recordBulkSize: 1000 })
     .then((kit) => Promise.all(METADATA_OBJECTS.map((metadata) => kit.loadEndpoint({ metadata, id : t.context.endpoint.register() }))))
