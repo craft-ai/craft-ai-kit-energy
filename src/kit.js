@@ -20,10 +20,19 @@ async function loadEndpoint(definition, resetAgent = false) {
   if (typeof id !== 'string')
     throw new TypeError(`The "id" property of the endpoint's definition must be a "string". Received "${id === null ? 'null' : typeof id}".`);
 
-  const metadata = definition.metadata;
+  let metadata = definition.metadata;
 
   if (metadata !== undefined && (metadata === null || typeof metadata !== 'object'))
     throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
+  
+  const globalZone = this.configuration.zone;
+  let zone = metadata ? metadata.zone : undefined
+
+  if (zone == undefined && globalZone !== undefined){
+    zone = globalZone;
+    if (metadata) metadata.zone = zone;
+    else metadata = { zone };
+  }
 
   const energy = parseEnergyConfiguration(definition.energy);
   const namespace = this.configuration.namespace;
