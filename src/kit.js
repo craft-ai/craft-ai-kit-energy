@@ -26,7 +26,7 @@ async function loadEndpoint(definition, resetAgent = false) {
     throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
   
   const globalZone = this.configuration.zone;
-  let zone = metadata ? metadata.zone : undefined
+  let zone = metadata ? metadata.zone : undefined;
 
   if (zone == undefined && globalZone !== undefined){
     zone = globalZone;

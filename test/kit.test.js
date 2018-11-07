@@ -69,28 +69,28 @@ test('loads an endpoint', async(t) => {
   t.snapshot(endpointA);
 });
 
-test('loads endpoint with zone defined in kit', async (t) => {
-  const METADATA_OBJECTS = [ {} , undefined];
+test('loads endpoint with zone defined in kit', async(t) => {
+  const METADATA_OBJECTS = [{}, undefined];
   const index = Math.floor(Math.random() * IANA_ZONES.length);
-  const kitZone = IANA_ZONES[index];
-  const endpointZone = index == 0 ? IANA_ZONES[ IANA_ZONES.length -1 ] : IANA_ZONES[ index - 1 ]
+  const kitZone = IANA_ZONES[ index ];
+  const endpointZone = index == 0 ? IANA_ZONES[ IANA_ZONES.length - 1 ] : IANA_ZONES[ index - 1 ];
 
   // kit with zone, metadata without zone
   await EnergyKit
     .initialize({ zone : kitZone, recordBulkSize: 1000 })
     .then((kit) => Promise.all(METADATA_OBJECTS.map((metadata) => kit.loadEndpoint({ metadata, id : t.context.endpoint.register() }))))
-    .then((endpoints) => { endpoints.map((endpoint) => {
-      console.log(endpoint)
-      t.not(endpoint.metadata, undefined)
-      t.is(endpoint.metadata.zone, kitZone);
-    })}
+    .then((endpoints) => endpoints
+      .map((endpoint) => {
+        t.not(endpoint.metadata, undefined);
+        t.is(endpoint.metadata.zone, kitZone);
+      })
     );
 
   // kit with zone, metadata with zone
   await EnergyKit
     .initialize({ zone : kitZone, recordBulkSize: 1000 })
-    .then((kit) => kit.loadEndpoint({ metadata : { zone : endpointZone } , id :  t.context.endpoint.register() }))
-    .then((endpoint) => t.is(endpoint.metadata.zone, endpointZone))
+    .then((kit) => kit.loadEndpoint({ metadata : { zone : endpointZone }, id :  t.context.endpoint.register() }))
+    .then((endpoint) => t.is(endpoint.metadata.zone, endpointZone));
 });
 
 test('loads an endpoint by forcing the recreation of the agent', async(t) => {

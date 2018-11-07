@@ -53,7 +53,7 @@ async function initialize(configuration = {}) {
       throw new TypeError(`The "zone" property of the kit's configuration must be a "string". Received "${typeof zone}".`);
     }
     else if (!Utils.isValidZone(zone)){
-      throw new TypeError(`The "zone" property of the kit's configuration must be a valid IANA zone. Received invalid zone.`);
+      throw new TypeError('The "zone" property of the kit\'s configuration must be a valid IANA zone. Received invalid zone.');
     }
   }
 
