@@ -2,6 +2,7 @@ const test = require('ava');
 
 const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
+const Utils = require('../../src/utils');
 
 
 test.before(require('dotenv').load);
@@ -32,6 +33,8 @@ test('retrieves the records\' history of an endpoint', (t) => {
   const secondIndex = middle + context.random(middle);
   const start = RECORDS[firstIndex][DATE];
   const end = RECORDS[secondIndex - 1][DATE];
+  const EXTENDED_RECORDS = RECORDS
+    .map((record) => ({ ...record, [TIMEZONE] : Utils.formatTimezone(Utils.parseDate(record.date).offset)}));
 
   return t.notThrowsAsync(kit
     .loadEndpoint({ id: t.context.endpoint.register() })
@@ -55,7 +58,7 @@ test('retrieves the records\' history of an endpoint', (t) => {
       t.is(values[1].length, length - firstIndex);
       t.is(values[2].length, secondIndex);
       t.is(values[3].length, secondIndex - firstIndex);
-      t.deepEqual(values[0].map((record) => ({ ...record, date: record[DATE].toISOString() })), RECORDS);
+      t.deepEqual(values[0].map((record) => ({ ...record, date: record[DATE].toISOString() })), EXTENDED_RECORDS);
       t.deepEqual(values[1], values[0].slice(firstIndex));
       t.deepEqual(values[2], values[0].slice(0, secondIndex));
       t.deepEqual(values[3], values[1].slice(0, secondIndex - firstIndex));
@@ -93,5 +96,6 @@ test('retrieves the predictive model of an endpoint', (t) => {
 
 
 const DATE = Constants.DATE_FEATURE;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
 const RECORDS = Helpers.RECORDS;
 const INVALID_DATES = Helpers.INVALID_DATES;

@@ -31,7 +31,6 @@ async function retrieveRecords(from, to) {
         operation[DATE] = DateTime.fromMillis(operation[TIMESTAMP] * 1000).toJSDate();
         generated.forEach((key) => delete operation[key]);
         delete operation[TIMESTAMP];
-        delete operation[TIMEZONE];
         delete operation.sample;
 
         return operation;
