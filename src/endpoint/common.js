@@ -88,7 +88,7 @@ function toContextOperation(record) {
 function toRecord(value, zone) {
   if (value === null || typeof value !== 'object')
     throw new TypeError(`A record must be an "object". Received "${value === null ? 'null' : typeof value}".`);
-  const date = Utils.parseDate(value[DATE], zone);
+  const date = value[TIMEZONE] ?  Utils.parseDate(value[DATE], value[TIMEZONE]) :  Utils.parseDate(value[DATE], zone);
   const record = { ...value };
 
   if (date) {

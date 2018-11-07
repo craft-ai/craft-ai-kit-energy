@@ -65,7 +65,6 @@ async function retrievePredictiveModel(modelDate) {
 
 const DATE = Constants.DATE_FEATURE;
 const TIMESTAMP = Constants.TIMESTAMP_FEATURE;
-const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
 const DateTime = luxon.DateTime;
 
