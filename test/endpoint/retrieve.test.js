@@ -34,7 +34,7 @@ test('retrieves the records\' history of an endpoint', (t) => {
   const start = RECORDS[firstIndex][DATE];
   const end = RECORDS[secondIndex - 1][DATE];
   const EXTENDED_RECORDS = RECORDS
-    .map((record) => ({ ...record, [TIMEZONE] : Utils.formatTimezone(Utils.parseDate(record.date).offset) }));
+    .map((record) => ({ ...record, [TIMEZONE] : `utc${Utils.formatTimezone(Utils.parseDate(record.date).offset)}` }));
 
   return t.notThrowsAsync(kit
     .loadEndpoint({ id: t.context.endpoint.register() })
