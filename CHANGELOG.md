@@ -18,6 +18,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Unable to parse dates with negative time offsets
 - Unable to compute predictions on states with non local timezones
+- Unbale to compute predictions from retrieved records without manually setting the timezone
+
+### Changed ###
+
+- Dates can be parsed by reading timezones from the record's features
+
+### Added ###
+
+- Timezone option can be set at the kit's or endpoint's level
 
 ## [0.2.1](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.2.0...v0.2.1) - 2018-09-28 ##
 
