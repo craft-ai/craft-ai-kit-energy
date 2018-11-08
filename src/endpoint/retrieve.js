@@ -30,6 +30,7 @@ async function retrieveRecords(from, to) {
         Object.assign(operation, operation.sample);
         operation[DATE] = DateTime.fromMillis(operation[TIMESTAMP] * 1000).toJSDate();
         generated.forEach((key) => delete operation[key]);
+        operation[TIMEZONE] = 'utc' + operation[TIMEZONE];
         delete operation[TIMESTAMP];
         delete operation.sample;
 
@@ -65,6 +66,7 @@ async function retrievePredictiveModel(modelDate) {
 
 const DATE = Constants.DATE_FEATURE;
 const TIMESTAMP = Constants.TIMESTAMP_FEATURE;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
 const DateTime = luxon.DateTime;
 
