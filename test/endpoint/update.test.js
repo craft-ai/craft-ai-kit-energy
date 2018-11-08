@@ -284,6 +284,21 @@ test('converts accumulated energy values to mean electrical loads', (t) => {
     }));
 });
 
+test('use timezone feature when provided to parse dates', (t) => {
+  const context = t.context;
+  const kit = context.kit;
+  const client = kit.client;
+  const offset = '+7';
+  
+  const RECORDS_WITH_TIMEZONES = RECORDS
+    .map((record) => Object.assign(record, { [TIMEZONE] : `utc${offset}` }));
+
+  return kit
+    .loadEndpoint({ id:  context.endpoint.register(), metadata: { zone : 'Europe/Paris' } })
+    .then((endpoint) => endpoint.update (RECORDS_WITH_TIMEZONES))
+    .then((endpoint) => client.getAgentStateHistory(endpoint.agentId))
+    .then((history) => history.map((state) => t.is(parseInt(state.sample[TIMEZONE]), parseInt(offset))));
+});
 
 function toRecords(history) {
   const state = Object.defineProperty({}, 'timezone', { writable: true });
