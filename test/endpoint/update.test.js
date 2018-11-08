@@ -291,10 +291,10 @@ test('use timezone feature when provided to parse dates', (t) => {
   const offset = '+7';
   
   const RECORDS_WITH_TIMEZONES = RECORDS
-    .map((record) => Object.assign(record, { [TIMEZONE] : `utc${offset}` }));
+    .map((record) => ({ ...record,  [TIMEZONE] : `utc${offset}` }));
 
   return kit
-    .loadEndpoint({ id:  context.endpoint.register(), metadata: { zone : 'Europe/Paris' } })
+    .loadEndpoint({ id:  context.endpoint.register('test'), metadata: { zone : 'Europe/Paris' } })
     .then((endpoint) => endpoint.update (RECORDS_WITH_TIMEZONES))
     .then((endpoint) => client.getAgentStateHistory(endpoint.agentId))
     .then((history) => history.map((state) => t.is(parseInt(state.sample[TIMEZONE]), parseInt(offset))));
