@@ -29,12 +29,11 @@ test('uses a provider to extend records', async(t) => {
     .loadEndpoint({ id: context.endpoint.register(), metadata: { zone: 'Europe/Paris' } })
     .then((endpoint) => endpoint.update(RECORDS))
     .then((endpoint) => endpoint.retrieveRecords())
-    .then((history) => removeTimezones(history))
     .then((history) => {
       t.true(Array.isArray(history));
       t.is(history.length, RECORDS.length);
       t.true(isExtended(history));
-      
+
       t.snapshot(history);
     });
 });
@@ -54,7 +53,6 @@ test('uses a provider with options to extend records', async(t) => {
     .loadEndpoint({ id: context.endpoint.register(), metadata: { averageMin: 15, averageMax: 24, zone: 'Europe/Paris' } })
     .then((endpoint) => endpoint.update(RECORDS))
     .then((endpoint) => endpoint.retrieveRecords())
-    .then((history) => removeTimezones(history))
     .then((history) => {
       t.true(Array.isArray(history));
       t.is(history.length, RECORDS.length);
@@ -90,13 +88,6 @@ function isExtended(history) {
     .every((keys) => FEATURES.every((key) => keys.includes(key)));
 }
 
-function removeTimezones(history) {
-  return history
-    .map((record) => { 
-      delete record.timezone; 
-      return record;
-    });
-}
 
 const DATE = Constants.DATE_FEATURE;
 const FEATURES = Provider.FEATURES;
