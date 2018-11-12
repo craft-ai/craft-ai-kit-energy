@@ -5,7 +5,7 @@ const Constants = require('../constants');
 const Utils = require('../utils');
 
 
-async function retrieveRecords(from, to) {
+async function retrieveRecords(from, to, retrieveTimezone =  false) {
   this.debug('retrieving records');
 
   const client = this.kit.client;
@@ -30,7 +30,10 @@ async function retrieveRecords(from, to) {
         Object.assign(operation, operation.sample);
         operation[DATE] = DateTime.fromMillis(operation[TIMESTAMP] * 1000).toJSDate();
         generated.forEach((key) => delete operation[key]);
-        operation[TIMEZONE] = `utc${operation[TIMEZONE]}`;
+
+        if (retrieveTimezone == true) operation[TIMEZONE] = `utc${operation[TIMEZONE]}`;
+        else delete operation[TIMEZONE];
+
         delete operation[TIMESTAMP];
         delete operation.sample;
 
