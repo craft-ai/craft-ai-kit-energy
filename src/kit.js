@@ -25,11 +25,19 @@ async function loadEndpoint(definition, resetAgent = false) {
 
   if (metadata !== undefined && (metadata === null || typeof metadata !== 'object'))
     throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
-  
+
   const globalZone = this.configuration.zone;
   let zone = metadata ? metadata.zone : undefined;
 
-  if ((zone == undefined  || !Utils.isValidZone(zone)) && globalZone !== undefined){
+  if (zone !== undefined) {
+    if (Utils.isNotString(zone))
+      throw new TypeError(`The "zone" property of the endpoint's configuration must be a "string". Received "${typeof zone}".`);
+
+    if (!Info.isValidIANAZone(zone))
+      throw new RangeError('The "zone" property of the endpoint\'s configuration must be a valid IANA zone or a fixed-offset name.');
+  }
+
+  if (zone == undefined && globalZone !== undefined){
     zone = globalZone;
     if (metadata) metadata.zone = zone;
     else metadata = { zone };
@@ -206,6 +214,7 @@ const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
 const LOAD = Constants.LOAD_FEATURE;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
+const Info = luxon.Info;
 
 module.exports = {
   loadEndpoint,
