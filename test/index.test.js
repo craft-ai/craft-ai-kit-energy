@@ -17,7 +17,6 @@ test.beforeEach((t) => {
 test.serial('fails initializing the kit with invalid configurations', async(t) => {
   const INVALID_TOKENS = [undefined].concat(INVALID_STRINGS, 'very bad token');
   const INVALID_SECRETS = INVALID_STRINGS.concat(['']);
-  const INVALID_ZONES = INVALID_STRINGS.concat(['Europe/Taipei', 'America/Madrid']);
 
   await Promise.all(INVALID_OBJECTS.map((configuration) => t.throwsAsync(EnergyKit.initialize(configuration))));
 
@@ -36,7 +35,7 @@ test.serial('fails initializing the kit with invalid configurations', async(t) =
   await Promise.all([EnergyKit.initialize()]
     .concat(INVALID_TOKENS.map((token) => EnergyKit.initialize({ token })))
     .concat(INVALID_SECRETS.map((secret) => EnergyKit.initialize({ token: t.context.token, secret })))
-    .concat(INVALID_ZONES.map((zone) => EnergyKit.initialize({ token: t.context.token, zone })))
+    .concat(INVALID_IANA_ZONES.map((zone) => EnergyKit.initialize({ token: t.context.token, zone })))
     .map((promise) => t.throwsAsync(promise)));
 
 });
@@ -64,5 +63,6 @@ test('initializes the kit', async(t) => {
 });
 
 
+const INVALID_IANA_ZONES = Helpers.INVALID_IANA_ZONES;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const INVALID_STRINGS = Helpers.INVALID_STRINGS;

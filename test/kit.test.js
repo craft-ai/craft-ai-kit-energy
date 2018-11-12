@@ -29,6 +29,7 @@ test('fails loading an endpoint with invalid definition', (t) => {
     .concat(INVALID_ORIGINS.map((value) => ({ id: 'id', energy: { origin: value } })))
     .concat(VALID_ORIGINS.map((value) => ({ id: 'id', energy: { origin: value } })))
     .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', metadata: value })))
+    .concat(INVALID_IANA_ZONES.map((value) => ({ id: 'id', metadata: { zone: value } })))
     .map((definition) => t.throwsAsync(kit.loadEndpoint(definition))));
 });
 
@@ -173,6 +174,7 @@ test('closes the kit', (t) => {
 
 
 const IANA_ZONES = Helpers.IANA_ZONES;
+const INVALID_IANA_ZONES = Helpers.INVALID_IANA_ZONES;
 const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const INVALID_STRINGS = Helpers.INVALID_STRINGS;
