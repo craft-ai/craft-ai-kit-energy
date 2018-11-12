@@ -2,7 +2,6 @@ const test = require('ava');
 
 const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
-const Utils = require('../../src/utils');
 
 
 test.before(require('dotenv').load);
@@ -94,6 +93,5 @@ test('retrieves the predictive model of an endpoint', (t) => {
 
 
 const DATE = Constants.DATE_FEATURE;
-const TIMEZONE = Constants.TIMEZONE_FEATURE;
 const RECORDS = Helpers.RECORDS;
 const INVALID_DATES = Helpers.INVALID_DATES;
