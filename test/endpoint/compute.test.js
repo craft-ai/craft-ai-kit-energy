@@ -72,13 +72,11 @@ test('computes predictions with accurate non local timezone', (t) => {
     .toRecordStream(TEST_RECORDS, {}, false, 'Europe/Paris')
     .thru(buffer())
     .thru(nth.last)
-    .then((records) => {
-      return endpoint
-        .computePredictions(TEST_RECORDS)
-        .then((predictions) => {
-          predictions.forEach((prediction, idx) => t.is(prediction.context.timezone, records[idx].timezone));
-        });
-    });
+    .then((records) => endpoint
+      .computePredictions(TEST_RECORDS)
+      .then((predictions) => {
+        predictions.forEach((prediction, idx) => t.is(prediction.context.timezone, records[idx].timezone));
+      }));
 });
 
 test('computes predictions given a model', (t) => {
