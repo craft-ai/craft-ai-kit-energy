@@ -8,6 +8,7 @@ const Helpers = require('../helpers');
 const Is = require('../helpers/is');
 const Common = require('../../src/endpoint/common');
 
+
 test.before(require('dotenv').load);
 
 test.beforeEach((t) => Helpers
@@ -67,7 +68,7 @@ test('computes predictions', (t) => {
 test('computes predictions with accurate non local timezone', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
-  
+
   return Common
     .toRecordStream(TEST_RECORDS, {}, false, 'Europe/Paris')
     .thru(buffer())
