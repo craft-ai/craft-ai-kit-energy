@@ -70,14 +70,14 @@ test('loads an endpoint', async(t) => {
   t.snapshot(endpointA);
 });
 
-test('loads endpoint with zone defined in kit', async(t) => {
-  const METADATA_OBJECTS = [{}, undefined, { zone : 'Alaska' }];
-  const index = Math.floor(Math.random() * IANA_ZONES.length);
-  const kitZone = IANA_ZONES[ index ];
-  const endpointZone = index == 0 ? IANA_ZONES[ IANA_ZONES.length - 1 ] : IANA_ZONES[ index - 1 ];
+test('initializes zone-less endpoint with kit\'s zone', async(t) => {
+  const index = t.context.random(IANA_ZONES.length - 1);
+  const kitZone = IANA_ZONES[index];
 
-  // Kit with zone, Endpoint with undefined or invalid zone : the kit's zone is used
-  await EnergyKit
+  const METADATA_OBJECTS = [{}, undefined];
+
+  // Kit with zone, Endpoint with undefined zone : the kit's zone is used
+  return EnergyKit
     .initialize({ zone : kitZone, recordBulkSize: 1000 })
     .then((kit) => Promise.all(METADATA_OBJECTS.map((metadata) => kit.loadEndpoint({ metadata, id : t.context.endpoint.register() }))))
     .then((endpoints) => endpoints
@@ -86,9 +86,15 @@ test('loads endpoint with zone defined in kit', async(t) => {
         t.is(endpoint.metadata.zone, kitZone);
       })
     );
+});
 
-  //  Kit with zone, Endpoint with valid zone : the endpoind's zone is kept
-  await EnergyKit
+test('initializes the endpoint with a valid zone when provided', async(t) => {
+  const index = t.context.random(IANA_ZONES.length - 1);
+  const kitZone = IANA_ZONES[index];
+  const endpointZone = index == 0 ? IANA_ZONES[IANA_ZONES.length - 1] : IANA_ZONES[index - 1];
+
+  // Kit with zone, Endpoint with valid zone : the endpoind's zone is kept
+  return EnergyKit
     .initialize({ zone : kitZone, recordBulkSize: 1000 })
     .then((kit) => kit.loadEndpoint({ metadata : { zone : endpointZone }, id :  t.context.endpoint.register() }))
     .then((endpoint) => t.is(endpoint.metadata.zone, endpointZone));
