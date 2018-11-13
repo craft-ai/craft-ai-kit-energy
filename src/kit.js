@@ -21,12 +21,11 @@ async function loadEndpoint(definition, resetAgent = false) {
   if (typeof id !== 'string')
     throw new TypeError(`The "id" property of the endpoint's definition must be a "string". Received "${id === null ? 'null' : typeof id}".`);
 
-  let metadata = definition.metadata;
+  const metadata = definition.metadata;
 
   if (metadata !== undefined && (metadata === null || typeof metadata !== 'object'))
     throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
 
-  const globalZone = this.configuration.zone;
   let zone = metadata ? metadata.zone : undefined;
 
   if (zone !== undefined) {
@@ -37,10 +36,8 @@ async function loadEndpoint(definition, resetAgent = false) {
       throw new RangeError('The "zone" property of the endpoint\'s configuration must be a valid IANA zone or a fixed-offset name.');
   }
 
-  if (zone == undefined && globalZone !== undefined){
-    zone = globalZone;
-    if (metadata) metadata.zone = zone;
-    else metadata = { zone };
+  if (zone === undefined && this.configuration.zone !== undefined){
+    zone = this.configuration.zone;
   }
 
   const energy = parseEnergyConfiguration(definition.energy);
@@ -66,7 +63,7 @@ async function loadEndpoint(definition, resetAgent = false) {
         kit: { value: this },
         agentId: { value: agentId, enumerable: true },
         id: { value: id, enumerable: true },
-        metadata: { value: metadata || {}, enumerable: true },
+        metadata: { value: zone ? { ...metadata, zone } : metadata || {}, enumerable: true },
       });
     });
 }
