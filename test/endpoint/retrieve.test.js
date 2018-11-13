@@ -2,6 +2,7 @@ const test = require('ava');
 
 const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
+const Utils = require('../../src/utils');
 
 
 test.before(require('dotenv').load);
@@ -63,6 +64,25 @@ test('retrieves the records\' history of an endpoint', (t) => {
     }));
 });
 
+test('retrieves the records\' history of an endpoint with the timezones', (t) => {
+  const kit = t.context.kit;
+
+  const length = RECORDS.length;
+  const EXTENDED_RECORDS = RECORDS
+    .map((record) => ({ ...record, [TIMEZONE] : `utc${Utils.formatTimezone(Utils.parseDate(record.date).offset)}` }));
+
+  return t.notThrowsAsync(kit
+    .loadEndpoint({ id: t.context.endpoint.register() })
+    .then((endpoint) => endpoint.update(RECORDS))
+    .then((endpoint) => endpoint.retrieveRecords(undefined, undefined, true))
+    .then((history) => {
+      t.true(Array.isArray(history));
+      t.is(history.length, length);
+      t.deepEqual(history.map((record) => ({ ...record, date: record[DATE].toISOString() })), EXTENDED_RECORDS);
+    }));
+
+});
+
 test('fails retrieving the predictive model of an endpoint with invalid paramaters', (t) => {
   const context = t.context;
   const kit = context.kit;
@@ -93,5 +113,7 @@ test('retrieves the predictive model of an endpoint', (t) => {
 
 
 const DATE = Constants.DATE_FEATURE;
-const RECORDS = Helpers.RECORDS;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
 const INVALID_DATES = Helpers.INVALID_DATES;
+const RECORDS = Helpers.RECORDS;
+
