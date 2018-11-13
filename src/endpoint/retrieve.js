@@ -8,6 +8,10 @@ const Utils = require('../utils');
 async function retrieveRecords(from, to, retrieveTimezone =  false) {
   this.debug('retrieving records');
 
+  if (retrieveTimezone !== undefined && typeof retrieveTimezone !== 'boolean'){
+    throw new TypeError(`The "retrieveTimezone" argument must be a "boolean". Received "${typeof retrieveTimezone}".`);
+  }
+
   const client = this.kit.client;
   const generated = this.generated;
   const parsedFrom = Utils.parseTimestamp(from);
@@ -31,7 +35,7 @@ async function retrieveRecords(from, to, retrieveTimezone =  false) {
         operation[DATE] = DateTime.fromMillis(operation[TIMESTAMP] * 1000).toJSDate();
         generated.forEach((key) => delete operation[key]);
 
-        if (retrieveTimezone == true) operation[TIMEZONE] = `utc${operation[TIMEZONE]}`;
+        if (retrieveTimezone === true) operation[TIMEZONE] = `utc${operation[TIMEZONE]}`;
         else delete operation[TIMEZONE];
 
         delete operation[TIMESTAMP];
