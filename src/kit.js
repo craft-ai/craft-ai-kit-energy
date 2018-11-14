@@ -35,10 +35,7 @@ async function loadEndpoint(definition, resetAgent = false) {
     if (!Info.isValidIANAZone(zone))
       throw new RangeError('The "zone" property of the endpoint\'s configuration must be a valid IANA zone or a fixed-offset name.');
   }
-
-  if (zone === undefined && this.configuration.zone !== undefined){
-    zone = this.configuration.zone;
-  }
+  else zone = this.configuration.zone;
 
   const energy = parseEnergyConfiguration(definition.energy);
   const namespace = this.configuration.namespace;
