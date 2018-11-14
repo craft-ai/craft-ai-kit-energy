@@ -8,7 +8,7 @@ const Utils = require('../utils');
 async function retrieveRecords(from, to, retrieveTimezone) {
   this.debug('retrieving records');
 
-  if (retrieveTimezone !== undefined && typeof retrieveTimezone !== 'boolean'){
+  if (retrieveTimezone !== undefined && typeof retrieveTimezone !== 'boolean') {
     throw new TypeError(`The "retrieveTimezone" argument must be a "boolean". Received "${typeof retrieveTimezone}".`);
   }
 
