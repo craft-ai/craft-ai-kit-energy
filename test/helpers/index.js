@@ -95,6 +95,7 @@ function registerEndpoint() {
 
 const IANA_ZONES = ['America/Adak', 'America/Chihuahua', 'America/St_Johns', 'Europe/Paris', 'Asia/Kolkata', 'Antarctica/South_Pole'];
 const INVALID_ARRAYS = [null, 0, true, 'string', Symbol(), new Uint8Array(10), () => {}];
+const INVALID_BOOLEANS = ['true', [1], [0], 'false', {}, new Date(), null];
 const INVALID_DATES = [false, NaN, 'N/A', 'NaN', 'unknown', '123456', 'string', '5151-51-51T51:51:51.515Z', () => {}];
 const INVALID_FUNCTIONS = [null, {}, 'abc', Boolean(), Array.from(2), new Date(2018)];
 const INVALID_IANA_ZONES = [null, false, 2, 'Europe/Taipei', 'America/Madrid'];
@@ -116,6 +117,7 @@ module.exports = {
   streamify,
   IANA_ZONES,
   INVALID_ARRAYS,
+  INVALID_BOOLEANS,
   INVALID_DATES,
   INVALID_FUNCTIONS,
   INVALID_IANA_ZONES,

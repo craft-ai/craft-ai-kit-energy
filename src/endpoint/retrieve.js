@@ -5,7 +5,7 @@ const Constants = require('../constants');
 const Utils = require('../utils');
 
 
-async function retrieveRecords(from, to, retrieveTimezone =  false) {
+async function retrieveRecords(from, to, retrieveTimezone) {
   this.debug('retrieving records');
 
   if (retrieveTimezone !== undefined && typeof retrieveTimezone !== 'boolean'){

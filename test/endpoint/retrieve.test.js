@@ -18,8 +18,11 @@ test('fails retrieving the records\' history of an endpoint with invalid paramat
     .loadEndpoint({ id: context.endpoint.register() })
     .then((endpoint) => Promise.all(INVALID_DATES.map((date) => Promise.all([
       t.throwsAsync(endpoint.retrieveRecords(date)),
-      t.throwsAsync(endpoint.retrieveRecords(undefined, date))
-    ]))));
+      t.throwsAsync(endpoint.retrieveRecords(undefined, date))]))
+      .concat(INVALID_BOOLEANS.map((option) => t.throwsAsync(endpoint
+        .retrieveRecords(undefined, undefined, option))
+      ))
+    ));
 });
 
 test('retrieves the records\' history of an endpoint', (t) => {
@@ -114,6 +117,7 @@ test('retrieves the predictive model of an endpoint', (t) => {
 
 const DATE = Constants.DATE_FEATURE;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
+const INVALID_BOOLEANS = Helpers.INVALID_BOOLEANS;
 const INVALID_DATES = Helpers.INVALID_DATES;
 const RECORDS = Helpers.RECORDS;
 
