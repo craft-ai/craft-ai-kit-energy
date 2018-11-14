@@ -22,22 +22,22 @@ async function loadEndpoint(definition, resetAgent = false) {
     throw new TypeError(`The "id" property of the endpoint's definition must be a "string". Received "${id === null ? 'null' : typeof id}".`);
 
   const metadata = definition.metadata;
-  let zone;
+
   if (metadata !== undefined) {
     if (metadata === null || typeof metadata !== 'object')
       throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
 
-    zone = metadata.zone;
-    if (zone !== undefined) {
+    const zone = metadata.zone;
+
+    if (zone === undefined) metadata.zone = this.configuration.zone;
+    else {
       if (Utils.isNotString(zone))
         throw new TypeError(`The "zone" property of the endpoint's configuration must be a "string". Received "${typeof zone}".`);
 
       if (!Info.isValidIANAZone(zone))
         throw new RangeError('The "zone" property of the endpoint\'s configuration must be a valid IANA zone or a fixed-offset name.');
     }
-    else zone = this.configuration.zone;
   }
-  else zone = this.configuration.zone;
 
   const energy = parseEnergyConfiguration(definition.energy);
   const namespace = this.configuration.namespace;
@@ -62,7 +62,7 @@ async function loadEndpoint(definition, resetAgent = false) {
         kit: { value: this },
         agentId: { value: agentId, enumerable: true },
         id: { value: id, enumerable: true },
-        metadata: { value: { ...metadata, zone }, enumerable: true },
+        metadata: { value: metadata || { zone: this.configuration.zone }, enumerable: true },
       });
     });
 }
