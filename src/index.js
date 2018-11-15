@@ -20,6 +20,7 @@ async function initialize(configuration = {}) {
 
   const token = configuration.token || process.env.CRAFT_AI_TOKEN || process.env.CRAFT_TOKEN;
   const secret = configuration.secret;
+  const zone = configuration.zone;
 
   if (!token)
     throw new Error('A craft ai access token is required to initialize the kit. The token must be provided either as part of the kit\'s configuration or through the environment variable "CRAFT_AI_TOKEN", but none was found.');
@@ -38,8 +39,14 @@ async function initialize(configuration = {}) {
     configuration.namespace = uuid(secret, ROOT_NAMESPACE);
   } else if (process.env.NODE_ENV !== 'test') console.warn('WARNING: No secret was defined in the kit\'s configuration.');
 
+  if (zone !== undefined) {
+    if (Utils.isNotString(zone))
+      throw new TypeError(`The "zone" property of the kit's configuration must be a "string". Received "${typeof zone}".`);
+    if (!Info.isValidIANAZone(zone))
+      throw new RangeError('The "zone" property of the kit\'s configuration must be a valid IANA zone or a fixed-offset name.');
+  }
+
   const providers = configuration.providers;
-  const zone = configuration.zone;
   const client = createClient(token, configuration.recordBulkSize);
   const kit = Object.create(Kit, {
     configuration: { value: configuration },
@@ -48,14 +55,6 @@ async function initialize(configuration = {}) {
   });
 
   log('created and linked to the project "%s/%s"', client.cfg.owner, client.cfg.project);
-
-  if (zone !== undefined) {
-    if (Utils.isNotString(zone))
-      throw new TypeError(`The "zone" property of the kit's configuration must be a "string". Received "${typeof zone}".`);
-
-    if (!Info.isValidIANAZone(zone))
-      throw new RangeError('The "zone" property of the kit\'s configuration must be a valid IANA zone or a fixed-offset name.');
-  }
 
   if (providers !== undefined) {
     if (!Array.isArray(providers))

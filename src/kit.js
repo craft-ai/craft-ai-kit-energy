@@ -33,7 +33,6 @@ async function loadEndpoint(definition, resetAgent = false) {
     else {
       if (Utils.isNotString(zone))
         throw new TypeError(`The "zone" property of the endpoint's configuration must be a "string". Received "${typeof zone}".`);
-
       if (!Info.isValidIANAZone(zone))
         throw new RangeError('The "zone" property of the endpoint\'s configuration must be a valid IANA zone or a fixed-offset name.');
     }

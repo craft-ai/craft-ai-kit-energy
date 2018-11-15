@@ -9,6 +9,7 @@ const Utils = require('../utils');
 
 async function update(records, options) {
   this.debug('updating');
+
   const agent = this.agent;
   const agentId = this.agentId;
   const client = this.kit.client;

@@ -70,34 +70,31 @@ test('loads an endpoint', async(t) => {
   t.snapshot(endpointA);
 });
 
-test('initializes zone-less endpoint with kit\'s zone', async(t) => {
-  const index = t.context.random(IANA_ZONES.length - 1);
-  const kitZone = IANA_ZONES[index];
-
+test('initializes zone-less endpoint with the zone of the kit', (t) => {
   const METADATA_OBJECTS = [{}, undefined];
 
-  // Kit with zone, Endpoint with undefined zone : the kit's zone is used
   return EnergyKit
-    .initialize({ zone : kitZone, recordBulkSize: 1000 })
-    .then((kit) => Promise.all(METADATA_OBJECTS.map((metadata) => kit.loadEndpoint({ metadata, id : t.context.endpoint.register() }))))
-    .then((endpoints) => endpoints
-      .map((endpoint) => {
-        t.not(endpoint.metadata, undefined);
-        t.is(endpoint.metadata.zone, kitZone);
-      })
-    );
+    .initialize({ zone: IANA_ZONES[0] })
+    .then((kit) => Promise
+      .all(METADATA_OBJECTS.map((metadata) => kit.loadEndpoint({ metadata, id: t.context.endpoint.register() })))
+      .then((endpoints) => endpoints.forEach((endpoint) => {
+        t.truthy(endpoint.metadata);
+        t.is(typeof endpoint.metadata, 'object');
+        t.is(endpoint.metadata.zone, kit.configuration.zone);
+      })));
 });
 
-test('initializes the endpoint with a valid zone when provided', async(t) => {
-  const index = t.context.random(IANA_ZONES.length - 1);
-  const kitZone = IANA_ZONES[index];
-  const endpointZone = index == 0 ? IANA_ZONES[IANA_ZONES.length - 1] : IANA_ZONES[index - 1];
+test('initializes the endpoint with a valid zone', async(t) => {
+  const zone = IANA_ZONES[0];
 
-  // Kit with zone, Endpoint with valid zone : the endpoind's zone is kept
   return EnergyKit
-    .initialize({ zone : kitZone, recordBulkSize: 1000 })
-    .then((kit) => kit.loadEndpoint({ metadata : { zone : endpointZone }, id :  t.context.endpoint.register() }))
-    .then((endpoint) => t.is(endpoint.metadata.zone, endpointZone));
+    .initialize({ zone: IANA_ZONES[IANA_ZONES.length - 1] })
+    .then((kit) => kit.loadEndpoint({ metadata: { zone }, id: t.context.endpoint.register() }))
+    .then((endpoint) => {
+      t.truthy(endpoint.metadata);
+      t.is(typeof endpoint.metadata, 'object');
+      t.is(endpoint.metadata.zone, zone);
+    });
 });
 
 test('loads an endpoint by forcing the recreation of the agent', async(t) => {

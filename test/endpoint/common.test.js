@@ -1,5 +1,5 @@
 const buffer = require('most-buffer');
-const nth = require('most-nth');
+const most = require('most');
 const test = require('ava');
 
 const Constants = require('../../src/constants');
@@ -10,15 +10,23 @@ const Common = require('../../src/endpoint/common');
 test('properly formats timezone', async(t) => {
   const date = '2017-07-30T02:30:00';
 
-  return Promise.all([
-    IANA_ZONES.map((zone) => Common.toRecordStream([{ date, [TIMEZONE] : zone }], {}, false)), // with timezone as a feature
-    IANA_ZONES.map((zone) => Common.toRecordStream([{ date }], {}, false, zone))  // with timezone as an option
-  ].map((records) => records.reduce((records, record) => records.concat(record)))
-    .map((records) => records.thru(buffer()))
-    .map((records) => records.thru(nth.last)))
-    .then((records) => {
-      records[0].forEach((record, idx) => t.is(record[TIMEZONE], records[1][idx][TIMEZONE]));
-      t.snapshot(records[0].map((record) => ({ formatted: record[TIMEZONE], raw: record[PARSED_RECORD][DATE].zone })));
+  return most
+    .from([
+      // with timezone as a feature
+      IANA_ZONES.map((zone) => Common.toRecordStream([{ date, [TIMEZONE]: zone }], {}, false)),
+      // with timezone as an option
+      IANA_ZONES.map((zone) => Common.toRecordStream([{ date }], {}, false, zone)),
+    ])
+    .chain((streams) => most.mergeArray(streams).thru(buffer()))
+    .thru(buffer())
+    .observe((result) => {
+      const records = result[0];
+
+      t.deepEqual(records, result[1]);
+      t.snapshot(records.map((record) => ({
+        formatted: record[TIMEZONE],
+        raw: record[PARSED_RECORD][DATE].zone.name
+      })));
     });
 });
 

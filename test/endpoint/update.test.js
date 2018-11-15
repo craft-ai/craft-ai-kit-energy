@@ -173,7 +173,7 @@ test('reduces the size of the records by dropping successive identical values', 
   const client = kit.client;
 
   return t.notThrowsAsync(kit
-    .loadEndpoint({ id: context.endpoint.register(), metadata: { zone : 'Europe/Paris' } })
+    .loadEndpoint({ id: context.endpoint.register(), metadata: { zone: 'Europe/Paris' } })
     .then((endpoint) => endpoint.update(RECORDS))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
     .then((history) => {
@@ -268,7 +268,7 @@ test('converts accumulated energy values to mean electrical loads', (t) => {
         origin: { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 },
         period: { days: 1 }
       },
-      metadata: { zone : 'Europe/Paris' }
+      metadata: { zone: 'Europe/Paris' }
     })
     .then((endpoint) => endpoint.update(RECORDS_AS_ACCUMULATED_ENERGY))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
@@ -284,20 +284,22 @@ test('converts accumulated energy values to mean electrical loads', (t) => {
     }));
 });
 
-test('uses timezone feature when provided to parse dates', (t) => {
+test('uses timezone information provided as a feature to parse dates', (t) => {
   const context = t.context;
   const kit = context.kit;
-  const client = kit.client;
   const offset = '+07:00';
-  
-  const RECORDS_WITH_TIMEZONES = RECORDS
-    .map((record) => ({ ...record,  [TIMEZONE] : `utc${offset}` }));
+
+  const RECORDS_WITH_TIMEZONES = RECORDS.map((record) => ({ ...record, [TIMEZONE]: `utc${offset}` }));
 
   return kit
-    .loadEndpoint({ id:  context.endpoint.register('test'), metadata: { zone : 'Europe/Paris' } })
+    .loadEndpoint({ id: context.endpoint.register('test'), metadata: { zone: 'Europe/Paris' } })
     .then((endpoint) => endpoint.update(RECORDS_WITH_TIMEZONES))
-    .then((endpoint) => client.getAgentStateHistory(endpoint.agentId))
-    .then((history) => history.forEach((state) => t.is(state.sample[TIMEZONE], offset)));
+    .then((endpoint) => kit.client.getAgentStateHistory(endpoint.agentId))
+    .then((history) => {
+      const offsets = new Array(RECORDS.length).fill(offset);
+
+      t.deepEqual(history.map((state) => state.sample[TIMEZONE]), offsets);
+    });
 });
 
 

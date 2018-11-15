@@ -8,9 +8,8 @@ const Utils = require('../utils');
 async function retrieveRecords(from, to, retrieveTimezone = false) {
   this.debug('retrieving records');
 
-  if (retrieveTimezone !== undefined && typeof retrieveTimezone !== 'boolean') {
+  if (typeof retrieveTimezone !== 'boolean')
     throw new TypeError(`The "retrieveTimezone" argument must be a "boolean". Received "${typeof retrieveTimezone}".`);
-  }
 
   const client = this.kit.client;
   const generated = this.generated;

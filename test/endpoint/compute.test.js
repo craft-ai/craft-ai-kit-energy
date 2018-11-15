@@ -18,7 +18,7 @@ test.beforeEach((t) => Helpers
     const kit = context.kit;
 
     return kit
-      .loadEndpoint({ id: context.endpoint.register(), metadata: { zone : 'Europe/Paris' } })
+      .loadEndpoint({ id: context.endpoint.register(), metadata: { zone: 'Europe/Paris' } })
       .then((endpoint) => endpoint.update(TRAINING_RECORDS))
       .then((endpoint) => t.context.endpoint.current = endpoint);
   }));
@@ -76,7 +76,9 @@ test('computes predictions with accurate non local timezone', (t) => {
     .then((records) => endpoint
       .computePredictions(TEST_RECORDS)
       .then((predictions) => {
-        predictions.forEach((prediction, idx) => t.is(prediction.context.timezone, records[idx].timezone));
+        const timezones = records.map((record) => record[TIMEZONE]);
+
+        t.deepEqual(predictions.map((prediction) => prediction.context[TIMEZONE]), timezones);
       }));
 });
 
@@ -374,6 +376,7 @@ const INVALID_DATES = Helpers.INVALID_DATES;
 const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS.filter((object) => object !== null);
 const RECORDS = Helpers.RECORDS;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
 const INDEX = Math.floor((RECORDS.length - 1) * .4);
 const TRAINING_RECORDS = RECORDS.slice(0, INDEX);
 const TEST_RECORDS = RECORDS.slice(INDEX);

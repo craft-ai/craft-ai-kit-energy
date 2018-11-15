@@ -1,3 +1,4 @@
+const luxon = require('luxon');
 const test = require('ava');
 
 const Constants = require('../../src/constants');
@@ -16,13 +17,10 @@ test('fails retrieving the records\' history of an endpoint with invalid paramat
 
   return kit
     .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => Promise.all(INVALID_DATES.map((date) => Promise.all([
-      t.throwsAsync(endpoint.retrieveRecords(date)),
-      t.throwsAsync(endpoint.retrieveRecords(undefined, date))]))
-      .concat(INVALID_BOOLEANS.map((option) => t.throwsAsync(endpoint
-        .retrieveRecords(undefined, undefined, option))
-      ))
-    ));
+    .then((endpoint) => Promise.all(INVALID_DATES.map((date) => [date])
+      .concat(INVALID_DATES.map((date) => [undefined, date]))
+      .concat(INVALID_BOOLEANS.map((option) => [undefined, undefined, option]))
+      .map((parameters) => t.throwsAsync(endpoint.retrieveRecords(...parameters)))));
 });
 
 test('retrieves the records\' history of an endpoint', (t) => {
@@ -68,22 +66,19 @@ test('retrieves the records\' history of an endpoint', (t) => {
 });
 
 test('retrieves the records\' history of an endpoint with the timezones', (t) => {
-  const kit = t.context.kit;
-
-  const length = RECORDS.length;
-  const EXTENDED_RECORDS = RECORDS
-    .map((record) => ({ ...record, [TIMEZONE] : `utc${Utils.formatTimezone(Utils.parseDate(record.date).offset)}` }));
+  const context = t.context;
+  const kit = context.kit;
+  const offsets = RECORDS.map((record) => Utils.parseDate(record[DATE]).offset);
 
   return t.notThrowsAsync(kit
-    .loadEndpoint({ id: t.context.endpoint.register() })
+    .loadEndpoint({ id: context.endpoint.register() })
     .then((endpoint) => endpoint.update(RECORDS))
     .then((endpoint) => endpoint.retrieveRecords(undefined, undefined, true))
     .then((history) => {
       t.true(Array.isArray(history));
-      t.is(history.length, length);
-      t.deepEqual(history.map((record) => ({ ...record, date: record[DATE].toISOString() })), EXTENDED_RECORDS);
+      t.is(history.length, RECORDS.length);
+      t.deepEqual(history.map((record) => DateTime.fromObject({ zone: record[TIMEZONE] }).offset), offsets);
     }));
-
 });
 
 test('fails retrieving the predictive model of an endpoint with invalid paramaters', (t) => {
@@ -121,3 +116,4 @@ const INVALID_BOOLEANS = Helpers.INVALID_BOOLEANS;
 const INVALID_DATES = Helpers.INVALID_DATES;
 const RECORDS = Helpers.RECORDS;
 
+const DateTime = luxon.DateTime;

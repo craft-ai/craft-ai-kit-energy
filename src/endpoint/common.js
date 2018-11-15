@@ -88,10 +88,11 @@ function toContextOperation(record) {
 function toRecord(value, zone) {
   if (value === null || typeof value !== 'object')
     throw new TypeError(`A record must be an "object". Received "${value === null ? 'null' : typeof value}".`);
-  const date = Utils.parseDate(value[DATE], value[TIMEZONE] || zone);
+
+  const date = Utils.setZone(Utils.parseDate(value[DATE]), value[TIMEZONE] || zone);
   const record = { ...value };
 
-  if (date) {
+  if (date.isValid) {
     const parsed = {};
     const timezone = Utils.formatTimezone(date.offset);
 
