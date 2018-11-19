@@ -1,4 +1,3 @@
-const buffer = require('most-buffer');
 const fs = require('fs');
 const luxon = require('luxon');
 const most = require('most');
@@ -11,6 +10,7 @@ const Common = require('../../src/endpoint/common');
 const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
 const Provider = require('../../src/provider');
+const Stream = require('../../src/stream');
 const WeatherProvider = require('../../src/providers/weather');
 
 
@@ -88,8 +88,8 @@ test('computes the record\'s extension in Paris', async(t) => {
 
         return extension;
       })))
-    .thru(buffer())
-    .observe((records) => t.snapshot(records));
+    .thru(Stream.toBuffer)
+    .then((records) => t.snapshot(records));
 });
 
 test('computes the record\'s extension in Annecy daily', async(t) => {
@@ -113,8 +113,8 @@ test('computes the record\'s extension in Annecy daily', async(t) => {
 
         return extension;
       })))
-    .thru(buffer())
-    .observe((records) => t.snapshot(records));
+    .thru(Stream.toBuffer)
+    .then((records) => t.snapshot(records));
 });
 
 test('computes the record\'s extension in Angers hourly with cache', async(t) => {
@@ -140,8 +140,8 @@ test('computes the record\'s extension in Angers hourly with cache', async(t) =>
 
         return extension;
       })))
-    .thru(buffer())
-    .observe((records) => t.snapshot(records));
+    .thru(Stream.toBuffer)
+    .then((records) => t.snapshot(records));
 });
 
 test('closes the provider', (t) => {

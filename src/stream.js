@@ -1,6 +1,5 @@
 const buffer = require('most-buffer');
 const most = require('most');
-const nth = require('most-nth');
 
 
 function from(value, options) {
@@ -34,8 +33,7 @@ function isStream(value) {
 function toBuffer(stream) {
   return stream
     .thru(buffer())
-    .thru(nth.first)
-    .then((buffer) => buffer || []);
+    .reduce((_, buffer) => buffer, []);
 }
 
 

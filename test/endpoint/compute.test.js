@@ -1,12 +1,11 @@
-const buffer = require('most-buffer');
-const nth = require('most-nth');
 const path = require('path');
 const test = require('ava');
 
+const Common = require('../../src/endpoint/common');
 const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
 const Is = require('../helpers/is');
-const Common = require('../../src/endpoint/common');
+const Stream = require('../../src/stream');
 
 
 test.before(require('dotenv').load);
@@ -71,8 +70,7 @@ test('computes predictions with accurate non local timezone', (t) => {
 
   return Common
     .toRecordStream(TEST_RECORDS, {}, false, 'Europe/Paris')
-    .thru(buffer())
-    .thru(nth.last)
+    .thru(Stream.toBuffer)
     .then((records) => endpoint
       .computePredictions(TEST_RECORDS)
       .then((predictions) => {
