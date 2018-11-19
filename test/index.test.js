@@ -35,6 +35,7 @@ test.serial('fails initializing the kit with invalid configurations', async(t) =
   await Promise.all([EnergyKit.initialize()]
     .concat(INVALID_TOKENS.map((token) => EnergyKit.initialize({ token })))
     .concat(INVALID_SECRETS.map((secret) => EnergyKit.initialize({ token: t.context.token, secret })))
+    .concat(INVALID_IANA_ZONES.map((zone) => EnergyKit.initialize({ token: t.context.token, zone })))
     .map((promise) => t.throwsAsync(promise)));
 
 });
@@ -62,5 +63,6 @@ test('initializes the kit', async(t) => {
 });
 
 
+const INVALID_IANA_ZONES = Helpers.INVALID_IANA_ZONES;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const INVALID_STRINGS = Helpers.INVALID_STRINGS;

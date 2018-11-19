@@ -17,7 +17,7 @@ async function update(records, options) {
   const features = this.features;
   const end = agent.lastTimestamp;
 
-  let stream = Common.toRecordStream(records, options && options.import, true);
+  let stream = Common.toRecordStream(records, options && options.import, true, this.metadata.zone);
   let failed = false;
 
   if (energy.period) stream = energy.origin

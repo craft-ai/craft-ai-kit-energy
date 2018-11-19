@@ -1,11 +1,13 @@
 const craftai = require('craft-ai');
 const debug = require('debug');
+const luxon = require('luxon');
 const uuid = require('uuid/v5');
 
 const Constants = require('./constants');
 const CsvParser = require('./parsers/csv');
 const Kit = require('./kit');
 const Provider = require('./provider');
+const Utils = require('./utils');
 
 
 async function initialize(configuration = {}) {
@@ -18,6 +20,7 @@ async function initialize(configuration = {}) {
 
   const token = configuration.token || process.env.CRAFT_AI_TOKEN || process.env.CRAFT_TOKEN;
   const secret = configuration.secret;
+  const zone = configuration.zone;
 
   if (!token)
     throw new Error('A craft ai access token is required to initialize the kit. The token must be provided either as part of the kit\'s configuration or through the environment variable "CRAFT_AI_TOKEN", but none was found.');
@@ -35,6 +38,13 @@ async function initialize(configuration = {}) {
 
     configuration.namespace = uuid(secret, ROOT_NAMESPACE);
   } else if (process.env.NODE_ENV !== 'test') console.warn('WARNING: No secret was defined in the kit\'s configuration.');
+
+  if (zone !== undefined) {
+    if (Utils.isNotString(zone))
+      throw new TypeError(`The "zone" property of the kit's configuration must be a "string". Received "${typeof zone}".`);
+    if (!Info.isValidIANAZone(zone))
+      throw new RangeError('The "zone" property of the kit\'s configuration must be a valid IANA zone or a fixed-offset name.');
+  }
 
   const providers = configuration.providers;
   const client = createClient(token, configuration.recordBulkSize);
@@ -77,6 +87,7 @@ function createClient(token, bulkSize) {
 const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
 const ROOT_NAMESPACE = uuid.DNS;
 
+const Info = luxon.Info;
 
 module.exports = {
   craftai,

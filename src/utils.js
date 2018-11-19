@@ -17,7 +17,7 @@ function formatTimezone(offset) {
   const offsetValue = Math.abs(offset);
   const hours = Math.floor(offsetValue / 60);
 
-  return (Math.sign(offset) ? '+' : '-')
+  return (Math.sign(offset) >= 0 ? '+' : '-')
     + [hours, offsetValue - hours * 60].map((value) => String(value).padStart(2, 0)).join(':');
 }
 
@@ -33,6 +33,8 @@ function isNull(value) { return value === null; }
 
 function isNotNull(value) { return value !== null; }
 
+function isNotString(value) { return typeof value !== 'string'; }
+
 function isPredictiveModel(value) {
   return value !== null
     && typeof value === 'object'
@@ -43,16 +45,14 @@ function isPredictiveModel(value) {
     && value.configuration !== null;
 }
 
-function isNotString(value) { return typeof value !== 'string'; }
-
 function parseDate(value) {
-  if (value === null || value === undefined || typeof value === 'boolean') return;
-
-  return typeof value === 'string'
-    ? DateTime.fromISO(value)
-    : value instanceof Date
-      ? DateTime.fromJSDate(value)
-      : typeof value === 'number' ? DateTime.fromMillis(value) : value;
+  return value === null || value === undefined || typeof value === 'boolean'
+    ? DateTime.invalid('wrong type')
+    : typeof value === 'string'
+      ? DateTime.fromISO(value, { setZone: true })
+      : value instanceof Date
+        ? DateTime.fromJSDate(value)
+        : typeof value === 'number' ? DateTime.fromMillis(value) : value;
 }
 
 function parseNumber(value) {
@@ -66,9 +66,14 @@ function parseTimestamp(value) {
 
   const date = parseDate(value);
 
-  if (date && date.isValid) return Math.floor(date.valueOf() / 1000);
+  if (!date.isValid)
+    throw new Error('Invalid date');
 
-  throw new Error();
+  return Math.floor(date.valueOf() / 1000);
+}
+
+function setZone(date, zone) {
+  return zone && date.isValid ? date.setZone(zone) : date;
 }
 
 
@@ -82,9 +87,10 @@ module.exports = {
   handleResponse,
   isNotNull,
   isNull,
-  isPredictiveModel,
   isNotString,
+  isPredictiveModel,
   parseDate,
   parseNumber,
   parseTimestamp,
+  setZone,
 };

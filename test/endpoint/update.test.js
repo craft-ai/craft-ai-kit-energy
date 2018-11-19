@@ -173,7 +173,7 @@ test('reduces the size of the records by dropping successive identical values', 
   const client = kit.client;
 
   return t.notThrowsAsync(kit
-    .loadEndpoint({ id: context.endpoint.register() })
+    .loadEndpoint({ id: context.endpoint.register(), metadata: { zone: 'Europe/Paris' } })
     .then((endpoint) => endpoint.update(RECORDS))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
     .then((history) => {
@@ -267,7 +267,8 @@ test('converts accumulated energy values to mean electrical loads', (t) => {
       energy: {
         origin: { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 },
         period: { days: 1 }
-      }
+      },
+      metadata: { zone: 'Europe/Paris' }
     })
     .then((endpoint) => endpoint.update(RECORDS_AS_ACCUMULATED_ENERGY))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
@@ -281,6 +282,24 @@ test('converts accumulated energy values to mean electrical loads', (t) => {
       records.forEach((record) => record[LOAD] = Math.round(record[LOAD] * 10) / 10);
       t.deepEqual(records, RECORDS);
     }));
+});
+
+test('uses timezone information provided as a feature to parse dates', (t) => {
+  const context = t.context;
+  const kit = context.kit;
+  const offset = '+07:00';
+
+  const RECORDS_WITH_TIMEZONES = RECORDS.map((record) => ({ ...record, [TIMEZONE]: `utc${offset}` }));
+
+  return kit
+    .loadEndpoint({ id: context.endpoint.register('test'), metadata: { zone: 'Europe/Paris' } })
+    .then((endpoint) => endpoint.update(RECORDS_WITH_TIMEZONES))
+    .then((endpoint) => kit.client.getAgentStateHistory(endpoint.agentId))
+    .then((history) => {
+      const offsets = new Array(RECORDS.length).fill(offset);
+
+      t.deepEqual(history.map((state) => state.sample[TIMEZONE]), offsets);
+    });
 });
 
 

@@ -1,9 +1,12 @@
+const buffer = require('most-buffer');
+const nth = require('most-nth');
 const path = require('path');
 const test = require('ava');
 
 const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
 const Is = require('../helpers/is');
+const Common = require('../../src/endpoint/common');
 
 
 test.before(require('dotenv').load);
@@ -15,7 +18,7 @@ test.beforeEach((t) => Helpers
     const kit = context.kit;
 
     return kit
-      .loadEndpoint({ id: context.endpoint.register() })
+      .loadEndpoint({ id: context.endpoint.register(), metadata: { zone: 'Europe/Paris' } })
       .then((endpoint) => endpoint.update(TRAINING_RECORDS))
       .then((endpoint) => t.context.endpoint.current = endpoint);
   }));
@@ -60,6 +63,23 @@ test('computes predictions', (t) => {
       values.slice(1).forEach((current) => t.deepEqual(predictions, current));
       t.snapshot(predictions);
     }));
+});
+
+test('computes predictions with accurate non local timezone', (t) => {
+  const context = t.context;
+  const endpoint = context.endpoint.current;
+
+  return Common
+    .toRecordStream(TEST_RECORDS, {}, false, 'Europe/Paris')
+    .thru(buffer())
+    .thru(nth.last)
+    .then((records) => endpoint
+      .computePredictions(TEST_RECORDS)
+      .then((predictions) => {
+        const timezones = records.map((record) => record[TIMEZONE]);
+
+        t.deepEqual(predictions.map((prediction) => prediction.context[TIMEZONE]), timezones);
+      }));
 });
 
 test('computes predictions given a model', (t) => {
@@ -356,6 +376,7 @@ const INVALID_DATES = Helpers.INVALID_DATES;
 const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS.filter((object) => object !== null);
 const RECORDS = Helpers.RECORDS;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
 const INDEX = Math.floor((RECORDS.length - 1) * .4);
 const TRAINING_RECORDS = RECORDS.slice(0, INDEX);
 const TEST_RECORDS = RECORDS.slice(INDEX);

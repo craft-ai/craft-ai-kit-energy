@@ -6,6 +6,7 @@ const uuid = require('uuid/v5');
 const Constants = require('./constants');
 const Endpoint = require('./endpoint');
 const Provider = require('./provider');
+const Utils = require('./utils');
 
 
 async function loadEndpoint(definition, resetAgent = false) {
@@ -22,8 +23,20 @@ async function loadEndpoint(definition, resetAgent = false) {
 
   const metadata = definition.metadata;
 
-  if (metadata !== undefined && (metadata === null || typeof metadata !== 'object'))
-    throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
+  if (metadata !== undefined) {
+    if (metadata === null || typeof metadata !== 'object')
+      throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
+
+    const zone = metadata.zone;
+
+    if (zone === undefined) metadata.zone = this.configuration.zone;
+    else {
+      if (Utils.isNotString(zone))
+        throw new TypeError(`The "zone" property of the endpoint's configuration must be a "string". Received "${typeof zone}".`);
+      if (!Info.isValidIANAZone(zone))
+        throw new RangeError('The "zone" property of the endpoint\'s configuration must be a valid IANA zone or a fixed-offset name.');
+    }
+  }
 
   const energy = parseEnergyConfiguration(definition.energy);
   const namespace = this.configuration.namespace;
@@ -48,7 +61,7 @@ async function loadEndpoint(definition, resetAgent = false) {
         kit: { value: this },
         agentId: { value: agentId, enumerable: true },
         id: { value: id, enumerable: true },
-        metadata: { value: metadata || {}, enumerable: true },
+        metadata: { value: metadata || { zone: this.configuration.zone }, enumerable: true },
       });
     });
 }
@@ -196,6 +209,7 @@ const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
 const LOAD = Constants.LOAD_FEATURE;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
+const Info = luxon.Info;
 
 module.exports = {
   loadEndpoint,

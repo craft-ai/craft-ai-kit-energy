@@ -90,14 +90,14 @@ async function predict(endpoint, values, model, options, onlyRecords) {
   const features = endpoint.features.filter(isNotLoadFeature);
 
   return retrieveModel(endpoint, model).then((model) => Common
-    .toRecordStream(values, options && options.import, onlyRecords)
+    .toRecordStream(values, options && options.import, onlyRecords, endpoint.metadata.zone)
     .thru(Provider.extendRecords.bind(null, endpoint))
     .thru(Common.mergeUntilFirstFullRecord.bind(null, features))
     .thru(Common.formatRecords.bind(null, features))
     .loop((previous, state) => {
       const context = state.context;
       const current = Object.assign(previous, context);
-      const result = interpreter.decide(model, current, new craftai.Time(state[TIMESTAMP]));
+      const result = interpreter.decide(model, current, new craftai.Time(state[TIMESTAMP], current[TIMEZONE]));
       const output = result.output[LOAD];
 
       return {
@@ -166,6 +166,7 @@ function setActualLoad(prediction) {
 
 const DATE = Constants.DATE_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
 const ORIGINAL_CONTEXT = Constants.ORIGINAL_CONTEXT;
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const TIMESTAMP = Constants.TIMESTAMP_FEATURE;

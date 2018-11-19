@@ -1,7 +1,9 @@
+const luxon = require('luxon');
 const test = require('ava');
 
 const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
+const Utils = require('../../src/utils');
 
 
 test.before(require('dotenv').load);
@@ -15,10 +17,10 @@ test('fails retrieving the records\' history of an endpoint with invalid paramat
 
   return kit
     .loadEndpoint({ id: context.endpoint.register() })
-    .then((endpoint) => Promise.all(INVALID_DATES.map((date) => Promise.all([
-      t.throwsAsync(endpoint.retrieveRecords(date)),
-      t.throwsAsync(endpoint.retrieveRecords(undefined, date))
-    ]))));
+    .then((endpoint) => Promise.all(INVALID_DATES.map((date) => [date])
+      .concat(INVALID_DATES.map((date) => [undefined, date]))
+      .concat(INVALID_BOOLEANS.map((option) => [undefined, undefined, option]))
+      .map((parameters) => t.throwsAsync(endpoint.retrieveRecords(...parameters)))));
 });
 
 test('retrieves the records\' history of an endpoint', (t) => {
@@ -63,6 +65,22 @@ test('retrieves the records\' history of an endpoint', (t) => {
     }));
 });
 
+test('retrieves the records\' history of an endpoint with the timezones', (t) => {
+  const context = t.context;
+  const kit = context.kit;
+  const offsets = RECORDS.map((record) => Utils.parseDate(record[DATE]).offset);
+
+  return t.notThrowsAsync(kit
+    .loadEndpoint({ id: context.endpoint.register() })
+    .then((endpoint) => endpoint.update(RECORDS))
+    .then((endpoint) => endpoint.retrieveRecords(undefined, undefined, true))
+    .then((history) => {
+      t.true(Array.isArray(history));
+      t.is(history.length, RECORDS.length);
+      t.deepEqual(history.map((record) => DateTime.fromObject({ zone: record[TIMEZONE] }).offset), offsets);
+    }));
+});
+
 test('fails retrieving the predictive model of an endpoint with invalid paramaters', (t) => {
   const context = t.context;
   const kit = context.kit;
@@ -77,7 +95,7 @@ test('retrieves the predictive model of an endpoint', (t) => {
   const kit = context.kit;
 
   return t.notThrowsAsync(kit
-    .loadEndpoint({ id: t.context.endpoint.register() })
+    .loadEndpoint({ id: t.context.endpoint.register(), metadata: { zone: 'Europe/Paris' } })
     .then((endpoint) => endpoint
       .update(RECORDS)
       .then(() => Promise.all([
@@ -93,5 +111,9 @@ test('retrieves the predictive model of an endpoint', (t) => {
 
 
 const DATE = Constants.DATE_FEATURE;
-const RECORDS = Helpers.RECORDS;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
+const INVALID_BOOLEANS = Helpers.INVALID_BOOLEANS;
 const INVALID_DATES = Helpers.INVALID_DATES;
+const RECORDS = Helpers.RECORDS;
+
+const DateTime = luxon.DateTime;
