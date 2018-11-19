@@ -29,7 +29,6 @@ function stream(filepath, options = {}) {
   file.once('error', (error) => {
     // [Readable.destroy()](https://nodejs.org/dist/latest-v10.x/docs/api/stream.html#stream_readable_destroy_error) doesn't exist on Node.js 6.x LTS
     rows.emit('error', error);
-    rows.end();
   });
 
   const result = Stream.fromNativeStream(rows, (error) => {
