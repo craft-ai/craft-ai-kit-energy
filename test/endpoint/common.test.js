@@ -2,12 +2,13 @@ const buffer = require('most-buffer');
 const most = require('most');
 const test = require('ava');
 
+const Common = require('../../src/endpoint/common');
 const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
-const Common = require('../../src/endpoint/common');
+const Stream = require('../../src/stream');
 
 
-test('properly formats timezone', async(t) => {
+test('properly formats timezone', (t) => {
   const date = '2017-07-30T02:30:00';
 
   return most
@@ -18,8 +19,8 @@ test('properly formats timezone', async(t) => {
       IANA_ZONES.map((zone) => Common.toRecordStream([{ date }], {}, false, zone)),
     ])
     .chain((streams) => most.mergeArray(streams).thru(buffer()))
-    .thru(buffer())
-    .observe((result) => {
+    .thru(Stream.toBuffer)
+    .then((result) => {
       const records = result[0];
 
       t.deepEqual(records, result[1]);

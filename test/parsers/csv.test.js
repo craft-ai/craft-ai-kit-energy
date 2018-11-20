@@ -1,10 +1,9 @@
-const buffer = require('most-buffer');
-const nth = require('most-nth');
 const path = require('path');
 const test = require('ava');
 
 const CsvHelper = require('../../src/parsers/csv');
 const Helpers = require('../helpers');
+const Stream = require('../../src/stream');
 
 
 test('fails streaming a CSV file with invalid parameters', (t) => {
@@ -33,16 +32,14 @@ test('fails streaming a CSV file with invalid parameters', (t) => {
 test('streams a CSV file', (t) => {
   return CsvHelper
     .stream(FILEPATH)
-    .thru(buffer())
-    .thru(nth.first)
+    .thru(Stream.toBuffer)
     .then((records) => t.deepEqual(parseRecords(records), Helpers.RECORDS));
 });
 
 test('streams a portion of a CSV file', (t) => {
   return CsvHelper
     .stream(FILEPATH, { from: WINDOW_START, to: WINDOW_END })
-    .thru(buffer())
-    .thru(nth.first)
+    .thru(Stream.toBuffer)
     .then((records) => t.deepEqual(parseRecords(records), RECORDS.slice(WINDOW_START, WINDOW_END)));
 });
 
@@ -54,8 +51,7 @@ test('streams a CSV file written in a custom format', (t) => {
       escape: '\\',
       columns: ['date', 'index'],
     })
-    .thru(buffer())
-    .thru(nth.first)
+    .thru(Stream.toBuffer)
     .then((records) => t.snapshot(records));
 });
 

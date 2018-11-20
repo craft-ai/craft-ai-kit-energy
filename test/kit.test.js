@@ -84,7 +84,7 @@ test('initializes zone-less endpoint with the zone of the kit', (t) => {
       })));
 });
 
-test('initializes the endpoint with a valid zone', async(t) => {
+test('initializes the endpoint with a valid zone', (t) => {
   const zone = IANA_ZONES[0];
 
   return EnergyKit
