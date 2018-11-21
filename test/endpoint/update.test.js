@@ -302,6 +302,43 @@ test('uses timezone information provided as a feature to parse dates', (t) => {
     });
 });
 
+test('parses continuous features\'s values into numbers', (t) => {
+  const context = t.context;
+  const kit = context.kit;
+  const client = kit.client;
+
+  return t.notThrowsAsync(kit
+    .loadEndpoint({
+      id: context.endpoint.register(),
+      learning: {
+        properties: { property: { type : 'continuous' } }
+      }
+    })
+    .then((endpoint) => endpoint
+      .update(RECORDS.slice(0, INDEX).map((record) => ({ ...record, property: '5' })))
+      .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
+      .then((operations) => {
+        t.is(operations.length, INDEX);
+        const property = operations
+          .map((operation) => operation.context.property)
+          .filter((value) => value != undefined);
+        t.is(property.length, 1);
+        t.is(property[0], 5);
+      })
+      .then(() => endpoint
+        .update(RECORDS.slice(INDEX).map((record) => ({ ...record, property: 'o' }))))
+      .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
+      .then((operations) => {
+        t.is(operations.length, RECORDS.length);
+        const property = operations
+          .map((operation) => operation.context.property)
+          .filter((value) => value != undefined);
+        t.is(property.length, 1);
+        t.is(property[0], 5);
+      })
+    ));
+});
+
 
 function toRecords(history) {
   const state = Object.defineProperty({}, 'timezone', { writable: true });
@@ -325,3 +362,4 @@ const RECORDS = Helpers.RECORDS;
 const RECORDS_AS_ACCUMULATED_ENERGY = Helpers.RECORDS_AS_ACCUMULATED_ENERGY;
 const RECORDS_AS_ENERGY = Helpers.RECORDS_AS_ENERGY;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
+const INDEX = Math.floor((RECORDS.length - 1) * .4);

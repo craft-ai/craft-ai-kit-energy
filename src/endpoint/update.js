@@ -31,7 +31,7 @@ async function update(records, options) {
       ? Common.mergeUntilFirstFullRecord.bind(null, features)
       : ignoreOldRecords.bind(null, end))
     // Send the context operations by bulks.
-    .thru(Common.formatRecords.bind(null, features))
+    .thru(Common.formatRecords.bind(null, this))
     .thru(buffer(client.cfg.operationsChunksSize))
     .recoverWith((error) => {
       // TODO: proper error handling
