@@ -1,7 +1,7 @@
 # craft ai energy kit #
 
 > The [craft ai] integration kit for energy prediction in JavaScript.
-
+<!-- -->
 > :construction: This project is still under active development.
 
 [![Version](https://img.shields.io/npm/v/craft-ai-kit-energy.svg?style=flat-square)](https://npmjs.org/package/craft-ai-kit-energy)
@@ -11,7 +11,29 @@
 [![Dependencies](https://img.shields.io/david/craft-ai/craft-ai-kit-energy.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-kit-energy)
 [![Dev Dependencies](https://img.shields.io/david/dev/craft-ai/craft-ai-kit-energy.svg?style=flat-square)](https://david-dm.org/craft-ai/craft-ai-kit-energy#info=devDependencies)
 
+## Overview ##
+
+The [craft ai] energy kit is a plug-and-play JavaScript library allowing to leverage the [craft ai] explainable artificial intelligence for predicting energy consumption behaviors.
+
+### Workflow ###
+
+1. Initialize: The energy kit accepts as input a historical records of the electrical load of one or more device; based on these records, it will generate predictive models for each of the device.
+
+2. Exploit: Those models allows you to
+    - make predictions in the near future;
+    - detect anomalies in the past.
+
+3. Update: The predictive models are dynamic and it is possible to update them with new data at any point in time past the initialization; Feeding them newly recorded data allows to keep them relevant.
+
+### Technical considerations ###
+
+The load records to use must be dated, following the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DDTHH:mm:ss.sssZ`.
+
+The minimum amount of time accepted between two items of data is 1 second.
+
 ## Usage ##
+
+###
 
 This integration kit has been tested on every active and maintained [`LTS` releases of Node.js](https://github.com/nodejs/Release#release-schedule) (i.e. it should work with any version greater or equal to `v6.9.0`).
 
@@ -190,12 +212,11 @@ $ npm run examples:single_endpoint
 
 [![Powered By Dark Sky](./poweredby_dark_sky.png)](https://darksky.net/poweredby/)
 
-> Dua, D. and Karra Taniskidou, E. (2017). UCI Machine Learning Repository \[http://archive.ics.uci.edu/ml\]. Irvine, CA: University of California, School of Information and Computer Science.
-
-
-> Hébrail, Georges and Bérard, Alice, 2012 "Individual household electric power consumption Data Set", https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption
-
-> Makonin, Stephen, 2016, "AMPds2: The Almanac of Minutely Power dataset (Version 2)", https://doi.org/10.7910/DVN/FIE0S4, Harvard Dataverse, V1, UNF:6:0uqZaBkSWdyv27JqTHFWPg==\[fileUNF\]
+> Dua, D. and Karra Taniskidou, E. (2017). UCI Machine Learning Repository [http://archive.ics.uci.edu/ml]([http://archive.ics.uci.edu/ml). Irvine, CA: University of California, School of Information and Computer Science.
+<!-- -->
+> Hébrail, Georges and Bérard, Alice, 2012 "Individual household electric power consumption Data Set", [https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption](https://archive.ics.uci.edu/ml/datasets/individual+household+electric+power+consumption)
+<!-- -->
+> Makonin, Stephen, 2016, "AMPds2: The Almanac of Minutely Power dataset (Version 2)", [https://doi.org/10.7910/DVN/FIE0S4](https://doi.org/10.7910/DVN/FIE0S4), Harvard Dataverse, V1, UNF:6:0uqZaBkSWdyv27JqTHFWPg==\[fileUNF\]
 
 [craft ai]: http://www.craft.ai
 [AMPds2: The Almanac of Minutely Power dataset (Version 2)]: https://doi.org/10.7910/DVN/FIE0S4
