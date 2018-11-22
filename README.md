@@ -15,21 +15,20 @@
 
 The [craft ai] energy kit is a plug-and-play JavaScript library allowing to leverage the [craft ai] explainable artificial intelligence for predicting energy consumption behaviors.
 
+For each of the device that you want to modelize, you will define an _endpoint_.
+This endpoint will be identified by a unique _id_ string. You might also provide some details as to the location.
+
 ### Workflow ###
 
-1. Initialize: The energy kit accepts as input a historical records of the electrical load of one or more device; based on these records, it will generate predictive models for each of the device.
+1. Initialize: the endpoint accepts a historical record of power or energy as input; based on this record, it will generate a predictive model.
 
-2. Exploit: Those models allows you to
-    - make predictions in the near future;
-    - detect anomalies in the past.
+2. Evaluate: make sure that the model is able to capture the behavior of your signal.
 
-3. Update: The predictive models are dynamic and it is possible to update them with new data at any point in time past the initialization; Feeding them newly recorded data allows to keep them relevant.
+3. Exploit: a model allows you to
+    - detect anomalies in the past;
+    - predict the behavior of your device in the future.
 
-### Technical considerations ###
-
-The load records to use must be dated, following the [ISO 8601 format](https://en.wikipedia.org/wiki/ISO_8601) `YYYY-MM-DDTHH:mm:ss.sssZ`.
-
-The minimum amount of time accepted between two items of data is 1 second.
+4. Update: predictive models are dynamic and it is possible to update them with new data at any time; Feeding them newly recorded data allows to keep them relevant.
 
 ## Usage ##
 
@@ -67,14 +66,63 @@ EnergyKit
      * an endpoint when creating the related craft ai agents. If not specified,
      * each agent will use the same identifier as the endpoint's identifier.
      */
-    secret: '{a-secret-string}'
+    secret: '{a-secret-string}',
+    /**
+     * __Optional__
+     *
+     * Specify external data providers to enrich your records.
+     * Preset providers are 'PublicHolidayProvider', 'SchoolHolidaysProvider' (France only)
+     * and 'WeatherProvider' using the Dark Sky API.
+     */
+    providers: [
+      {
+        provider: PublicHolidayProvider,
+        options: { country: 'fr' }
+      },
+      {
+        provider: SchoolHolidaysProvider,
+        options: { country: 'fr' }
+      },
+      {
+        provider: WeatherProvider,
+        options: {
+          /**
+           * __Required__
+           *
+           * Specify the access token to the weather provider.
+           */
+          token: '{dark-sky-token}',
+          /**
+           * __Optional__
+           *
+           * List of properties to retrieve from the weather provider.
+           * Default to ['temperatureLow', 'temperatureHigh'].
+           */
+          properties : '{array-of-properties}',
+          /**
+           * __Optional__
+           *
+           * Enable the cache mechanism.
+           */
+          cache: {
+            load: () => require('{weather-cache-path}'),
+            save: (cache) => {
+              fs.writeFileSync(
+                '{weather-cache-path}',
+                JSON.stringify(cache, null, '  ')
+              );
+            }
+          }
+        }
+      }
+    ]
   })
   .then((kit) => /* Do something with the kit... */);
 ```
 
 #### Load an endpoint ####
 
-One instance of the kit can manage several electrical equipments, they are called _endpoints_. They need at least a unique identifier to be loaded.
+One instance of the kit can manage several electrical devices, they are called _endpoints_. They need at least a unique identifier to be loaded.
 
 ```js
 kit
@@ -84,14 +132,23 @@ kit
      *
      * Define uniquely the endpoint.
      */
-    id: '{a-unique-id}'
+    id: '{a-unique-id}',
+    /* __Optional__
+     *
+     * Add details as to what the endoint represents.
+     */
+    metadata: {
+      region: '91',
+      latitude: 48.458570,  // We consider a location in Essonne (France), near the dataset authors' workplace
+      longitude: 2.156942   // Latitude and longitude retrieved from https://www.latlong.net
+    }
   })
   .then((endpoint) => /* Do something with the endpoint... */)
 ```
 
 #### Update the endpoint ###
 
-Before using the endpoint, you might want to update it with load consumption data.
+Before using the endpoint, you will want to update it with load consumption data.
 The endpoint takes as an input a _record_, which consists at least of a dated eletrical load information.
 
 ```js
@@ -130,6 +187,8 @@ kit
   .close()
   .then(() => /* Do something after the kit has been closed... */)
 ```
+
+> This will also close the connection with any data providers specified at initialization.
 
 #### Adding additional context information ####
 
