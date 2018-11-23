@@ -98,7 +98,10 @@ EnergyKit
            * List of properties to retrieve from the weather provider.
            * Default to ['temperatureLow', 'temperatureHigh'].
            */
-          properties : '{array-of-properties}',
+          properties: [
+            '{a-first-property-to-retrieve}',
+            '{a-second-property-to-retrieve}'
+          ],
           /**
            * __Optional__
            *
@@ -126,23 +129,40 @@ One instance of the kit can manage several electrical devices, they are called _
 
 ```js
 kit
-  .loadEndpoint({
+  .loadEndpoint(
+  /**
+   * __Required__
+   *
+   * Endpoint configuration.
+   */
+    {
     /**
      * __Required__
      *
      * Define uniquely the endpoint.
      */
     id: '{a-unique-id}',
-    /* __Optional__
+    /**
+     * __Optional__
      *
      * Add details as to what the endoint represents.
+     * Some metadata properties might be required by the providers.
      */
     metadata: {
-      region: '91',
-      latitude: 48.458570,  // We consider a location in Essonne (France), near the dataset authors' workplace
-      longitude: 2.156942   // Latitude and longitude retrieved from https://www.latlong.net
+      region: '{2-digit-department-code}', // Used by the default packaged School Holidays provider (France only)
+      latitude: '{latitude}',  // Used by the default Weather provider
+      longitude: '{longitude}'   // Used by the default Weather provider
     }
-  })
+  },
+  /**
+   * __Optional__
+   *
+   * Specify if the endpoint must be reset.
+   * true => delete the associated agent if it exists and recreate it.
+   * false => retrieve the associated agent if it exists, create it otherwise.
+   * Default to false.
+   */
+  false)
   .then((endpoint) => /* Do something with the endpoint... */)
 ```
 
@@ -174,7 +194,15 @@ const today = new Date()
 const lastMonth = new Date(today - 30 * 24 * 3600 * 1000)
 
 endpoint
-  .computeAnomalies({ from: lastMonth, to: today })
+  .computeAnomalies(
+  /**
+   * __Required__
+   *
+   * Date range for which to compute anomalies.
+   * From {date} to {date}.
+   */
+    { from: lastMonth, to: today },
+  )
   .then((anomalies) => console.log(anomalies))
 ```
 
