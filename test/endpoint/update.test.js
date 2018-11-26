@@ -302,6 +302,43 @@ test('uses timezone information provided as a feature to parse dates', (t) => {
     });
 });
 
+test('parses continuous features\'s values into numbers', (t) => {
+  const context = t.context;
+  const kit = context.kit;
+  const client = kit.client;
+
+  return t.notThrowsAsync(kit
+    .loadEndpoint({
+      id: context.endpoint.register(),
+      learning: {
+        properties: { property: { type : 'continuous' } }
+      }
+    })
+    .then((endpoint) => endpoint
+      .update(RECORDS.slice(0, INDEX).map((record) => ({ ...record, property: '5' })))
+      .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
+      .then((operations1) => {
+        t.is(operations1.length, INDEX);
+        t.is(operations1[0].context.property, 5);
+
+        const properties = operations1.slice(1).map((operation) => operation.context.property);
+
+        t.deepEqual(properties, new Array(INDEX - 1).fill(undefined));
+
+        return endpoint
+          .update(RECORDS.slice(INDEX).map((record) => ({ ...record, property: 'o' })))
+          .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
+          .then((operations2) => {
+            t.is(operations2.length, RECORDS.length);
+            t.deepEqual(operations2.slice(0, INDEX), operations1);
+
+            const properties = operations2.slice(INDEX).map((operation) => operation.context.property);
+
+            t.deepEqual(properties, new Array(RECORDS.length - INDEX).fill(undefined));
+          });
+      })));
+});
+
 
 function toRecords(history) {
   const state = Object.defineProperty({}, 'timezone', { writable: true });
@@ -325,3 +362,4 @@ const RECORDS = Helpers.RECORDS;
 const RECORDS_AS_ACCUMULATED_ENERGY = Helpers.RECORDS_AS_ACCUMULATED_ENERGY;
 const RECORDS_AS_ENERGY = Helpers.RECORDS_AS_ENERGY;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
+const INDEX = Math.floor((RECORDS.length - 1) * .4);

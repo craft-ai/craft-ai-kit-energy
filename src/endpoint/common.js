@@ -5,7 +5,11 @@ const Stream = require('../stream');
 const Utils = require('../utils');
 
 
-function formatRecords(features, records) {
+function formatRecords(endpoint, records) {
+  const context = endpoint.agent.configuration.context;
+  const features = endpoint.features;
+  const continuousFeatures = features.filter((key) => context[key].type === 'continuous');
+
   return records
     // Remove unknown keys
     .tap((record) => {
@@ -22,6 +26,11 @@ function formatRecords(features, records) {
 
       return { seed: Object.assign(previous, record), value: record };
     }, {})
+    .tap((record) => continuousFeatures.forEach((key) => {
+      if (typeof record[key] === 'string') {
+        record[key] = Utils.parseNumber(record[key]);
+      }
+    }))
     .map(toContextOperation);
 }
 

@@ -14,7 +14,6 @@ async function update(records, options) {
   const agentId = this.agentId;
   const client = this.kit.client;
   const energy = this.energy;
-  const features = this.features;
   const end = agent.lastTimestamp;
 
   let stream = Common.toRecordStream(records, options && options.import, true, this.metadata.zone);
@@ -28,10 +27,10 @@ async function update(records, options) {
     // Extend the record with providers
     .thru(Provider.extendRecords.bind(null, this))
     .thru(end === undefined
-      ? Common.mergeUntilFirstFullRecord.bind(null, features)
+      ? Common.mergeUntilFirstFullRecord.bind(null, this.features)
       : ignoreOldRecords.bind(null, end))
     // Send the context operations by bulks.
-    .thru(Common.formatRecords.bind(null, features))
+    .thru(Common.formatRecords.bind(null, this))
     .thru(buffer(client.cfg.operationsChunksSize))
     .recoverWith((error) => {
       // TODO: proper error handling

@@ -93,7 +93,7 @@ async function predict(endpoint, values, model, options, onlyRecords) {
     .toRecordStream(values, options && options.import, onlyRecords, endpoint.metadata.zone)
     .thru(Provider.extendRecords.bind(null, endpoint))
     .thru(Common.mergeUntilFirstFullRecord.bind(null, features))
-    .thru(Common.formatRecords.bind(null, features))
+    .thru(Common.formatRecords.bind(null, endpoint))
     .loop((previous, state) => {
       const context = state.context;
       const current = Object.assign(previous, context);
