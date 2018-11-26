@@ -8,8 +8,7 @@ const Utils = require('../utils');
 function formatRecords(endpoint, records) {
   const context = endpoint.agent.configuration.context;
   const features = endpoint.features;
-  const continuousFeatures = features
-    .filter((key) => context[key].type === 'continuous');
+  const continuousFeatures = features.filter((key) => context[key].type === 'continuous');
 
   return records
     // Remove unknown keys
@@ -27,14 +26,11 @@ function formatRecords(endpoint, records) {
 
       return { seed: Object.assign(previous, record), value: record };
     }, {})
-    .tap((record) => {
-      continuousFeatures.forEach((key) => {
-        const value = record[key];
-        if (typeof value === 'string') {
-          record[key] = Utils.parseNumber(value);
-        }
-      });
-    })
+    .tap((record) => continuousFeatures.forEach((key) => {
+      if (typeof record[key] === 'string') {
+        record[key] = Utils.parseNumber(record[key]);
+      }
+    }))
     .map(toContextOperation);
 }
 

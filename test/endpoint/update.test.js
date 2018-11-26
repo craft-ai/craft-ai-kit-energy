@@ -317,26 +317,26 @@ test('parses continuous features\'s values into numbers', (t) => {
     .then((endpoint) => endpoint
       .update(RECORDS.slice(0, INDEX).map((record) => ({ ...record, property: '5' })))
       .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
-      .then((operations) => {
-        t.is(operations.length, INDEX);
-        const property = operations
-          .map((operation) => operation.context.property)
-          .filter((value) => value != undefined);
-        t.is(property.length, 1);
-        t.is(property[0], 5);
-      })
-      .then(() => endpoint
-        .update(RECORDS.slice(INDEX).map((record) => ({ ...record, property: 'o' }))))
-      .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
-      .then((operations) => {
-        t.is(operations.length, RECORDS.length);
-        const property = operations
-          .map((operation) => operation.context.property)
-          .filter((value) => value != undefined);
-        t.is(property.length, 1);
-        t.is(property[0], 5);
-      })
-    ));
+      .then((operations1) => {
+        t.is(operations1.length, INDEX);
+        t.is(operations1[0].context.property, 5);
+
+        const properties = operations1.slice(1).map((operation) => operation.context.property);
+
+        t.deepEqual(properties, new Array(INDEX - 1).fill(undefined));
+
+        return endpoint
+          .update(RECORDS.slice(INDEX).map((record) => ({ ...record, property: 'o' })))
+          .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
+          .then((operations2) => {
+            t.is(operations2.length, RECORDS.length);
+            t.deepEqual(operations2.slice(0, INDEX), operations1);
+
+            const properties = operations2.slice(INDEX).map((operation) => operation.context.property);
+
+            t.deepEqual(properties, new Array(RECORDS.length - INDEX).fill(undefined));
+          });
+      })));
 });
 
 
