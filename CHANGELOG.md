@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.3.0...HEAD)
 
+### Fixed
+
+- Parsing numeric embedded properties when provided as a string.
+
 ## [0.3.0](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.2.2...v0.3.0) - 2018-11-20
 
 ### Fixed
