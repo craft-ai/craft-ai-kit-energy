@@ -168,8 +168,11 @@ kit
 
 #### Update the endpoint ###
 
-Before using the endpoint, you will want to update it with load consumption data.
-The endpoint takes as an input a _record_, which consists at least of a dated eletrical load information.
+Before using the endpoint, you will want to update it with energetic consumption data.
+The endpoint takes as an input a _record_, which consists at least of a dated energetic information.
+This energetic data can be one of the two following forms:
+- `load` (=instant power);
+- `energy` (transformed energy since last index)
 
 ```js
 endpoint
