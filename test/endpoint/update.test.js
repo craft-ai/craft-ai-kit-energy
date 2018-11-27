@@ -245,7 +245,7 @@ test('converts energy values to mean electrical loads', (t) => {
   return t.notThrowsAsync(kit
     .loadEndpoint({
       id: context.endpoint.register(),
-      energy: { period: 30 * 60 * 1000 }
+      energy: { period: 30 * 60 }
     })
     .then((endpoint) => endpoint.update(RECORDS_AS_ENERGY))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
@@ -266,7 +266,7 @@ test('converts accumulated energy values to mean electrical loads', (t) => {
       id: context.endpoint.register(),
       energy: {
         origin: '00:00:00',
-        period: 24 * 3600 * 1000
+        period: 24 * 3600
       },
       metadata: { zone: 'Europe/Paris' }
     })

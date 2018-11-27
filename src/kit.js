@@ -184,8 +184,8 @@ function parseEnergyConfiguration(value) {
     if (value.period <= 0)
       throw new RangeError(`The "period" property of the endpoint's energy definition must represent a strictly positive duration. Received "${value.period}".`);
 
-    energy.period = value.period;
-    energy.hours = value.period / (3600 * 1000);
+    energy.period = value.period * 1000;
+    energy.hours = value.period / 3600;
   }
 
   if (value.origin !== undefined) {
