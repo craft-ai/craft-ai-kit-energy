@@ -4,8 +4,8 @@ const seedrandom = require('seedrandom');
 async function initialize(provider) {
   if (!provider.options.random) provider.options.random = seedrandom('weather');
 
-  provider.refresh.origin.hours = 12;
-  provider.refresh.period = { days: 1 };
+  provider.refresh.origin = '12:00:00';
+  provider.refresh.period = 24 * 3600;
 }
 
 async function extendConfiguration() {

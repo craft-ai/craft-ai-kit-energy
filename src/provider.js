@@ -33,8 +33,8 @@ async function initialize(instance, index) {
   delete prototype.initialize;
 
   const refresh = {
-    origin: { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 },
-    period: { seconds: 1 }
+    origin: '00:00:00',
+    period: 1
   };
 
   const provider = Object.create(prototype, {
@@ -45,7 +45,7 @@ async function initialize(instance, index) {
   });
 
   await initialize(provider);
-  refresh.period = luxon.Duration.fromObject(refresh.period);
+  refresh.period = luxon.Duration.fromMillis(refresh.period * 1000);
   log('initialized');
 
   return provider;
@@ -74,9 +74,7 @@ function extendRecords(endpoint, records) {
         if (previous && previous > date) return;
 
         const refresh = providers[index].refresh;
-
-        states[index] = Utils.getDateWindow(date, refresh.origin, refresh.period)[1];
-
+        states[index] = Utils.getDateWindow(date, luxon.DateTime.fromISO(refresh.origin), refresh.period)[1];
         return record;
       });
 

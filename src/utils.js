@@ -33,7 +33,7 @@ function formatTimezone(offset) {
 function getDateWindow(date, origin, period) {
   const timeDifference = date - origin + 60 * 1000 * (date.offset - origin.offset);
   const rounded = date.minus({ milliseconds: timeDifference % period });
-
+  
   return rounded > date
     ? [rounded.minus(period), rounded]
     : [rounded, rounded.plus(period)];
