@@ -31,12 +31,12 @@ function formatTimezone(offset) {
 }
 
 function getDateWindow(date, origin, period) {
-  const timeDifference = date - origin + 60 * 1000 * (date.offset - origin.offset);
-  const rounded = date.minus({ milliseconds: timeDifference % period });
+  // Timezone offset is in minutes
+  const timeDifference = date - origin + (date.offset - origin.offset) * 60 * 1000;
+  // "rounded" is inferior or equal to "date" by design (positive modulo)
+  const rounded = date.minus(modulo(timeDifference, period));
   
-  return rounded > date
-    ? [rounded.minus(period), rounded]
-    : [rounded, rounded.plus(period)];
+  return [rounded, rounded.plus(period)];
 }
 
 function isNull(value) { return value === null; }
@@ -53,6 +53,12 @@ function isPredictiveModel(value) {
     && typeof value.configuration === 'object'
     && value.trees !== null
     && value.configuration !== null;
+}
+
+function modulo(a, b) {
+  const mod = a % b;
+  
+  return mod < 0 ? mod + b : mod;
 }
 
 function parseDate(value) {
@@ -109,6 +115,7 @@ module.exports = {
   isNull,
   isNotString,
   isPredictiveModel,
+  modulo,
   parseDate,
   parseNumber,
   parseTimestamp,
