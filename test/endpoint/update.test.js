@@ -261,27 +261,27 @@ test('converts accumulated energy values to mean electrical loads', (t) => {
   const kit = context.kit;
   const client = kit.client;
 
-  return t.notThrowsAsync(kit
-    .loadEndpoint({
-      id: context.endpoint.register(),
-      energy: {
-        origin: '00:00:00',
-        period: 24 * 3600
-      },
-      metadata: { zone: 'Europe/Paris' }
-    })
-    .then((endpoint) => endpoint.update(RECORDS_AS_ACCUMULATED_ENERGY))
-    .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
-    .then((history) => {
+  return Promise
+    .all(PERIOD_ORIGINS.map((origin) => kit
+      .loadEndpoint({
+        id: context.endpoint.register(),
+        energy: { origin, period: 24 * 3600 },
+        metadata: { zone: 'Europe/Paris' }
+      })
+      .then((endpoint) => endpoint.update(RECORDS_AS_ACCUMULATED_ENERGY))
+      .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))))
+    .then((histories) => {
+      const history = histories[0];
+      
       t.true(Array.isArray(history));
       t.is(history.length, RECORDS_AS_ACCUMULATED_ENERGY.length);
 
-      const records = toRecords(history);
-
       // Avoid rounding issue when comparing to the source
-      records.forEach((record) => record[LOAD] = Math.round(record[LOAD] * 10) / 10);
+      const records = toRecords(history).map((record) => ({ ...record, [LOAD]: Math.round(record[LOAD] * 10) / 10 }));
+
       t.deepEqual(records, RECORDS);
-    }));
+      histories.slice(1).forEach((currentHistory) => t.deepEqual(currentHistory, history));
+    });
 });
 
 test('uses timezone information provided as a feature to parse dates', (t) => {
@@ -358,6 +358,7 @@ const DATE = Constants.DATE_FEATURE;
 const INVALID_DATES = Helpers.INVALID_DATES;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const LOAD = Constants.LOAD_FEATURE;
+const PERIOD_ORIGINS = Helpers.PERIOD_ORIGINS;
 const RECORDS = Helpers.RECORDS;
 const RECORDS_AS_ACCUMULATED_ENERGY = Helpers.RECORDS_AS_ACCUMULATED_ENERGY;
 const RECORDS_AS_ENERGY = Helpers.RECORDS_AS_ENERGY;

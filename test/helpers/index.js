@@ -105,6 +105,7 @@ const INVALID_ZONES = [null, false, 2, 'Europe/Taipei', 'America/Madrid'];
 const INVALID_NUMBERS = [null, {}, '12', true, new Date(2018), () => {}];
 const INVALID_OBJECTS = [null, 0, true, 'string', Symbol(), () => {}];
 const INVALID_STRINGS = [null, {}, [false], true, new Date(2018), Promise.resolve('string'), () => {}];
+const PERIOD_ORIGINS = ['2018-01-01', '00:00:00', '2020-12-31T00:00:00.000Z', '2016-W05-4', new Date('Fri Jan 01 2016 00:00:00 GMT+0100 (Central European Standard Time)'), 1543446000000];
 const RECORDS = require('./data/records');
 const RECORDS_AS_ENERGY = require('./data/records_energy');
 const RECORDS_AS_ACCUMULATED_ENERGY = require('./data/records_accumulated_energy');
@@ -127,6 +128,7 @@ module.exports = {
   INVALID_NUMBERS,
   INVALID_OBJECTS,
   INVALID_STRINGS,
+  PERIOD_ORIGINS,
   RECORDS,
   RECORDS_AS_ENERGY,
   RECORDS_AS_ACCUMULATED_ENERGY,
