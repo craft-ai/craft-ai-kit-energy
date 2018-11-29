@@ -19,7 +19,7 @@ async function initialize(provider) {
     throw error;
   }
 
-  provider.refresh.period = { days: 1 };
+  provider.refresh.period = 24 * 3600;
 
   return context.holidays.initialize();
 }

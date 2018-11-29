@@ -33,7 +33,7 @@ async function initialize(instance, index) {
   delete prototype.initialize;
 
   const refresh = {
-    origin: '00:00:00',
+    origin: DateTime.utc(2018),
     period: 1
   };
 
@@ -45,7 +45,7 @@ async function initialize(instance, index) {
   });
 
   await initialize(provider);
-  refresh.period = luxon.Duration.fromMillis(refresh.period * 1000);
+  refresh.period = refresh.period * 1000;
   log('initialized');
 
   return provider;
@@ -55,6 +55,7 @@ async function extendConfiguration(providers, context) {
   if (!providers.length) return context;
 
   // TODO: Submit the endpoint's metadata to the providers for validation
+  // TODO: Validate the 'refresh' object from the provider
   return Promise
     .all(providers.map((provider) => provider.extendConfiguration()))
     .then((extensions) => Object.assign(context, ...extensions));
@@ -74,7 +75,9 @@ function extendRecords(endpoint, records) {
         if (previous && previous > date) return;
 
         const refresh = providers[index].refresh;
-        states[index] = Utils.getDateWindow(date, luxon.DateTime.fromISO(refresh.origin), refresh.period)[1];
+
+        states[index] = Utils.getDateWindow(date, refresh.origin, refresh.period)[1];
+
         return record;
       });
 
@@ -101,9 +104,11 @@ function isProvider(value) {
 }
 
 
+const DATE = Constants.DATE_FEATURE;
 const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
 const PARSED_RECORD = Constants.PARSED_RECORD;
-const DATE = Constants.DATE_FEATURE;
+
+const DateTime = luxon.DateTime;
 
 
 module.exports = {

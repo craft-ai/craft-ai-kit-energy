@@ -31,11 +31,8 @@ function formatTimezone(offset) {
 }
 
 function getDateWindow(date, origin, period) {
-  // Timezone offset is in minutes
-  const timeDifference = date - origin + (date.offset - origin.offset) * 60 * 1000;
-  // "rounded" is inferior or equal to "date" by design (positive modulo)
-  const rounded = date.minus(modulo(timeDifference, period));
-  
+  const rounded = roundDate(date, origin, period);
+
   return [rounded, rounded.plus(period)];
 }
 
@@ -57,7 +54,7 @@ function isPredictiveModel(value) {
 
 function modulo(a, b) {
   const mod = a % b;
-  
+
   return mod < 0 ? mod + b : mod;
 }
 
@@ -86,6 +83,14 @@ function parseTimestamp(value) {
     throw new Error('Invalid date');
 
   return Math.floor(date.valueOf() / 1000);
+}
+
+function roundDate(date, origin, period) {
+  // Timezone offset is in minutes
+  const timeDifference = date - origin + (date.offset - origin.offset) * 60 * 1000;
+
+  // Returned date is inferior or equal to "date" by design (positive modulo)
+  return date.minus(modulo(timeDifference, period));
 }
 
 function setZone(date, zone) {
@@ -119,5 +124,6 @@ module.exports = {
   parseDate,
   parseNumber,
   parseTimestamp,
+  roundDate,
   setZone,
 };

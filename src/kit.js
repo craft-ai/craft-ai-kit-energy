@@ -178,8 +178,8 @@ function parseEnergyConfiguration(value) {
     throw new TypeError(`The "energy" property of the endpoint's definition must be an "object". Received "${value === null ? 'null' : typeof value}".`);
 
   if (value.period !== undefined) {
-    if (value.period === null || typeof value.period !== 'number')
-      throw new TypeError(`The "period" property of the endpoint's energy definition must be an "number". Received "${value.period === null ? 'null' : typeof value.period}".`);
+    if (typeof value.period !== 'number')
+      throw new TypeError(`The "period" property of the endpoint's energy definition must be an "number". Received "${typeof value.period}".`);
 
     if (value.period <= 0)
       throw new RangeError(`The "period" property of the endpoint's energy definition must represent a strictly positive duration. Received "${value.period}".`);
@@ -196,7 +196,7 @@ function parseEnergyConfiguration(value) {
       
     if (value.period === undefined)
       throw new Error('The "origin" property of the endpoint\'s energy definition cannot be defined without a "period" property.');
-    
+
     energy.origin = origin;
   }
 

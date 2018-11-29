@@ -27,12 +27,11 @@ async function initialize(provider) {
     if (!POSSIBLE_REFRESH_VALUES.includes(refresh))
       throw new RangeError(`The "refresh" option of the weather provider must be one of: "${POSSIBLE_REFRESH_VALUES.join('", "')}". Received "${refresh}".`);
 
-    provider.refresh.period = 3600 * (refresh === 'hourly' ? 1 : 24);
+    provider.refresh.period = refresh === 'hourly' ? 3600 : 24 * 3600;
   } else {
     options.refresh = 'daily';
     provider.refresh.period = 24 * 3600;
   }
-  provider.refresh.option = options.refresh;
 
   const properties = options.properties;
 
@@ -86,13 +85,8 @@ async function extendConfiguration() {
 }
 
 async function extendRecord(endpoint, record) {
-  const refresh = require('luxon').DateTime.fromISO(this.refresh.origin).toObject();
-  let refreshTime = { minute: refresh.minute, second: refresh.second };
-
-  if (this.refresh.option == undefined || this.refresh.option !== 'hourly')
-    refreshTime = (({ hour, minute, second }) => ({ hour, minute, second }))(refresh);
-
-  const date = record[PARSED_RECORD][DATE].set(refreshTime).toSeconds();
+  const refresh = this.refresh;
+  const date = Utils.roundDate(record[PARSED_RECORD][DATE], refresh.origin, refresh.period).toSeconds();
   const metadata = endpoint.metadata;
   const context = this.context;
   const cache = context.cache.values;
