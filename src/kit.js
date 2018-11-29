@@ -189,24 +189,15 @@ function parseEnergyConfiguration(value) {
   }
 
   if (value.origin !== undefined) {
+    const origin = Utils.parseDate(value.origin);
+
+    if (!origin.isValid)
+      throw new RangeError(`The "origin" property of the endpoint's energy definition must be a valid date definition. Received "${JSON.stringify(value.origin)}". Reason: ${origin.invalidReason}.`);
+      
     if (value.period === undefined)
       throw new Error('The "origin" property of the endpoint\'s energy definition cannot be defined without a "period" property.');
-    if (value.origin === null)
-      throw new TypeError('The "origin" property of the endpoint\'s energy definition must be either an "object" or a "string". Received "null".');
-    if (typeof value.origin == 'string') {
-      const strOrigin = luxon.DateTime.fromISO(value.origin);
-      if (strOrigin.invalidReason)
-        throw new RangeError(`The "origin" property of the endpoint's energy definition must be a valid date definition. Received "${JSON.stringify(value.origin)}". Reason: ${strOrigin.invalidReason}.`);
-      energy.origin = strOrigin;
-    }
-    else if (typeof value.origin == 'object') {
-      const objOrigin = luxon.DateTime.fromJSDate(value.origin);
-      if (objOrigin.invalidReason)
-        throw new RangeError(`The "origin" property of the endpoint's energy definition must be a valid date definition. Received "${JSON.stringify(value.origin)}". Reason: ${objOrigin.invalidReason}.`);
-      energy.origin = objOrigin;
-    }
-    else
-      throw new TypeError(`The "origin" property of the endpoint's energy definition must be either an "object" or a "string". Received "${value.origin === null ? 'null' : typeof value.origin}".`);
+    
+    energy.origin = origin;
   }
 
   return energy;
