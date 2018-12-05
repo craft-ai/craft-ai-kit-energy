@@ -14,9 +14,9 @@ test('properly formats timezone', (t) => {
   return most
     .from([
       // with timezone as a feature
-      IANA_ZONES.map((zone) => Common.toRecordStream([{ date, [TIMEZONE]: zone }], {}, false)),
+      ZONES.map((zone) => Common.toRecordStream([{ date, [TIMEZONE]: zone }], {}, false)),
       // with timezone as an option
-      IANA_ZONES.map((zone) => Common.toRecordStream([{ date }], {}, false, zone)),
+      ZONES.map((zone) => Common.toRecordStream([{ date }], {}, false, zone)),
     ])
     .chain((streams) => most.mergeArray(streams).thru(buffer()))
     .thru(Stream.toBuffer)
@@ -34,4 +34,4 @@ test('properly formats timezone', (t) => {
 const DATE = Constants.DATE_FEATURE;
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
-const IANA_ZONES = Helpers.IANA_ZONES;
+const ZONES = Helpers.ZONES;

@@ -29,7 +29,7 @@ test('fails loading an endpoint with invalid definition', (t) => {
     .concat(INVALID_ORIGINS.map((value) => ({ id: 'id', energy: { origin: value } })))
     .concat(VALID_ORIGINS.map((value) => ({ id: 'id', energy: { origin: value } })))
     .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', metadata: value })))
-    .concat(INVALID_IANA_ZONES.map((value) => ({ id: 'id', metadata: { zone: value } })))
+    .concat(INVALID_ZONES.map((value) => ({ id: 'id', metadata: { zone: value } })))
     .map((definition) => t.throwsAsync(kit.loadEndpoint(definition))));
 });
 
@@ -70,11 +70,11 @@ test('loads an endpoint', async(t) => {
   t.snapshot(endpointA);
 });
 
-test('initializes zone-less endpoint with the zone of the kit', (t) => {
+test('initializes an endpoint with the zone inherited from the kit', (t) => {
   const METADATA_OBJECTS = [{}, undefined];
 
   return EnergyKit
-    .initialize({ zone: IANA_ZONES[0] })
+    .initialize({ zone: ZONES[0] })
     .then((kit) => Promise
       .all(METADATA_OBJECTS.map((metadata) => kit.loadEndpoint({ metadata, id: t.context.endpoint.register() })))
       .then((endpoints) => endpoints.forEach((endpoint) => {
@@ -84,11 +84,11 @@ test('initializes zone-less endpoint with the zone of the kit', (t) => {
       })));
 });
 
-test('initializes the endpoint with a valid zone', (t) => {
-  const zone = IANA_ZONES[0];
+test('initializes an endpoint with a valid zone', (t) => {
+  const zone = ZONES[0];
 
   return EnergyKit
-    .initialize({ zone: IANA_ZONES[IANA_ZONES.length - 1] })
+    .initialize({ zone: ZONES[ZONES.length - 1] })
     .then((kit) => kit.loadEndpoint({ metadata: { zone }, id: t.context.endpoint.register() }))
     .then((endpoint) => {
       t.truthy(endpoint.metadata);
@@ -176,8 +176,8 @@ test('closes the kit', (t) => {
 });
 
 
-const IANA_ZONES = Helpers.IANA_ZONES;
-const INVALID_IANA_ZONES = Helpers.INVALID_IANA_ZONES;
+const ZONES = Helpers.ZONES;
+const INVALID_ZONES = Helpers.INVALID_ZONES;
 const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const INVALID_STRINGS = Helpers.INVALID_STRINGS;

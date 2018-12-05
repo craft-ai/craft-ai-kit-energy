@@ -33,7 +33,7 @@ async function loadEndpoint(definition, resetAgent = false) {
     else {
       if (Utils.isNotString(zone))
         throw new TypeError(`The "zone" property of the endpoint's configuration must be a "string". Received "${typeof zone}".`);
-      if (!Info.isValidIANAZone(zone))
+      if (!Utils.checkZone(zone))
         throw new RangeError('The "zone" property of the endpoint\'s configuration must be a valid IANA zone or a fixed-offset name.');
     }
   }
@@ -209,7 +209,6 @@ const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
 const LOAD = Constants.LOAD_FEATURE;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
-const Info = luxon.Info;
 
 module.exports = {
   loadEndpoint,
