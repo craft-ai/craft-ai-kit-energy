@@ -15,7 +15,7 @@ function stream(filepath, options = {}) {
   const file = fs.createReadStream(filepath);
 
   const rows = file.pipe(csv({
-    from: options.from && options.from + 1,
+    from: options.from ? options.from + 1 : 0,
     to: options.to,
     delimiter: options.delimiter || ',',
     quote: options.quote || '"',
