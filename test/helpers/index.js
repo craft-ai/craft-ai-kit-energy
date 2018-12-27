@@ -109,6 +109,7 @@ const PERIOD_ORIGINS = ['2018-01-01', '00:00:00', '2020-12-31T00:00:00.000Z', '2
 const RECORDS = require('./data/records');
 const RECORDS_AS_ENERGY = require('./data/records_energy');
 const RECORDS_AS_ACCUMULATED_ENERGY = require('./data/records_accumulated_energy');
+const RECORDS_AS_ACCUMULATED_ENERGY_DST = require('./data/records_accumulated_energy_dst');
 
 
 module.exports = {
@@ -132,4 +133,5 @@ module.exports = {
   RECORDS,
   RECORDS_AS_ENERGY,
   RECORDS_AS_ACCUMULATED_ENERGY,
+  RECORDS_AS_ACCUMULATED_ENERGY_DST
 };
