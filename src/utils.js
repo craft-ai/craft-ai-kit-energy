@@ -1,3 +1,4 @@
+const lru = require('quick-lru');
 const luxon = require('luxon');
 
 
@@ -11,6 +12,14 @@ async function checkResponse(response) {
 async function handleResponse(response) {
   /* istanbul ignore next */
   return response.status < 400 ? response : Promise.reject(response);
+}
+
+function checkZone(zone) {
+  if (ZONE_CACHE.has(zone)) return true;
+
+  const date = DateTime.fromObject({ zone });
+
+  return date.isValid && Boolean(ZONE_CACHE.set(zone, date.zone));
 }
 
 function formatTimezone(offset) {
@@ -73,15 +82,25 @@ function parseTimestamp(value) {
 }
 
 function setZone(date, zone) {
-  return zone && date.isValid ? date.setZone(zone) : date;
+  if (!zone || !date.isValid) return date;
+
+  if (ZONE_CACHE.has(zone)) return date.setZone(ZONE_CACHE.get(zone));
+
+  const result = date.setZone(zone);
+
+  ZONE_CACHE.set(zone, result.zone);
+
+  return result;
 }
 
 
+const ZONE_CACHE = new lru({ maxSize: 50 });
 const DateTime = luxon.DateTime;
 
 
 module.exports = {
   checkResponse,
+  checkZone,
   formatTimezone,
   getDateWindow,
   handleResponse,

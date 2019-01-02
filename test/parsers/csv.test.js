@@ -33,7 +33,7 @@ test('streams a CSV file', (t) => {
   return CsvHelper
     .stream(FILEPATH)
     .thru(Stream.toBuffer)
-    .then((records) => t.deepEqual(parseRecords(records), Helpers.RECORDS));
+    .then((records) => t.deepEqual(parseRecords(records), RECORDS));
 });
 
 test('streams a portion of a CSV file', (t) => {
