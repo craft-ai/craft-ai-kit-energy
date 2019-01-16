@@ -70,7 +70,8 @@ async function update(records, options) {
 function convertAccumulatedEnergyToLoad(energy, records) {
   const period = energy.period;
   const origin = energy.origin;
-
+  // TODO: - check that 'period' works without 'origin', and that 'origin' requires 'period'.
+  // - send a warning "load computation defaults to the delta between two consecutive records" when no period as been defined and 'energy' data is sent.
   return records.loop((seed, record) => {
     const previousDate = seed.date;
     const currentDate = record[PARSED_RECORD][DATE];

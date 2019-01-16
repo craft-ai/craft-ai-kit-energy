@@ -2,6 +2,7 @@ const path = require('path');
 const test = require('ava');
 
 const Constants = require('../../src/constants');
+const Utils = require('../../src/utils');
 const Helpers = require('../helpers');
 
 
@@ -245,7 +246,7 @@ test('converts energy values to mean electrical loads', (t) => {
   return t.notThrowsAsync(kit
     .loadEndpoint({
       id: context.endpoint.register(),
-      energy: { period: { minutes: 30 } }
+      energy: { period: 30 * 60 }
     })
     .then((endpoint) => endpoint.update(RECORDS_AS_ENERGY))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
@@ -261,27 +262,53 @@ test('converts accumulated energy values to mean electrical loads', (t) => {
   const kit = context.kit;
   const client = kit.client;
 
-  return t.notThrowsAsync(kit
-    .loadEndpoint({
-      id: context.endpoint.register(),
-      energy: {
-        origin: { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 },
-        period: { days: 1 }
-      },
-      metadata: { zone: 'Europe/Paris' }
-    })
-    .then((endpoint) => endpoint.update(RECORDS_AS_ACCUMULATED_ENERGY))
-    .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
-    .then((history) => {
+  return Promise
+    .all(PERIOD_ORIGINS.map((origin) => kit
+      .loadEndpoint({
+        id: context.endpoint.register(),
+        energy: { origin, period: 24 * 3600 },
+        metadata: { zone: 'Europe/Paris' }
+      })
+      .then((endpoint) => endpoint.update(RECORDS_AS_ACCUMULATED_ENERGY))
+      .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))))
+    .then((histories) => {
+      const history = histories[0];
+
       t.true(Array.isArray(history));
       t.is(history.length, RECORDS_AS_ACCUMULATED_ENERGY.length);
 
-      const records = toRecords(history);
+      // Avoid rounding issue when comparing to the source
+      const records = toRecords(history).map((record) => ({ ...record, [LOAD]: Math.round(record[LOAD] * 10) / 10 }));
+
+      t.deepEqual(records, RECORDS);
+      histories.slice(1).forEach((currentHistory) => t.deepEqual(currentHistory, history));
+    });
+});
+
+test('converts accumulated energy values to mean electrical loads with daytime saving', (t) => {
+  const context = t.context;
+  const kit = context.kit;
+  const client = kit.client;
+
+  return kit
+    .loadEndpoint({
+      id: context.endpoint.register(),
+      energy: { origin: '02:00:00', period: 24 * 3600 },
+      metadata: { zone: 'Europe/Paris' }
+    })
+    .then((endpoint) => endpoint.update(RECORDS_AS_ACCUMULATED_ENERGY_DST))
+    .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
+    .then((history) => {
+
+      t.true(Array.isArray(history));
+      t.is(history.length, RECORDS_AS_ACCUMULATED_ENERGY_DST.length);
 
       // Avoid rounding issue when comparing to the source
-      records.forEach((record) => record[LOAD] = Math.round(record[LOAD] * 10) / 10);
-      t.deepEqual(records, RECORDS);
-    }));
+      const records = toRecords(history, false)
+        .map((record) => ({ ...record, [LOAD]: Math.round(record[LOAD] * 10) / 10 }));
+
+      t.deepEqual(records, RECORDS_DST);
+    });
 });
 
 test('uses timezone information provided as a feature to parse dates', (t) => {
@@ -340,13 +367,16 @@ test('parses continuous features\'s values into numbers', (t) => {
 });
 
 
-function toRecords(history) {
+function toRecords(history, utcFormat = true) {
   const state = Object.defineProperty({}, 'timezone', { writable: true });
-
+  
   return history.map((current) => {
+    const timestamp = current.timestamp * 1000;
     Object.assign(state, {
+      [DATE]: utcFormat
+        ? new Date(timestamp).toISOString()
+        : Utils.setZone(Utils.parseDate(timestamp), current[TIMEZONE]).toISO(),
       ...current.context,
-      [DATE]: new Date(current.timestamp * 1000).toISOString()
     });
 
     return { ...state };
@@ -358,8 +388,11 @@ const DATE = Constants.DATE_FEATURE;
 const INVALID_DATES = Helpers.INVALID_DATES;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const LOAD = Constants.LOAD_FEATURE;
+const PERIOD_ORIGINS = Helpers.PERIOD_ORIGINS;
 const RECORDS = Helpers.RECORDS;
 const RECORDS_AS_ACCUMULATED_ENERGY = Helpers.RECORDS_AS_ACCUMULATED_ENERGY;
+const RECORDS_AS_ACCUMULATED_ENERGY_DST = Helpers.RECORDS_AS_ACCUMULATED_ENERGY_DST;
 const RECORDS_AS_ENERGY = Helpers.RECORDS_AS_ENERGY;
+const RECORDS_DST = Helpers.RECORDS_DST;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
 const INDEX = Math.floor((RECORDS.length - 1) * .4);

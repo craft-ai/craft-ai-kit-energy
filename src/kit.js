@@ -1,6 +1,5 @@
 const craftaiErrors = require('craft-ai/lib/errors');
 const debug = require('debug');
-const luxon = require('luxon');
 const uuid = require('uuid/v5');
 
 const Constants = require('./constants');
@@ -178,27 +177,26 @@ function parseEnergyConfiguration(value) {
     throw new TypeError(`The "energy" property of the endpoint's definition must be an "object". Received "${value === null ? 'null' : typeof value}".`);
 
   if (value.period !== undefined) {
-    if (value.period === null || typeof value.period !== 'object')
-      throw new TypeError(`The "period" property of the endpoint's energy definition must be an "object". Received "${value.period === null ? 'null' : typeof value.period}".`);
+    if (typeof value.period !== 'number')
+      throw new TypeError(`The "period" property of the endpoint's energy definition must be an "number". Received "${typeof value.period}".`);
 
-    const period = luxon.Duration.fromObject(value.period);
-
-    if (period.valueOf() === 0)
+    if (value.period <= 0)
       throw new RangeError(`The "period" property of the endpoint's energy definition must represent a strictly positive duration. Received "${value.period}".`);
 
-    energy.period = period;
-    energy.hours = period.as('hours');
+    energy.period = value.period * 1000;
+    energy.hours = value.period / 3600;
   }
 
   if (value.origin !== undefined) {
-    if (value.origin === null || typeof value.origin !== 'object')
-      throw new TypeError(`The "origin" property of the endpoint's energy definition must be an "object". Received "${value.origin === null ? 'null' : typeof value.origin}".`);
-    if (luxon.DateTime.fromObject(value.origin).invalidReason)
-      throw new RangeError(`The "origin" property of the endpoint's energy definition must be a valid date definition. Received "${JSON.stringify(value.origin)}". Reason: ${luxon.DateTime.fromObject(value.origin).invalidReason}.`);
+    const origin = Utils.parseDate(value.origin);
+
+    if (!origin.isValid)
+      throw new RangeError(`The "origin" property of the endpoint's energy definition must be a valid date definition. Received "${JSON.stringify(value.origin)}". Reason: ${origin.invalidReason}.`);
+      
     if (value.period === undefined)
       throw new Error('The "origin" property of the endpoint\'s energy definition cannot be defined without a "period" property.');
 
-    energy.origin = value.origin;
+    energy.origin = origin;
   }
 
   return energy;

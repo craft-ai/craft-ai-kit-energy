@@ -27,13 +27,11 @@ async function initialize(provider) {
     if (!POSSIBLE_REFRESH_VALUES.includes(refresh))
       throw new RangeError(`The "refresh" option of the weather provider must be one of: "${POSSIBLE_REFRESH_VALUES.join('", "')}". Received "${refresh}".`);
 
-    provider.refresh.period = { [refresh === 'hourly' ? 'hours' : 'days']: 1 };
+    provider.refresh.period = refresh === 'hourly' ? 3600 : 24 * 3600;
   } else {
     options.refresh = 'daily';
-    provider.refresh.period = { days: 1 };
+    provider.refresh.period = 24 * 3600;
   }
-
-  if (options.refresh === 'hourly') delete provider.refresh.origin.hours;
 
   const properties = options.properties;
 
@@ -87,11 +85,13 @@ async function extendConfiguration() {
 }
 
 async function extendRecord(endpoint, record) {
+  const refresh = this.refresh;
+  const date = Utils.roundDate(record[PARSED_RECORD][DATE], refresh.origin, refresh.period).toSeconds();
   const metadata = endpoint.metadata;
   const context = this.context;
   const cache = context.cache.values;
   const position = `${metadata.latitude},${metadata.longitude}`;
-  const resource = `${position},${record[PARSED_RECORD][DATE].set(this.refresh.origin).toMillis() / 1000}`;
+  const resource = `${position},${date}`;
 
   if (cache.has(resource)) return cache.get(resource);
 
