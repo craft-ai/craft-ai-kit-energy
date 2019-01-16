@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 - Caching `zone` information to speed up records parsing and prevent high CPU loads.
 
+### Changed
+
+- Energy data is now defined with an origin as a datetime string representing a **local** time and a period as a number of seconds.
+
 ## [0.3.0](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.2.2...v0.3.0) - 2018-11-20
 
 ### Fixed
