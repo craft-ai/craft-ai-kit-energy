@@ -32,8 +32,10 @@ function formatTimezone(offset) {
 
 function getDateWindow(date, origin, period) {
   const rounded = roundDate(date, origin, period);
+  const nextDate = rounded.plus(period);
+  const timezoneDiff = (nextDate.offset - rounded.offset) * 60 * 1000;
 
-  return [rounded, rounded.plus(period)];
+  return [rounded, nextDate.minus(timezoneDiff)];
 }
 
 function isNull(value) { return value === null; }

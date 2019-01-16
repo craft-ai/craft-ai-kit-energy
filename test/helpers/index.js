@@ -110,7 +110,7 @@ const RECORDS = require('./data/records');
 const RECORDS_AS_ENERGY = require('./data/records_energy');
 const RECORDS_AS_ACCUMULATED_ENERGY = require('./data/records_accumulated_energy');
 const RECORDS_AS_ACCUMULATED_ENERGY_DST = require('./data/records_accumulated_energy_dst');
-
+const RECORDS_DST = require('./data/records_dst');
 
 module.exports = {
   ...Utils,
@@ -133,5 +133,6 @@ module.exports = {
   RECORDS,
   RECORDS_AS_ENERGY,
   RECORDS_AS_ACCUMULATED_ENERGY,
-  RECORDS_AS_ACCUMULATED_ENERGY_DST
+  RECORDS_AS_ACCUMULATED_ENERGY_DST,
+  RECORDS_DST
 };
