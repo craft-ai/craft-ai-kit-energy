@@ -13,7 +13,7 @@
   "homepage": "https://github.com/craft-ai/craft-ai-kit-energy#readme",
   "main": "lib/index.js",
   "scripts": {
-    "test": "npm run lint && npm run test:coverage",
+    "test": "npm run lint && npm run test:coverage && npm run test:integration -- -- --short",
     "lint": "npx eslint . --ignore-path .gitignore",
     "build": "npx babel src --out-dir lib",
     "lint:fix": "npm run lint -- --fix",

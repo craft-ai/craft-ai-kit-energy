@@ -4,19 +4,24 @@ const EnergyKit = require('../src');
 
 const debug = require('debug');
 const fs = require('fs');
+const minimist = require('minimist');
 const path = require('path');
 const test = require('ava');
 
-const log = debug('craft-ai:kit-energy:test:integration');
-log.enabled = true;
+const args = minimist(process.argv.slice(2));
+const SHORT_TEST = args.short ? true : false;
+const testComment = SHORT_TEST ? ', short version' : '';
 
-test('computes rolling predictions for ampds2 dataset', (t) => {
+const log = debug('craft-ai:kit-energy:test:integration');
+log.enabled = !SHORT_TEST;
+
+test(`computes rolling predictions for ampds2 dataset${testComment}`, (t) => {
   return t.notThrowsAsync(rolling_predictions(ampds.definition, undefined, AMPDS_DATASET_PATH, { import: { to: PERIOD } })
     .then((results) =>
       t.snapshot(results)));
 });
 
-test('computes rolling predictions for uci dataset', (t) => {
+test(`computes rolling predictions for uci dataset${testComment}`, (t) => {
   return rolling_predictions(uci.definition, uci.providers, UCI_DATASET_PATH, { import: { to: PERIOD } })
     .then((results) =>
       t.snapshot(results));
@@ -31,12 +36,13 @@ async function rolling_predictions(definition, providers, records, options) {
   })
     .then((kit) => {
       /*
-      * Don't force the recreation of the agent, the completion of
-      * computations can require several test runs on the same agent
+      * Don't force the recreation of the agents in the long version,
+      * the completion of computations can require several test runs
+      * on the same agent.
       */
       return kit.loadEndpoint(
         definition,
-        false)
+        SHORT_TEST)
         .then((endpoint) => {
           log('Updating the endpoint ...');
           return endpoint
@@ -51,12 +57,13 @@ async function rolling_predictions(definition, providers, records, options) {
                 delete report.values;
                 return report;
               });
+            })
+            .then((results) => {
+              log(`predictions computed for agent ${definition.id}`);
+              // Destroy the agents in the short version
+              if (SHORT_TEST === true) endpoint.destroy();
+              return results;
             });
-        })
-        .then((results) => {
-          log(`predictions computed for agent ${definition.id}`);
-          return results;
-
         })
         .catch((error) => {
           log('Computation failed, closing the kit');
@@ -69,7 +76,8 @@ async function rolling_predictions(definition, providers, records, options) {
 const AMPDS_DATASET_PATH = path.join(__dirname, '../examples/data/ampds2.csv');
 const UCI_DATASET_PATH = path.join(__dirname, '../examples/data/uci_household_power_consumption.csv');
 const UCI_WEATHER_CACHE_PATH = path.join(__dirname, '../examples/data/weather_cache.json');
-const PERIOD = 0.5 * 365 * 24 * 60; // To update the endpoints with ~ 6 months of data
+// Update the endpoints with ~ 6 months of data, or 2 weeks in the short version
+const PERIOD = SHORT_TEST ? 2 * 7 * 24 * 60 : 0.5 * 365 * 24 * 60;
 const PublicHolidayProvider = require('../src/providers/public_holiday');
 const SchoolHolidaysProvider = require('../src/providers/school_holidays');
 const WeatherProvider = require('../src/providers/weather');
