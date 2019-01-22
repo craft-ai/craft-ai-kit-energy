@@ -78,6 +78,10 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
   if (learning === null || typeof learning !== 'object')
     throw new TypeError(`The "learning" property of the endpoint's definition must be an "object". Received "${learning === null ? 'null' : typeof learning}".`);
 
+  const maxTreeDepth = learning.maxTreeDepth;
+  if (maxTreeDepth !== undefined && typeof maxTreeDepth !== 'number')
+    throw new TypeError(`The "maxTreeDepth" property of the endpoint's learning definition must be a "number". Received "${maxTreeDepth === null ? 'null' : typeof maxTreeDepth}".`);
+
   const maxRecords = learning.maxRecords;
 
   if (maxRecords !== undefined && typeof maxRecords !== 'number')
@@ -106,7 +110,7 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
       context,
       output: ['load'],
       operations_as_events: true,
-      tree_max_depth: 6,
+      tree_max_depth: maxTreeDepth || 6,
       tree_max_operations: maxRecords || 50000,
       learning_period: maxRecordAge || 365 * 24 * 60 * 60
     }));
