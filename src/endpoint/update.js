@@ -55,7 +55,7 @@ async function update(records, options) {
       result.end = history[history.length - 1].timestamp;
 
       return result;
-    }, { start: agent.start, end })
+    }, { start: agent.firstTimestamp, end })
     .then((result) => {
       agent.firstTimestamp = result.start;
       agent.lastTimestamp = result.end;

@@ -157,11 +157,11 @@ function computeAverages(values) {
   return counts;
 }
 
-function isNotLoadFeature(feature) { return feature !== LOAD; }
-
 function setActualLoad(prediction) {
   prediction.actualLoad = prediction[ORIGINAL_CONTEXT][PARSED_RECORD][LOAD];
 }
+
+function isNotLoadFeature(feature) { return feature !== LOAD; }
 
 
 const DATE = Constants.DATE_FEATURE;
@@ -184,6 +184,7 @@ const interpreter = craftai.interpreter;
 
 module.exports = {
   anomalies: computeAnomalies,
+  averages: computeAverages,
   predictions: computePredictions,
   report: computeReport,
 };
