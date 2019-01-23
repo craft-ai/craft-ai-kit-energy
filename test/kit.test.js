@@ -22,6 +22,7 @@ test('fails loading an endpoint with invalid definition', (t) => {
     .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', learning: value })))
     .concat(INVALID_NUMBERS.map((value) => ({ id: 'id', learning: { maxRecords: value } })))
     .concat(INVALID_NUMBERS.map((value) => ({ id: 'id', learning: { maxRecordAge: value } })))
+    .concat(INVALID_NUMBERS.map((value) => ({ id: 'id', learning: { maxTreeDepth: value } })))
     .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', learning: { properties: value } })))
     .concat(INVALID_OBJECTS.map((value) => ({ id: 'id', energy: value })))
     .concat(INVALID_DURATIONS.map((value) => ({ id: 'id', energy: { period: value } })))

@@ -13,11 +13,12 @@
   "homepage": "https://github.com/craft-ai/craft-ai-kit-energy#readme",
   "main": "lib/index.js",
   "scripts": {
-    "test": "npm run lint && npm run test:coverage",
+    "test": "npm run lint && npm run test:coverage && npm run test:integration -- -- --short",
     "lint": "npx eslint . --ignore-path .gitignore",
     "build": "npx babel src --out-dir lib",
     "lint:fix": "npm run lint -- --fix",
     "test:coverage": "npx nyc --reporter=html --reporter=text --reporter=text-summary npm run test:unit --",
+    "test:integration": "npm run test:unit -- test/integration.test.js",
     "test:unit": "npx ava",
     "test:update": "npm run test:coverage -- --update-snapshots",
     "test:watch": "npm run test:unit -- --watch",
@@ -71,7 +72,8 @@
       "@babel/register"
     ],
     "files": [
-      "test/**/*.test.js"
+      "test/**/*.test.js",
+      "!test/integration.test.js"
     ],
     "sources": [
       "src/**/*.js"

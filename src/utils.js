@@ -70,6 +70,16 @@ function parseDate(value) {
         : typeof value === 'number' ? DateTime.fromMillis(value) : value;
 }
 
+function parseDuration(value) {
+  return value === null || value === undefined || typeof value === 'boolean'
+    ? Duration.invalid('wrong type')
+    : typeof value === 'string'
+      ? Duration.fromISO(value)
+      : typeof value === 'object'
+        ? Duration.fromObject(value)
+        : typeof value === 'number' ? Duration.fromMillis(value) : value;
+}
+
 function parseNumber(value) {
   const result = value && typeof value === 'string' ? Number(value.replace(',', '.')) : value;
 
@@ -110,6 +120,7 @@ function setZone(date, zone) {
 
 const ZONE_CACHE = new lru({ maxSize: 50 });
 const DateTime = luxon.DateTime;
+const Duration = luxon.Duration;
 
 
 module.exports = {
@@ -124,6 +135,7 @@ module.exports = {
   isPredictiveModel,
   modulo,
   parseDate,
+  parseDuration,
   parseNumber,
   parseTimestamp,
   roundDate,

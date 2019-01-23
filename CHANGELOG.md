@@ -14,6 +14,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 
 - Caching `zone` information to speed up records parsing and prevent high CPU loads.
+- Introducing the ` endpoint.evaluate()` method, to evaluate an endpoint with a rolling prediction task.
+- Introducing an integration test that uses the new evaluate method to keep track of the kit's
+  performances on two prediction tasks.
 
 ### Changed
 
