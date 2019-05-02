@@ -153,6 +153,18 @@ kit
       latitude: '{latitude}',  // Used by the default Weather provider
       longitude: '{longitude}'   // Used by the default Weather provider
     }
+    energy: __
+    agent_id: '{craft-ai-agent-id}', // Id of the craft ai agent, default = id
+    learning: {
+      maxTreeDepth: int, // Max depth of the tree, default = 6
+      maxRecords: int, // Max operations in the tree, default = 50000
+      maxRecordAge: int, // Learning period, default = 31536000 (1 year)
+      properties: {
+        feature1: {type: 'continuous'}, // Feature of type continuous
+	feature2: {type: 'enum'}, // Feature of type enumeration
+	...
+      }
+    }
   },
   /**
    * __Optional__
