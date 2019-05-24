@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Fixed
 
 - Fixing the usage of `dotenv` in the examples code.
+- Sample retrieval code for AMPds2 now uses the right unit.
 
 ## [0.3.1](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.3.0...v0.3.1) - 2019-05-02
 

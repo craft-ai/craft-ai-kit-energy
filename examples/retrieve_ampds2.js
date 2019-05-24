@@ -45,7 +45,7 @@ return Promise.all([
               .fromMillis(row['UNIX_TS'] * 1000, { zone: 'America/Vancouver' });
             const transformed = {
               date: datetime,
-              load: row['WHE'] * 1000 // Convert from kW to W
+              load: row['WHE'] // 'WHE' is in Watts
             };
             this.push(transformed);
             next();
