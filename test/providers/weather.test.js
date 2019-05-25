@@ -14,7 +14,7 @@ const Stream = require('../../src/stream');
 const WeatherProvider = require('../../src/providers/weather');
 
 
-test.before(require('dotenv').load);
+test.before(require('dotenv').config);
 test.beforeEach((t) => t.context.token = process.env.DARK_SKY_TOKEN);
 test.afterEach.always(Helpers.destroyProviderContext);
 

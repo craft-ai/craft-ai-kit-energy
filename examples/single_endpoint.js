@@ -1,4 +1,4 @@
-require('dotenv').load();
+require('dotenv').config();
 
 const debug = require('debug');
 const EnergyKit = require('../src');

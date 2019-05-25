@@ -6,7 +6,7 @@ const Helpers = require('../helpers');
 const Utils = require('../../src/utils');
 
 
-test.before(require('dotenv').load);
+test.before(require('dotenv').config);
 test.beforeEach(Helpers.createEndpointContext);
 test.afterEach.always(Helpers.destroyEndpointContext);
 

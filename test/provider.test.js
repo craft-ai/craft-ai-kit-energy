@@ -8,7 +8,7 @@ const Is = require('./helpers/is');
 const Provider = require('./helpers/provider');
 
 
-test.before(require('dotenv').load);
+test.before(require('dotenv').config);
 test.afterEach.always(Helpers.destroyEndpointContext);
 
 

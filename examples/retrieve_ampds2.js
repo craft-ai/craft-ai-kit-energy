@@ -1,4 +1,4 @@
-require('dotenv').load();
+require('dotenv').config();
 
 const csv = require('csv-parse');
 const csvStringify = require('csv-stringify');

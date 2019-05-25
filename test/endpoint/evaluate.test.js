@@ -5,7 +5,7 @@ const Helpers = require('../helpers');
 const Is = require('../helpers/is');
 
 
-test.before(require('dotenv').load);
+test.before(require('dotenv').config);
 
 test.beforeEach((t) => Helpers
   .createEndpointContext(t)
