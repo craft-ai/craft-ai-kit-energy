@@ -4,9 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.3.1...HEAD) ##
+## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.3.1...HEAD)
 
-## [0.3.1](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.3.0...v0.3.1) - 2019-05-02 ##
+### Fixed
+
+- Fixing the usage of `dotenv` in the examples code.
+- Sample retrieval code for AMPds2 now uses the right unit.
+
+### Changed
+
+- Updating dependencies, especially [**craft ai**](https://www.npmjs.com/package/craft-ai) now using v2 of the decision trees.
+
+## [0.3.1](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.3.0...v0.3.1) - 2019-05-02
 
 ### Fixed
 
@@ -16,7 +25,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 ### Added
 
 - Caching `zone` information to speed up records parsing and prevent high CPU loads.
-- Introducing the ` endpoint.evaluate()` method, to evaluate an endpoint with a rolling prediction task.
+- Introducing the `endpoint.evaluate()` method, to evaluate an endpoint with a rolling prediction task.
 - Introducing an integration test that uses the new evaluate method to keep track of the kit's
   performances on two prediction tasks.
 
@@ -85,6 +94,7 @@ The signature of the method `endpoint.computePredictions()` has been changed to 
 ### BREAKING CHANGES
 
 In the aim of publishing the first version of the energy kit, we rewrote its API from the ground up:
+
 - introducing the notion of _endpoint_, which interfaces with a craft ai agent by uploading the consumption history of an electrical endpoint and exposing a few methods to make the most of the underlying predictive models.
 - introducing the concept of _providers_ to bring new context information, like weather condition, to the process of generating the predictive models.
 

@@ -8,7 +8,7 @@ const Is = require('../helpers/is');
 const Stream = require('../../src/stream');
 
 
-test.before(require('dotenv').load);
+test.before(require('dotenv').config);
 
 test.beforeEach((t) => Helpers
   .createEndpointContext(t)

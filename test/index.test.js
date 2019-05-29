@@ -4,7 +4,7 @@ const EnergyKit = require('../src/index');
 const Helpers = require('./helpers');
 
 
-test.before(require('dotenv').load);
+test.before(require('dotenv').config);
 test.afterEach.always((t) => process.env.CRAFT_AI_TOKEN = t.context.token);
 
 test.beforeEach((t) => {
