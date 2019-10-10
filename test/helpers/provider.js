@@ -1,7 +1,6 @@
 const luxon = require('luxon');
 const seedrandom = require('seedrandom');
 
-
 async function initialize(provider) {
   if (!provider.options.random) provider.options.random = seedrandom('weather');
 
@@ -12,13 +11,19 @@ async function initialize(provider) {
 async function extendConfiguration() {
   return {
     [TEMPERATURE_MAX]: { type: 'continuous' },
-    [TEMPERATURE_MIN]: { type: 'continuous' },
+    [TEMPERATURE_MIN]: { type: 'continuous' }
+  };
+}
+
+async function extendConfigurationOption() {
+  return {
+    [MISSING_VALUE]: false
   };
 }
 
 async function extendRecord(endpoint) {
-  const averageMax = endpoint.metadata && endpoint.metadata.averageMax || 10;
-  const averageMin = endpoint.metadata && endpoint.metadata.averageMin || 3;
+  const averageMax = (endpoint.metadata && endpoint.metadata.averageMax) || 10;
+  const averageMin = (endpoint.metadata && endpoint.metadata.averageMin) || 3;
 
   return {
     [TEMPERATURE_MAX]: averageMax + 8 * this.options.random(),
@@ -30,14 +35,15 @@ async function close() {
   /* Does nothing. */
 }
 
-
 const TEMPERATURE_MAX = 'temperatureMax';
 const TEMPERATURE_MIN = 'temperatureMin';
+const MISSING_VALUE = 'deactivate_missing_values';
 const FEATURES = [TEMPERATURE_MAX, TEMPERATURE_MIN];
 
 module.exports = {
   close,
   extendConfiguration,
+  extendConfigurationOption,
   extendRecord,
   initialize,
   FEATURES,

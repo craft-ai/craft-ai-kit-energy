@@ -5,7 +5,6 @@ const most = require('most');
 const Constants = require('./constants');
 const Utils = require('./utils');
 
-
 async function close(providers) {
   return Promise.all(providers.map(async(provider) => {
     await provider.close();
@@ -56,9 +55,17 @@ async function extendConfiguration(providers, context) {
 
   // TODO: Submit the endpoint's metadata to the providers for validation
   // TODO: Validate the 'refresh' object from the provider
+  return Promise.all(
+    providers.map((provider) => provider.extendConfiguration())
+  ).then((extensions) => Object.assign(context, ...extensions));
+}
+
+async function extendConfigurationOption(providers, options) {
+  if (!providers.length) return options;
+
   return Promise
-    .all(providers.map((provider) => provider.extendConfiguration()))
-    .then((extensions) => Object.assign(context, ...extensions));
+    .all(providers.map((provider) => provider.extendConfigurationOption()))
+    .then((extensions) => Object.assign(options, ...extensions));
 }
 
 function extendRecords(endpoint, records) {
@@ -93,16 +100,15 @@ function extendRecords(endpoint, records) {
       .then((extensions) => Object.assign(data[0], ...extensions, data[0]))));
 }
 
-
 function isProvider(value) {
   return value !== null
     && typeof value === 'object'
     && typeof value.initialize === 'function'
-    && typeof value.extendConfiguration === 'function'
+    && typeof value.extendConfiguration === 'function' 
+    && (typeof value.extendConfigurationOption === 'function' || value.extendConfigurationOption === undefined)
     && typeof value.extendRecord === 'function'
     && typeof value.close === 'function';
 }
-
 
 const DATE = Constants.DATE_FEATURE;
 const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
@@ -110,10 +116,10 @@ const PARSED_RECORD = Constants.PARSED_RECORD;
 
 const DateTime = luxon.DateTime;
 
-
 module.exports = {
   close,
   extendConfiguration,
+  extendConfigurationOption,
   extendRecords,
   initialize,
 };

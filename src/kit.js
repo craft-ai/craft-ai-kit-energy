@@ -7,7 +7,6 @@ const Endpoint = require('./endpoint');
 const Provider = require('./provider');
 const Utils = require('./utils');
 
-
 async function loadEndpoint(definition, resetAgent = false) {
   if (definition === null || typeof definition !== 'object')
     throw new TypeError(`The endpoint's definition must be an "object". Received "${definition === null ? 'null' : typeof definition}".`);
@@ -71,12 +70,11 @@ async function close() {
     .then(() => this.debug('closed'));
 }
 
-
 async function generateAgentConfiguration(log, providers, learning = {}) {
   log('generating the agent\'s configuration');
 
   if (learning === null || typeof learning !== 'object')
-    throw new TypeError(`The "learning" property of the endpoint's definition must be an "object". Received "${learning === null ? 'null' : typeof learning}".`);
+    throw new TypeError(`The "learning" property of the endpoint's definition must be an "object". Received "${ learning === null ? 'null' : typeof learning }".`);
 
   const maxTreeDepth = learning.maxTreeDepth;
   if (maxTreeDepth !== undefined && typeof maxTreeDepth !== 'number')
@@ -97,23 +95,45 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
   if (properties !== undefined && (properties === null || typeof properties !== 'object'))
     throw new TypeError(`The "properties" property of the endpoint's learning definition must be an "object". Received "${properties === null ? 'null' : typeof properties}".`);
 
-  return Provider
-    .extendConfiguration(providers, {
-      time: { type: 'time_of_day' },
-      day: { type: 'day_of_week' },
-      month: { type: 'month_of_year' },
-      ...properties,
-      [TIMEZONE]: { type: 'timezone' },
-      [LOAD]: { type: 'continuous' }
-    })
-    .then((context) => ({
-      context,
-      output: ['load'],
-      operations_as_events: true,
-      tree_max_depth: maxTreeDepth || 6,
-      tree_max_operations: maxRecords || 50000,
-      learning_period: maxRecordAge || 365 * 24 * 60 * 60
-    }));
+  const options = learning.options;
+
+  if (options !== undefined && (options === null || typeof options !== 'object'))
+    throw new TypeError(`The "options" property of the endpoint's learning definition must be an "object". Received "${options === null ? 'null' : typeof options}".`);
+
+  return Provider.extendConfiguration(providers, {
+    time: { type: 'time_of_day' },
+    day: { type: 'day_of_week' },
+    month: { type: 'month_of_year' },
+    ...properties,
+    [TIMEZONE]: { type: 'timezone' },
+    [LOAD]: { type: 'continuous' }
+  }).then((context) => {
+    if (Provider.extendConfigurationOption === 'function'){
+      return Provider
+        .extendConfigurationOption(
+          providers,
+          {
+            context,
+            output: ['load'],
+            operations_as_events: true,
+            tree_max_depth: maxTreeDepth || 6,
+            tree_max_operations: maxRecords || 50000,
+            learning_period: maxRecordAge || 365 * 24 * 60 * 60,
+            ...options
+          }
+        );
+    } else {
+      return ({
+        context,
+        output: ['load'],
+        operations_as_events: true,
+        tree_max_depth: maxTreeDepth || 6,
+        tree_max_operations: maxRecords || 50000,
+        learning_period: maxRecordAge || 365 * 24 * 60 * 60,
+        ...options
+      });
+    }
+  });
 }
 
 async function retrieveAgent(log, client, agentId, agentConfiguration, resetAgent) {
@@ -196,7 +216,7 @@ function parseEnergyConfiguration(value) {
 
     if (!origin.isValid)
       throw new RangeError(`The "origin" property of the endpoint's energy definition must be a valid date definition. Received "${JSON.stringify(value.origin)}". Reason: ${origin.invalidReason}.`);
-      
+
     if (value.period === undefined)
       throw new Error('The "origin" property of the endpoint\'s energy definition cannot be defined without a "period" property.');
 
@@ -206,11 +226,9 @@ function parseEnergyConfiguration(value) {
   return energy;
 }
 
-
 const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
 const LOAD = Constants.LOAD_FEATURE;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
-
 
 module.exports = {
   loadEndpoint,

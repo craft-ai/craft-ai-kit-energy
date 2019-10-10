@@ -3,11 +3,9 @@ const test = require('ava');
 const EnergyKit = require('../src/index');
 const Helpers = require('./helpers');
 
-
 test.before(require('dotenv').config);
 test.beforeEach(Helpers.createEndpointContext);
 test.afterEach.always(Helpers.destroyEndpointContext);
-
 
 test('fails loading an endpoint with invalid definition', (t) => {
   const INVALID_DEFINTIONS = [undefined].concat(INVALID_OBJECTS);
@@ -138,7 +136,10 @@ test('derives the agent\'s identifier when a secret is specified', async(t) => {
 });
 
 test('configures the agent\'s learning configuration', (t) => {
+  // agent's context
   const PROPERTIES = { enumValue: { type: 'enum' }, numericValue: { type: 'continuous' } };
+  // agent's configuration option
+  const OPTIONS = { [MISSING_VALUE_OPTION]: false };
   const SEED = 1;
 
   const context = t.context;
@@ -147,7 +148,7 @@ test('configures the agent\'s learning configuration', (t) => {
   return kit
     .loadEndpoint({
       id: context.endpoint.register(),
-      learning: { properties: PROPERTIES, maxRecords: SEED, maxRecordAge: SEED }
+      learning: { properties: PROPERTIES, options: OPTIONS, maxRecords: SEED, maxRecordAge: SEED }
     })
     .then((endpoint) => kit.client.getAgent(endpoint.agentId))
     .then((agent) => {
@@ -160,6 +161,7 @@ test('configures the agent\'s learning configuration', (t) => {
       t.is(typeof configuration, 'object');
       t.is(configuration.tree_max_operations, SEED);
       t.is(configuration.learning_period, SEED);
+      t.is(configuration[MISSING_VALUE_OPTION], false);
 
       const context = configuration.context;
 
@@ -175,10 +177,10 @@ test('closes the kit', (t) => {
     .then((result) => t.is(result, undefined)));
 });
 
-
 const ZONES = Helpers.ZONES;
 const INVALID_ZONES = Helpers.INVALID_ZONES;
 const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const INVALID_STRINGS = Helpers.INVALID_STRINGS;
 const PERIOD_ORIGINS = Helpers.PERIOD_ORIGINS;
+const MISSING_VALUE_OPTION = 'deactivate_missing_values';
