@@ -44,10 +44,7 @@ test('updates the endpoint', (t) => {
     .all([
       [[[]], [RECORDS]],
       [[Helpers.streamify([])], [Helpers.streamify(RECORDS)]],
-      [
-        [path.join(__dirname, '../helpers/data/records.csv'), { import: { to: 0 } }],
-        [path.join(__dirname, '../helpers/data/records.csv')]
-      ]
+      [[[]], [path.join(__dirname, '../helpers/data/records.csv')]]
     ].map((parameters) => kit
       .loadEndpoint({ id: context.endpoint.register() })
       .then((endpoint) => endpoint.update(...parameters[0]))
