@@ -8,6 +8,29 @@ const Provider = require('./provider');
 const Utils = require('./utils');
 
 async function loadEndpoint(definition, resetAgent = false) {
+  /*
+  Get the craft ai agent
+
+  *************
+  **Arguments**
+  *************
+  definition: Object that define the endpoint/craft ai agent.
+    It should contains:
+      - id: String, identifiant of the endpoint
+    It can contains:
+      - energy: Object optional, energy configuration that contains:
+        - period: positive integer, duration
+        - origin: String, date which is the origin.
+      - metadata: Object, that contains the metadata:
+        - zone: String, IANA zone
+      - agentId: String, identifiant of the craft ai agent, Default is id.
+  resetAgent: boolean optional, if true the agent is deleted and created
+
+  **********
+  **Return**
+  **********
+  An object endpoint
+  */
   if (definition === null || typeof definition !== 'object')
     throw new TypeError(`The endpoint's definition must be an "object". Received "${definition === null ? 'null' : typeof definition}".`);
 
@@ -65,12 +88,36 @@ async function loadEndpoint(definition, resetAgent = false) {
 }
 
 async function close() {
+  /*
+  Close the kit
+  */
   return Provider
     .close(this.configuration.providers)
     .then(() => this.debug('closed'));
 }
 
 async function generateAgentConfiguration(log, providers, learning = {}) {
+  /*
+  Generate a craft ai configuration
+
+  *************
+  **Arguments**
+  *************
+  log: String
+  providers: Array of providers that have as function extendConfiguration and extendConfigurationOption
+  learning: Object optional, parameters of the configuration. Can contain:
+    - maxTreeDepth: positive integer, define the max depth of the decision tree. Default is 6.
+    - maxRecords: positive integer, maximum number of events on which a single decision tree can be based. Default is 50000.
+    - maxRecordAge: positive integer, the maximum amount of time, in seconds, that matters for an agent. Default is one year.
+    - properties: object, context properties to add to {time: { type: 'time_of_day' }, day: { type: 'day_of_week' },
+    month: { type: 'month_of_year' }, timezone: { type: 'timezone' }, load: { type: 'continuous' }}
+    - options: object, configuration options. Default is {}
+
+  **********
+  **Return**
+  **********
+  craft ai configuration
+  */
   log('generating the agent\'s configuration');
 
   if (learning === null || typeof learning !== 'object')
@@ -108,35 +155,40 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
     [TIMEZONE]: { type: 'timezone' },
     [LOAD]: { type: 'continuous' }
   }).then((context) => {
-    if (Provider.extendConfigurationOption === 'function'){
-      return Provider
-        .extendConfigurationOption(
-          providers,
-          {
-            context,
-            output: ['load'],
-            operations_as_events: true,
-            tree_max_depth: maxTreeDepth || 6,
-            tree_max_operations: maxRecords || 50000,
-            learning_period: maxRecordAge || 365 * 24 * 60 * 60,
-            ...options
-          }
-        );
-    } else {
-      return ({
-        context,
-        output: ['load'],
-        operations_as_events: true,
-        tree_max_depth: maxTreeDepth || 6,
-        tree_max_operations: maxRecords || 50000,
-        learning_period: maxRecordAge || 365 * 24 * 60 * 60,
-        ...options
-      });
-    }
+    return Provider
+      .extendConfigurationOption(
+        providers, {
+          context,
+          output: ['load'],
+          operations_as_events: true,
+          tree_max_depth: maxTreeDepth || 6,
+          tree_max_operations: maxRecords || 50000,
+          learning_period: maxRecordAge || 365 * 24 * 60 * 60,
+          ...options
+        }
+      );
   });
 }
 
 async function retrieveAgent(log, client, agentId, agentConfiguration, resetAgent) {
+  /*
+  Get the craft ai agent
+
+  *************
+  **Arguments**
+  *************
+  log: String
+  client: craft ai client
+  agentId: String, id given to the agent to get
+  agentConfiguration: Object, craft ai agent configuration, it is needed if the agent
+  is reseted or doesn't exist and needs to be created
+  resetAgent: boolean optional, if true the agent is deleted and created
+
+  **********
+  **Return**
+  **********
+  craft ai configuration
+  */
   if (resetAgent) {
     /* istanbul ignore if */
     if (process.env.NODE_ENV === 'production')
@@ -172,6 +224,23 @@ async function retrieveAgent(log, client, agentId, agentConfiguration, resetAgen
 }
 
 async function createAgent(log, client, agentId, agentConfiguration) {
+  /*
+  Create a craft ai agent
+
+  *************
+  **Arguments**
+  *************
+  log: String
+  client: craft ai client
+  agentId: String, id to give to the agent
+  agentConfiguration: Object, craft ai agent configuration
+
+  **********
+  **Return**
+  **********
+  craft ai configuration
+  */
+
   log('creating the agent');
 
   return client
@@ -194,6 +263,21 @@ async function createAgent(log, client, agentId, agentConfiguration) {
 }
 
 function parseEnergyConfiguration(value) {
+  /*
+  Parse the energy configuration
+
+  *************
+  **Arguments**
+  *************
+  value: Object optional, it contains:
+    - period: positive integer, duration
+    - origin: String, date which is the origin
+
+  **********
+  **Return**
+  **********
+  Object that contains the parsed energy configuration
+  */
   const energy = {};
 
   if (value === undefined) return energy;

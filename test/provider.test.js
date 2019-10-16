@@ -84,6 +84,29 @@ test('uses a provider to compute predictions', async(t) => {
     });
 });
 
+test('uses a provider to extend the context and the configuration', async(t) => {
+  await Helpers.createEndpointContext(t, { providers: [Provider] });
+
+  const context = t.context;
+  const kit = context.kit;
+
+  return kit
+    .loadEndpoint({ id: context.endpoint.register(), metadata: { zone: 'Europe/Paris' } })
+    .then((endpoint) => kit.client.getAgent(endpoint.agentId))
+    .then((agent) => {
+      t.truthy(agent);
+      t.is(typeof agent, 'object');
+
+      const configuration = agent.configuration;
+      const context = configuration.context;
+
+      Object.keys(PROPERTIES).forEach((key) => t.deepEqual(context[key], PROPERTIES[key]));
+
+      t.truthy(configuration);
+      t.is(typeof configuration, 'object');
+      t.is(configuration[DEACTIVATE_MISSING_VALUES_OPTION], false);
+    });
+});
 
 function isExtended(history) {
   return history
@@ -98,3 +121,5 @@ const INVALID_ARRAYS = Helpers.INVALID_ARRAYS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const RECORDS = Helpers.RECORDS.slice(0, 500);
 const STATES = Helpers.RECORDS.slice(500, 1000).map((record) => ({ [DATE]: record[DATE] }));
+const DEACTIVATE_MISSING_VALUES_OPTION = 'deactivate_missing_values';
+const PROPERTIES = { 'temperatureMax': { type: 'continuous' }, 'temperatureMin': { type: 'continuous' } };

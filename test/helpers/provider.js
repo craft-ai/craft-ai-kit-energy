@@ -17,7 +17,7 @@ async function extendConfiguration() {
 
 async function extendConfigurationOption() {
   return {
-    [MISSING_VALUE]: false
+    [DEACTIVATE_MISSING_VALUES_OPTION]: false
   };
 }
 
@@ -37,8 +37,9 @@ async function close() {
 
 const TEMPERATURE_MAX = 'temperatureMax';
 const TEMPERATURE_MIN = 'temperatureMin';
-const MISSING_VALUE = 'deactivate_missing_values';
+const DEACTIVATE_MISSING_VALUES_OPTION = 'deactivate_missing_values';
 const FEATURES = [TEMPERATURE_MAX, TEMPERATURE_MIN];
+const OPTIONS = [DEACTIVATE_MISSING_VALUES_OPTION];
 
 module.exports = {
   close,
@@ -47,4 +48,5 @@ module.exports = {
   extendRecord,
   initialize,
   FEATURES,
+  OPTIONS,
 };

@@ -1,11 +1,20 @@
 const debug = require('debug');
 const luxon = require('luxon');
 const most = require('most');
+const isFunction = require('lodash.isfunction');
 
 const Constants = require('./constants');
 const Utils = require('./utils');
 
 async function close(providers) {
+  /*
+  Close a list of providers.
+
+  *************
+  **Arguments**
+  *************
+  providers: Array of providers.
+  */
   return Promise.all(providers.map(async(provider) => {
     await provider.close();
     provider.log('closed');
@@ -13,6 +22,23 @@ async function close(providers) {
 }
 
 async function initialize(instance, index) {
+  /*
+  Initialize a provider.
+
+  *************
+  **Arguments**
+  *************
+  instance: Object
+    - name: String optional, name of the provider. Default is the string version of index
+    - options: Object optional: contain the options for the provider
+    - provider: Object that is a provider (isProvider is true).
+  index: positive integer, index of the particular provider
+
+  **********
+  **Return**
+  **********
+  An object Provider
+  */
   if (instance === null || typeof instance !== 'object')
     throw new TypeError(`The provider at index "${index}" of the kit's configuration is not valid. Received "${instance === null ? 'null' : typeof instance}".`);
 
@@ -23,7 +49,7 @@ async function initialize(instance, index) {
 
   log('initializing');
 
-  if (typeof initialize !== 'function' || !isProvider(constructor))
+  if (!isFunction(initialize) || !isProvider(constructor))
     throw new TypeError(`The provider at index "${index}" of the kit's configuration is not valid.`);
 
   const prototype = { ...constructor };
@@ -51,6 +77,21 @@ async function initialize(instance, index) {
 }
 
 async function extendConfiguration(providers, context) {
+  /*
+  Extend the craft ai context of an agent using providers.
+
+  *************
+  **Arguments**
+  *************
+  providers: Array of Provider that have the function extendConfiguration
+  that return an object with the context properties to add.
+  context: Object, context properties to add to the agent's context.
+
+  **********
+  **Return**
+  **********
+  craft ai agent's context
+  */
   if (!providers.length) return context;
 
   // TODO: Submit the endpoint's metadata to the providers for validation
@@ -61,14 +102,48 @@ async function extendConfiguration(providers, context) {
 }
 
 async function extendConfigurationOption(providers, options) {
+  /*
+  Extend the craft ai configuration of an agent using providers.
+  
+  *************
+  **Arguments**
+  *************
+  providers: Array of Provider that have the function 
+  extendConfigurationOption that return an object with the configuration
+  options to add.
+  options: Object, configuration options to add to the agent's configuration.
+
+  **********
+  **Return**
+  **********
+  craft ai agent's configuration
+  */
   if (!providers.length) return options;
 
-  return Promise
-    .all(providers.map((provider) => provider.extendConfigurationOption()))
-    .then((extensions) => Object.assign(options, ...extensions));
+  // TODO: Submit the endpoint's metadata to the providers for validation
+  // TODO: Validate the 'refresh' object from the provider
+  return Promise.all(
+    providers.map((provider) => provider.extendConfigurationOption())
+  ).then((extensions) => Object.assign(options, ...extensions));
 }
 
 function extendRecords(endpoint, records) {
+  /*
+  Extend the data/records using providers.
+  
+  *************
+  **Arguments**
+  *************
+  endpoint: Endpoint (Object). It should contains:
+    - kit.configuration.providers: Array of Providers that have the function
+    extendRecords
+  records: Object, data to extend
+
+  **********
+  **Return**
+  **********
+  Extended record
+  */
   const providers = endpoint.kit.configuration.providers;
 
   if (!providers.length) return records;
@@ -101,11 +176,25 @@ function extendRecords(endpoint, records) {
 }
 
 function isProvider(value) {
+  /*
+  Check if the value parsed is a provider
+  
+  *************
+  **Arguments**
+  *************
+  value: value to test.
+
+  **********
+  **Return**
+  **********
+  Boolean
+  */
   return value !== null
     && typeof value === 'object'
     && typeof value.initialize === 'function'
+    && typeof value.extendConfiguration === 'function'
     && typeof value.extendConfiguration === 'function' 
-    && (typeof value.extendConfigurationOption === 'function' || value.extendConfigurationOption === undefined)
+    && typeof value.extendConfigurationOption === 'function'
     && typeof value.extendRecord === 'function'
     && typeof value.close === 'function';
 }

@@ -69,17 +69,12 @@ async function initialize(configuration = {}) {
 }
 
 function createClient(token, bulkSize) {
-  try {
-    return craftai.createClient({
-      token,
-      operationsChunksSize: bulkSize,
-    });
-  } catch (error) {
-    // TODO: proper error handling
-    console.log('Error when creating the client');
-    throw error;
-  }
-}
+  // TODO: proper error handling
+  return craftai.createClient({
+    token,
+    operationsChunksSize: bulkSize,
+  });
+} 
 
 const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
 const ROOT_NAMESPACE = uuid.DNS;
