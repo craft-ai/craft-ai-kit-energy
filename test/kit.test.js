@@ -1,6 +1,7 @@
 const test = require('ava');
 
 const EnergyKit = require('../src/index');
+const Constants = require('../src/constants');
 const Helpers = require('./helpers');
 
 test.before(require('dotenv').config);
@@ -135,21 +136,28 @@ test('derives the agent\'s identifier when a secret is specified', async(t) => {
     });
 });
 
-test('configures the agent\'s learning configuration', (t) => {
-  // agent's context
-  const PROPERTIES = { enumValue: { type: 'enum' }, numericValue: { type: 'continuous' } };
-  // agent's configuration option
-  const OPTIONS = { [MISSING_VALUE_OPTION]: false };
-  const SEED = 1;
-
+test('configure an agent configuration', (t) => {
   const context = t.context;
   const kit = context.kit;
 
+  // agent's configuration option
+  const SEED = 1;
+
+  // endpoint definition
+  const definition = {
+    id: context.endpoint.register(),
+    metadata: { zone: 'Europe/Paris' },
+    learning: {
+      // agent's context
+      properties: PROPERTIES,
+      maxRecords: SEED,
+      maxRecordAge: SEED,
+      advancedConfiguration: ADVANCED_CONFIGURATION,
+    }
+  };
+
   return kit
-    .loadEndpoint({
-      id: context.endpoint.register(),
-      learning: { properties: PROPERTIES, options: OPTIONS, maxRecords: SEED, maxRecordAge: SEED }
-    })
+    .loadEndpoint(definition)
     .then((endpoint) => kit.client.getAgent(endpoint.agentId))
     .then((agent) => {
       t.truthy(agent);
@@ -161,11 +169,36 @@ test('configures the agent\'s learning configuration', (t) => {
       t.is(typeof configuration, 'object');
       t.is(configuration.tree_max_operations, SEED);
       t.is(configuration.learning_period, SEED);
-      t.is(configuration[MISSING_VALUE_OPTION], false);
+      t.is(configuration[DEACTIVATE_MISSING_VALUES_OPTION], false);
 
       const context = configuration.context;
 
       Object.keys(PROPERTIES).forEach((key) => t.deepEqual(context[key], PROPERTIES[key]));
+    });
+});
+
+test('configure an default agent configuration', (t) => {
+  const context = t.context;
+  const kit = context.kit;
+
+  // endpoint definition
+  const definition = {
+    id: context.endpoint.register(),
+    metadata: { zone: 'Europe/Paris' },
+  };
+
+  return kit
+    .loadEndpoint(definition)
+    .then((endpoint) => kit.client.getAgent(endpoint.agentId))
+    .then((agent) => {
+      t.truthy(agent);
+      t.is(typeof agent, 'object');
+
+      const configuration = agent.configuration;
+      t.truthy(configuration);
+      t.is(typeof configuration, 'object');
+      // We should only find the default configuration and context in the generated configuration
+      Object.keys(DEFAULT_CONFIGURATION).forEach((key) => t.deepEqual(configuration[key], DEFAULT_CONFIGURATION[key]));
     });
 });
 
@@ -183,4 +216,25 @@ const INVALID_NUMBERS = Helpers.INVALID_NUMBERS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const INVALID_STRINGS = Helpers.INVALID_STRINGS;
 const PERIOD_ORIGINS = Helpers.PERIOD_ORIGINS;
-const MISSING_VALUE_OPTION = 'deactivate_missing_values';
+// context constant
+const LOAD = Constants.LOAD_FEATURE;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
+const PROPERTIES = { enumValue: { type: 'enum' }, numericValue: { type: 'continuous' } };
+const DEFAULT_PROPERTIES = {
+  'time': { type: 'time_of_day', is_generated: true },
+  'day': { type: 'day_of_week', is_generated: true },
+  'month': { type: 'month_of_year', is_generated: true },
+  [TIMEZONE]: { type: 'timezone' },
+  [LOAD]: { type: 'continuous' }
+};
+// configuration constant
+const DEACTIVATE_MISSING_VALUES_OPTION = 'deactivate_missing_values';
+const ADVANCED_CONFIGURATION = { [DEACTIVATE_MISSING_VALUES_OPTION]: false };
+const DEFAULT_CONFIGURATION = {
+  'context':  DEFAULT_PROPERTIES,
+  'output': ['load'],
+  'operations_as_events': true,
+  'tree_max_depth': 6,
+  'tree_max_operations': 50000,
+  'learning_period': 365 * 24 * 60 * 60,
+};

@@ -158,10 +158,6 @@ function generateConfiguration(extension, property) {
   return extension;
 }
 
-async function extendConfigurationOption() {
-  return {};
-}
-
 const DATE = Constants.DATE_FEATURE;
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const POSSIBLE_REFRESH_VALUES = ['hourly', 'daily'];
@@ -172,7 +168,6 @@ const ENUM_PROPERTIES = ['icon', 'precipType'];
 module.exports = {
   close,
   extendConfiguration,
-  extendConfigurationOption,
   extendRecord,
   initialize,
 };

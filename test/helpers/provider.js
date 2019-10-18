@@ -15,12 +15,6 @@ async function extendConfiguration() {
   };
 }
 
-async function extendConfigurationOption() {
-  return {
-    [DEACTIVATE_MISSING_VALUES_OPTION]: false
-  };
-}
-
 async function extendRecord(endpoint) {
   const averageMax = (endpoint.metadata && endpoint.metadata.averageMax) || 10;
   const averageMin = (endpoint.metadata && endpoint.metadata.averageMin) || 3;
@@ -44,7 +38,6 @@ const OPTIONS = [DEACTIVATE_MISSING_VALUES_OPTION];
 module.exports = {
   close,
   extendConfiguration,
-  extendConfigurationOption,
   extendRecord,
   initialize,
   FEATURES,

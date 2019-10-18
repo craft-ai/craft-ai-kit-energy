@@ -24,6 +24,7 @@ async function loadEndpoint(definition, resetAgent = false) {
       - metadata: Object, that contains the metadata:
         - zone: String, IANA zone
       - agentId: String, identifiant of the craft ai agent, Default is id.
+      - learning: Object: as described in generateAgentConfiguration
   resetAgent: boolean optional, if true the agent is deleted and created
 
   **********
@@ -104,14 +105,14 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
   **Arguments**
   *************
   log: String
-  providers: Array of providers that have as function extendConfiguration and extendConfigurationOption
+  providers: Array of providers that have as function extendConfiguration
   learning: Object optional, parameters of the configuration. Can contain:
     - maxTreeDepth: positive integer, define the max depth of the decision tree. Default is 6.
     - maxRecords: positive integer, maximum number of events on which a single decision tree can be based. Default is 50000.
     - maxRecordAge: positive integer, the maximum amount of time, in seconds, that matters for an agent. Default is one year.
     - properties: object, context properties to add to {time: { type: 'time_of_day' }, day: { type: 'day_of_week' },
     month: { type: 'month_of_year' }, timezone: { type: 'timezone' }, load: { type: 'continuous' }}
-    - options: object, configuration options. Default is {}
+    - advancedConfiguration: object, advanced configuration options. Default is {}
 
   **********
   **Return**
@@ -142,10 +143,10 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
   if (properties !== undefined && (properties === null || typeof properties !== 'object'))
     throw new TypeError(`The "properties" property of the endpoint's learning definition must be an "object". Received "${properties === null ? 'null' : typeof properties}".`);
 
-  const options = learning.options;
+  const advancedConfiguration = learning.advancedConfiguration;
 
-  if (options !== undefined && (options === null || typeof options !== 'object'))
-    throw new TypeError(`The "options" property of the endpoint's learning definition must be an "object". Received "${options === null ? 'null' : typeof options}".`);
+  if (advancedConfiguration !== undefined && (advancedConfiguration === null || typeof advancedConfiguration !== 'object'))
+    throw new TypeError(`The "options" property of the endpoint's learning definition must be an "object". Received "${advancedConfiguration === null ? 'null' : typeof advancedConfiguration}".`);
 
   return Provider.extendConfiguration(providers, {
     time: { type: 'time_of_day' },
@@ -155,18 +156,15 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
     [TIMEZONE]: { type: 'timezone' },
     [LOAD]: { type: 'continuous' }
   }).then((context) => {
-    return Provider
-      .extendConfigurationOption(
-        providers, {
-          context,
-          output: ['load'],
-          operations_as_events: true,
-          tree_max_depth: maxTreeDepth || 6,
-          tree_max_operations: maxRecords || 50000,
-          learning_period: maxRecordAge || 365 * 24 * 60 * 60,
-          ...options
-        }
-      );
+    return {
+      context,
+      output: ['load'],
+      operations_as_events: true,
+      tree_max_depth: maxTreeDepth || 6,
+      tree_max_operations: maxRecords || 50000,
+      learning_period: maxRecordAge || 365 * 24 * 60 * 60,
+      ...advancedConfiguration
+    };
   });
 }
 

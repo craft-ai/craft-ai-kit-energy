@@ -53,10 +53,6 @@ async function extendConfiguration() {
   };
 }
 
-async function extendConfigurationOption() {
-  return {};
-}
-
 async function extendRecord(endpoint, record) {
   return {
     [HOLIDAY]: isHoliday.call(this, record[PARSED_RECORD][DATE], endpoint.metadata.region) ? 'YES' : 'NO',
@@ -131,7 +127,6 @@ module.exports = {
   HOLIDAY,
   close,
   extendConfiguration,
-  extendConfigurationOption,
   extendRecord,
   initialize,
 };

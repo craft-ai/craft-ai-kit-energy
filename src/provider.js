@@ -101,32 +101,6 @@ async function extendConfiguration(providers, context) {
   ).then((extensions) => Object.assign(context, ...extensions));
 }
 
-async function extendConfigurationOption(providers, options) {
-  /*
-  Extend the craft ai configuration of an agent using providers.
-  
-  *************
-  **Arguments**
-  *************
-  providers: Array of Provider that have the function 
-  extendConfigurationOption that return an object with the configuration
-  options to add.
-  options: Object, configuration options to add to the agent's configuration.
-
-  **********
-  **Return**
-  **********
-  craft ai agent's configuration
-  */
-  if (!providers.length) return options;
-
-  // TODO: Submit the endpoint's metadata to the providers for validation
-  // TODO: Validate the 'refresh' object from the provider
-  return Promise.all(
-    providers.map((provider) => provider.extendConfigurationOption())
-  ).then((extensions) => Object.assign(options, ...extensions));
-}
-
 function extendRecords(endpoint, records) {
   /*
   Extend the data/records using providers.
@@ -193,8 +167,6 @@ function isProvider(value) {
     && typeof value === 'object'
     && typeof value.initialize === 'function'
     && typeof value.extendConfiguration === 'function'
-    && typeof value.extendConfiguration === 'function' 
-    && typeof value.extendConfigurationOption === 'function'
     && typeof value.extendRecord === 'function'
     && typeof value.close === 'function';
 }
@@ -208,7 +180,6 @@ const DateTime = luxon.DateTime;
 module.exports = {
   close,
   extendConfiguration,
-  extendConfigurationOption,
   extendRecords,
   initialize,
 };
