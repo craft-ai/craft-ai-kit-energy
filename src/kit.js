@@ -24,8 +24,8 @@ async function loadEndpoint(definition, resetAgent = false) {
       - metadata: Object, that contains the metadata:
         - zone: String, IANA zone
       - agentId: String, identifiant of the craft ai agent, Default is id.
-      - learning: Object: as described in generateAgentConfiguration
-  resetAgent: boolean optional, if true the agent is deleted and created
+      - learning: Object, as described in generateAgentConfiguration
+  resetAgent: boolean optional, if true the agent is deleted and (re-)created
 
   **********
   **Return**
@@ -111,8 +111,8 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
     - maxRecords: positive integer, maximum number of events on which a single decision tree can be based. Default is 50000.
     - maxRecordAge: positive integer, the maximum amount of time, in seconds, that matters for an agent. Default is one year.
     - properties: object, context properties to add to {time: { type: 'time_of_day' }, day: { type: 'day_of_week' },
-    month: { type: 'month_of_year' }, timezone: { type: 'timezone' }, load: { type: 'continuous' }}
-    - advancedConfiguration: object, advanced configuration options. Default is {}
+      month: { type: 'month_of_year' }, timezone: { type: 'timezone' }, load: { type: 'continuous' }}
+    - advancedConfiguration: Object, advanced configuration options. Default is {}
 
   **********
   **Return**

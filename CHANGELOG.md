@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.3.2...HEAD) ##
 
+### Added 
+
+- Introducing `advancedConfiguration` in the kit to add options to the craft ai configuration
+
+### Changed
+
+- Updating dependencies, the package [**craft ai**](https://www.npmjs.com/package/craft-ai) is now in version 1.17.1
+- Discontinuing the support for Node 6.9
+
 ## [0.3.2](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.3.1...v0.3.2) - 2019-05-30 ##
 
 ### Fixed
