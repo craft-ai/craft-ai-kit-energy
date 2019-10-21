@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const lru = require('quick-lru');
 const retry = require('p-retry');
+const isFunction = require('lodash.isfunction');
 
 const Constants = require('../constants');
 const Utils = require('../utils');
@@ -55,12 +56,12 @@ async function initialize(provider) {
 
     const load = cache.load;
 
-    if (load !== undefined && typeof load !== 'function')
+    if (load !== undefined && !isFunction(load))
       throw new TypeError(`The "load" property from the "cache" option of the weather provider must be a "function". Received "${typeof load}".`);
 
     const save = cache.save;
 
-    if (save !== undefined && typeof save !== 'function')
+    if (save !== undefined && !isFunction(save))
       throw new TypeError(`The "save" property from the "cache" option of the weather provider must be a "function". Received "${typeof save}".`);
 
     try {
@@ -156,7 +157,6 @@ function generateConfiguration(extension, property) {
 
   return extension;
 }
-
 
 const DATE = Constants.DATE_FEATURE;
 const PARSED_RECORD = Constants.PARSED_RECORD;

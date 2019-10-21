@@ -84,13 +84,11 @@ test('uses a provider to compute predictions', async(t) => {
     });
 });
 
-
 function isExtended(history) {
   return history
     .map((record) => Object.keys(record))
     .every((keys) => FEATURES.every((key) => keys.includes(key)));
 }
-
 
 const DATE = Constants.DATE_FEATURE;
 const FEATURES = Provider.FEATURES;

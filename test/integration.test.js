@@ -15,13 +15,13 @@ const testComment = SHORT_TEST ? ', short version' : '';
 const log = debug('craft-ai:kit-energy:test:integration');
 log.enabled = !SHORT_TEST;
 
-test(`computes rolling predictions for ampds2 dataset${testComment}`, (t) => {
+test.serial(`computes rolling predictions for ampds2 dataset${testComment}`, (t) => {
   return t.notThrowsAsync(rolling_predictions(ampds.definition, undefined, AMPDS_DATASET_PATH, { import: { to: PERIOD } })
     .then((results) =>
       t.snapshot(results)));
 });
 
-test(`computes rolling predictions for uci dataset${testComment}`, (t) => {
+test.serial(`computes rolling predictions for uci dataset${testComment}`, (t) => {
   return rolling_predictions(uci.definition, uci.providers, UCI_DATASET_PATH, { import: { to: PERIOD } })
     .then((results) =>
       t.snapshot(results));

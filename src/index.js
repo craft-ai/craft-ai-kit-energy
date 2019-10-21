@@ -8,7 +8,6 @@ const Kit = require('./kit');
 const Provider = require('./provider');
 const Utils = require('./utils');
 
-
 async function initialize(configuration = {}) {
   const log = debug(DEBUG_PREFIX);
 
@@ -69,23 +68,16 @@ async function initialize(configuration = {}) {
   return kit;
 }
 
-
 function createClient(token, bulkSize) {
-  try {
-    return craftai.createClient({
-      token,
-      operationsChunksSize: bulkSize,
-    });
-  } catch (error) {
-    // TODO: proper error handling
-    throw error;
-  }
-}
-
+  // TODO: proper error handling
+  return craftai.createClient({
+    token,
+    operationsChunksSize: bulkSize,
+  });
+} 
 
 const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
 const ROOT_NAMESPACE = uuid.DNS;
-
 
 module.exports = {
   craftai,

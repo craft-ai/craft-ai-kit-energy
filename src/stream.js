@@ -1,6 +1,6 @@
 const buffer = require('most-buffer');
 const most = require('most');
-
+const isFunction = require('lodash.isfunction');
 
 function from(value, options) {
   if (isStream(value)) return fromNativeStream(value);
@@ -24,9 +24,9 @@ function fromNativeStream(value, errorHandler = most.throwError) {
 function isStream(value) {
   return value !== null
     && typeof value === 'object'
-    && typeof value.pipe === 'function'
+    && isFunction(value.pipe)
     && value.readable !== false
-    && typeof value._read === 'function'
+    && isFunction(value._read)
     && typeof value._readableState === 'object';
 }
 

@@ -42,9 +42,9 @@ test('retrieves the records\' history of an endpoint', (t) => {
       .then((history) => {
         t.true(Array.isArray(history));
         t.is(history.length, 0);
-
-        return endpoint.update(RECORDS);
-      }))
+      })
+      .then(() => endpoint.update(RECORDS))
+    )
     .then((endpoint) => Promise.all([
       endpoint.retrieveRecords(),
       endpoint.retrieveRecords(start),
