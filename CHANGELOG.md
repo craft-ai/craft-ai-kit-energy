@@ -6,9 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.0...HEAD) ##
 
+### Fixed
+
+- Fixing the deploy version of node
+
 ## [0.4.0](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.3.2...v0.4.0) - 2019-10-22 ##
 
-### Added 
+### Added
 
 - Introducing `advancedConfiguration` in the kit to add options to the craft ai configuration
 
