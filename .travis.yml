@@ -22,7 +22,7 @@ deploy:
       repo: craft-ai/craft-ai-kit-energy
       all_branches: true
       condition: '"$TRAVIS_TAG" =~ ^v[0-9]'
-      node: '6.9'
+      node: '8.9'
 notifications:
   slack: craft-ai:ZNnQErHJhw40oKmphy3fNGza
   email: ops@craft.ai
