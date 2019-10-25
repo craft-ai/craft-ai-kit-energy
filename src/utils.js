@@ -32,7 +32,7 @@ function formatTimezone(offset) {
 
 function getDateWindow(date, origin, period) {
   const rounded = roundDate(date, origin, period);
-  const nextDate = rounded.plus(period);
+  const nextDate = Number.isFinite(period) ? rounded.plus(period) : rounded;
   const timezoneDiff = (nextDate.offset - rounded.offset) * 60 * 1000;
 
   return [rounded, nextDate.minus(timezoneDiff)];
@@ -100,9 +100,9 @@ function parseTimestamp(value) {
 function roundDate(date, origin, period) {
   // Timezone offset is in minutes
   const timeDifference = date - origin + (date.offset - origin.offset) * 60 * 1000;
-
   // Returned date is inferior or equal to "date" by design (positive modulo)
-  return date.minus(modulo(timeDifference, period));
+  const remainder = modulo(timeDifference, period);
+  return Number.isFinite(remainder) ? date.minus(remainder) : date;
 }
 
 function setZone(date, zone) {
