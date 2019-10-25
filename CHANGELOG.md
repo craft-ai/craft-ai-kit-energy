@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.1...HEAD) ##
 
+### Fixed
+
+- Enable `roundDate` to have period equal to NaN 
+
 ## [0.4.1](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.0...v0.4.1) - 2019-10-23 ##
 
 ### Fixed
