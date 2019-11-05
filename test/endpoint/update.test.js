@@ -5,11 +5,9 @@ const Constants = require('../../src/constants');
 const Utils = require('../../src/utils');
 const Helpers = require('../helpers');
 
-
 test.before(require('dotenv').config);
 test.beforeEach(Helpers.createEndpointContext);
 test.afterEach.always(Helpers.destroyEndpointContext);
-
 
 test('fails updating the endpoint with invalid records', (t) => {
   const context = t.context;
@@ -62,7 +60,8 @@ test('updates the endpoint', (t) => {
 
       t.true(Array.isArray(history));
       t.is(history.length, RECORDS.length);
-      values.slice(1).forEach((current) => t.deepEqual(history, current));
+      values.slice(1)
+        .forEach((current) => t.deepEqual(history, current));
       t.deepEqual(toRecords(history), RECORDS);
     }));
 });
@@ -214,11 +213,14 @@ test('merges partial records until first full record', (t) => {
   const client = kit.client;
 
   // Add some partial records not containing the embedded property `index`
-  const timestamp = new Date(RECORDS[0][DATE]).getTime();
+  const timestamp = new Date(RECORDS[0][DATE])
+    .getTime();
   const timestamps = new Array(11)
     .fill(timestamp)
     .map((date, index) => ({ [DATE]: date - index * 3600 * 1000, [LOAD]: 0 }));
-  const records = timestamps.slice(1).reverse().concat(RECORDS.map((record, index) => ({ ...record, index })));
+  const records = timestamps.slice(1)
+    .reverse()
+    .concat(RECORDS.map((record, index) => ({ ...record, index })));
 
   return t.notThrowsAsync(kit
     .loadEndpoint({
@@ -275,10 +277,12 @@ test('converts accumulated energy values to mean electrical loads', (t) => {
       t.is(history.length, RECORDS_AS_ACCUMULATED_ENERGY.length);
 
       // Avoid rounding issue when comparing to the source
-      const records = toRecords(history).map((record) => ({ ...record, [LOAD]: Math.round(record[LOAD] * 10) / 10 }));
+      const records = toRecords(history)
+        .map((record) => ({ ...record, [LOAD]: Math.round(record[LOAD] * 10) / 10 }));
 
       t.deepEqual(records, RECORDS);
-      histories.slice(1).forEach((currentHistory) => t.deepEqual(currentHistory, history));
+      histories.slice(1)
+        .forEach((currentHistory) => t.deepEqual(currentHistory, history));
     });
 });
 
@@ -296,7 +300,6 @@ test('converts accumulated energy values to mean electrical loads with daytime s
     .then((endpoint) => endpoint.update(RECORDS_AS_ACCUMULATED_ENERGY_DST))
     .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
     .then((history) => {
-
       t.true(Array.isArray(history));
       t.is(history.length, RECORDS_AS_ACCUMULATED_ENERGY_DST.length);
 
@@ -320,7 +323,8 @@ test('uses timezone information provided as a feature to parse dates', (t) => {
     .then((endpoint) => endpoint.update(RECORDS_WITH_TIMEZONES))
     .then((endpoint) => kit.client.getAgentStateHistory(endpoint.agentId))
     .then((history) => {
-      const offsets = new Array(RECORDS.length).fill(offset);
+      const offsets = new Array(RECORDS.length)
+        .fill(offset);
 
       t.deepEqual(history.map((state) => state.sample[TIMEZONE]), offsets);
     });
@@ -335,51 +339,57 @@ test('parses continuous features\'s values into numbers', (t) => {
     .loadEndpoint({
       id: context.endpoint.register(),
       learning: {
-        properties: { property: { type : 'continuous' } }
+        properties: { property: { type: 'continuous' } }
       }
     })
     .then((endpoint) => endpoint
-      .update(RECORDS.slice(0, INDEX).map((record) => ({ ...record, property: '5' })))
+      .update(RECORDS.slice(0, INDEX)
+        .map((record) => ({ ...record, property: '5' })))
       .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
       .then((operations1) => {
         t.is(operations1.length, INDEX);
         t.is(operations1[0].context.property, 5);
 
-        const properties = operations1.slice(1).map((operation) => operation.context.property);
+        const properties = operations1.slice(1)
+          .map((operation) => operation.context.property);
 
-        t.deepEqual(properties, new Array(INDEX - 1).fill(undefined));
+        t.deepEqual(properties, new Array(INDEX - 1)
+          .fill(undefined));
 
         return endpoint
-          .update(RECORDS.slice(INDEX).map((record) => ({ ...record, property: 'o' })))
+          .update(RECORDS.slice(INDEX)
+            .map((record) => ({ ...record, property: 'o' })))
           .then((endpoint) => client.getAgentContextOperations(endpoint.agentId))
           .then((operations2) => {
             t.is(operations2.length, RECORDS.length);
             t.deepEqual(operations2.slice(0, INDEX), operations1);
 
-            const properties = operations2.slice(INDEX).map((operation) => operation.context.property);
+            const properties = operations2.slice(INDEX)
+              .map((operation) => operation.context.property);
 
-            t.deepEqual(properties, new Array(RECORDS.length - INDEX).fill(undefined));
+            t.deepEqual(properties, new Array(RECORDS.length - INDEX)
+              .fill(undefined));
           });
       })));
 });
 
-
 function toRecords(history, utcFormat = true) {
   const state = Object.defineProperty({}, 'timezone', { writable: true });
-  
+
   return history.map((current) => {
     const timestamp = current.timestamp * 1000;
     Object.assign(state, {
       [DATE]: utcFormat
-        ? new Date(timestamp).toISOString()
-        : Utils.setZone(Utils.parseDate(timestamp), current[TIMEZONE]).toISO(),
-      ...current.context,
+        ? new Date(timestamp)
+          .toISOString()
+        : Utils.setZone(Utils.parseDate(timestamp), current[TIMEZONE])
+          .toISO(),
+      ...current.context
     });
 
     return { ...state };
   });
 }
-
 
 const DATE = Constants.DATE_FEATURE;
 const INVALID_DATES = Helpers.INVALID_DATES;

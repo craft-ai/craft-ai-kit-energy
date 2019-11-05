@@ -6,15 +6,16 @@ const isFunction = require('lodash.isfunction');
 const Constants = require('../constants');
 const Utils = require('../utils');
 
-
 async function initialize(provider) {
   const options = provider.options;
   const token = options.token;
 
-  if (typeof token !== 'string')
+  if (typeof token !== 'string') {
     throw new TypeError(`The "token" option of the weather provider must be a "string". Received "${typeof token}".`);
-  if (!token)
+  }
+  if (!token) {
     throw new RangeError(`The "token" option of the weather provider must be valid. Received "${token}".`);
+  }
 
   // Avoid printing the token when logging the provider
   Object.defineProperty(options, 'token', { enumerable: false });
@@ -23,13 +24,16 @@ async function initialize(provider) {
   const refresh = options.refresh;
 
   if (refresh !== undefined) {
-    if (typeof refresh !== 'string')
+    if (typeof refresh !== 'string') {
       throw new TypeError(`The "refresh" option of the weather provider must be a "string". Received "${typeof refresh}".`);
-    if (!POSSIBLE_REFRESH_VALUES.includes(refresh))
+    }
+    if (!POSSIBLE_REFRESH_VALUES.includes(refresh)) {
       throw new RangeError(`The "refresh" option of the weather provider must be one of: "${POSSIBLE_REFRESH_VALUES.join('", "')}". Received "${refresh}".`);
+    }
 
     provider.refresh.period = refresh === 'hourly' ? 3600 : 24 * 3600;
-  } else {
+  }
+  else {
     options.refresh = 'daily';
     provider.refresh.period = 24 * 3600;
   }
@@ -37,39 +41,52 @@ async function initialize(provider) {
   const properties = options.properties;
 
   if (properties !== undefined) {
-    if (!Array.isArray(properties))
+    if (!Array.isArray(properties)) {
       throw new TypeError(`The "properties" option of the weather provider must be an "array". Received "${typeof properties}".`);
-    if (properties.some(Utils.isNotString))
+    }
+    if (properties.some(Utils.isNotString)) {
       throw new TypeError(`The "properties" option of the weather provider must only contain "string" value (see https://darksky.net/dev/docs#data-block for a list of available properties). Received ${JSON.stringify(JSON.stringify(properties))}.`);
-  } else options.properties = ['temperatureLow', 'temperatureHigh'];
+    }
+  }
+  else {
+    options.properties = ['temperatureLow', 'temperatureHigh'];
+  }
 
   const cache = options.cache;
 
   if (cache !== undefined) {
-    if (cache === null || typeof cache !== 'object')
+    if (cache === null || typeof cache !== 'object') {
       throw new TypeError(`The "cache" option of the weather provider must be an "object". Received "${cache === null ? 'null' : typeof cache}".`);
+    }
 
     const size = cache.size;
 
-    if (size !== undefined && typeof size !== 'number')
+    if (size !== undefined && typeof size !== 'number') {
       throw new TypeError(`The "size" property from the "cache" option of the weather provider must be a "number". Received "${typeof size}".`);
+    }
 
     const load = cache.load;
 
-    if (load !== undefined && !isFunction(load))
+    if (load !== undefined && !isFunction(load)) {
       throw new TypeError(`The "load" property from the "cache" option of the weather provider must be a "function". Received "${typeof load}".`);
+    }
 
     const save = cache.save;
 
-    if (save !== undefined && !isFunction(save))
+    if (save !== undefined && !isFunction(save)) {
       throw new TypeError(`The "save" property from the "cache" option of the weather provider must be a "function". Received "${typeof save}".`);
+    }
 
     try {
       context.cache = { load, save, values: createCache(size, load && await load()) };
-    } catch (error) {
+    }
+    catch (error) {
       throw new RangeError(`The "cache" option of the weather provider must be valid. Reason: ${error}.`);
     }
-  } else context.cache = { values: createCache() };
+  }
+  else {
+    context.cache = { values: createCache() };
+  }
 
   const exclude = POSSIBLE_REFRESH_VALUES
     .filter((value) => value !== options.refresh)
@@ -87,20 +104,24 @@ async function extendConfiguration() {
 
 async function extendRecord(endpoint, record) {
   const refresh = this.refresh;
-  const date = Utils.roundDate(record[PARSED_RECORD][DATE], refresh.origin, refresh.period).toSeconds();
+  const date = Utils.roundDate(record[PARSED_RECORD][DATE], refresh.origin, refresh.period)
+    .toSeconds();
   const metadata = endpoint.metadata;
   const context = this.context;
   const cache = context.cache.values;
   const position = `${metadata.latitude},${metadata.longitude}`;
   const resource = `${position},${date}`;
 
-  if (cache.has(resource)) return cache.get(resource);
+  if (cache.has(resource)) {
+    return cache.get(resource);
+  }
 
   this.log('querying the resource "%s" on Dark Sky API', resource);
 
   const query = context.baseUrl + resource + context.queryOptions;
 
-  return retry(() => fetch(query).then(Utils.checkResponse), RETRY_OPTIONS)
+  return retry(() => fetch(query)
+    .then(Utils.checkResponse), RETRY_OPTIONS)
     .then(Utils.handleResponse)
     .then(formatResponse)
     .then((data) => {
@@ -109,7 +130,9 @@ async function extendRecord(endpoint, record) {
       const dataPoints = key in data && data[key].data;
 
       /* istanbul ignore next */
-      if (!dataPoints || !dataPoints.length) return;
+      if (!dataPoints || !dataPoints.length) {
+        return;
+      }
 
       const properties = options.properties;
 
@@ -136,13 +159,14 @@ async function close() {
   const cache = this.context.cache;
   const values = cache.values;
 
-  if (cache.save)
-    await cache.save(Array.from(values.keys()).map((key) => [key, values.get(key)]));
+  if (cache.save) {
+    await cache.save(Array.from(values.keys())
+      .map((key) => [key, values.get(key)]));
+  }
 
   // Clear the cache
   values.clear();
 }
-
 
 async function formatResponse(response) {
   return response.json();
@@ -164,10 +188,9 @@ const POSSIBLE_REFRESH_VALUES = ['hourly', 'daily'];
 const RETRY_OPTIONS = { retries: 5, minTimeout: 100 };
 const ENUM_PROPERTIES = ['icon', 'precipType'];
 
-
 module.exports = {
   close,
   extendConfiguration,
   extendRecord,
-  initialize,
+  initialize
 };

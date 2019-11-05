@@ -39,8 +39,9 @@ async function initialize(instance, index) {
   **********
   An object Provider
   */
-  if (instance === null || typeof instance !== 'object')
+  if (instance === null || typeof instance !== 'object') {
     throw new TypeError(`The provider at index "${index}" of the kit's configuration is not valid. Received "${instance === null ? 'null' : typeof instance}".`);
+  }
 
   const name = instance.name || index.toString();
   const log = debug(`${DEBUG_PREFIX}:provider:${name}`);
@@ -49,8 +50,9 @@ async function initialize(instance, index) {
 
   log('initializing');
 
-  if (!isFunction(initialize) || !isProvider(constructor))
+  if (!isFunction(initialize) || !isProvider(constructor)) {
     throw new TypeError(`The provider at index "${index}" of the kit's configuration is not valid.`);
+  }
 
   const prototype = { ...constructor };
   const options = instance.options ? { ...instance.options } : {};
@@ -66,7 +68,7 @@ async function initialize(instance, index) {
     context: { value: {} },
     log: { value: log },
     refresh: { value: refresh },
-    options: { value: options, enumerable: true },
+    options: { value: options, enumerable: true }
   });
 
   await initialize(provider);
@@ -92,19 +94,22 @@ async function extendConfiguration(providers, context) {
   **********
   craft ai agent's context
   */
-  if (!providers.length) return context;
+  if (!providers.length) {
+    return context;
+  }
 
   // TODO: Submit the endpoint's metadata to the providers for validation
   // TODO: Validate the 'refresh' object from the provider
   return Promise.all(
     providers.map((provider) => provider.extendConfiguration())
-  ).then((extensions) => Object.assign(context, ...extensions));
+  )
+    .then((extensions) => Object.assign(context, ...extensions));
 }
 
 function extendRecords(endpoint, records) {
   /*
   Extend the data/records using providers.
-  
+
   *************
   **Arguments**
   *************
@@ -120,7 +125,9 @@ function extendRecords(endpoint, records) {
   */
   const providers = endpoint.kit.configuration.providers;
 
-  if (!providers.length) return records;
+  if (!providers.length) {
+    return records;
+  }
 
   return records
     // Check the providers that have to refresh its output
@@ -128,7 +135,9 @@ function extendRecords(endpoint, records) {
       const date = record[PARSED_RECORD][DATE];
 
       const values = states.map((previous, index) => {
-        if (previous && previous > date) return;
+        if (previous && previous > date) {
+          return;
+        }
 
         const refresh = providers[index].refresh;
 
@@ -138,7 +147,8 @@ function extendRecords(endpoint, records) {
       });
 
       return { seed: states, value: [record, values] };
-    }, new Array(providers.length).fill(null))
+    }, new Array(providers.length)
+      .fill(null))
     // Compute the extensions and merge them to the record
     .concatMap((data) => most.fromPromise(Promise
       .all(providers.map((provider, index) => {
@@ -152,7 +162,7 @@ function extendRecords(endpoint, records) {
 function isProvider(value) {
   /*
   Check if the value parsed is a provider
-  
+
   *************
   **Arguments**
   *************
@@ -181,5 +191,5 @@ module.exports = {
   close,
   extendConfiguration,
   extendRecords,
-  initialize,
+  initialize
 };

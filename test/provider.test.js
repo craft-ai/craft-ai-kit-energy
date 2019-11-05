@@ -7,10 +7,8 @@ const Helpers = require('./helpers');
 const Is = require('./helpers/is');
 const Provider = require('./helpers/provider');
 
-
 test.before(require('dotenv').config);
 test.afterEach.always(Helpers.destroyEndpointContext);
-
 
 test('fails initializing a kit with invalid providers', (t) => {
   return Promise.all(INVALID_ARRAYS
@@ -95,4 +93,5 @@ const FEATURES = Provider.FEATURES;
 const INVALID_ARRAYS = Helpers.INVALID_ARRAYS;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;
 const RECORDS = Helpers.RECORDS.slice(0, 500);
-const STATES = Helpers.RECORDS.slice(500, 1000).map((record) => ({ [DATE]: record[DATE] }));
+const STATES = Helpers.RECORDS.slice(500, 1000)
+  .map((record) => ({ [DATE]: record[DATE] }));

@@ -2,7 +2,9 @@ const luxon = require('luxon');
 const seedrandom = require('seedrandom');
 
 async function initialize(provider) {
-  if (!provider.options.random) provider.options.random = seedrandom('weather');
+  if (!provider.options.random) {
+    provider.options.random = seedrandom('weather');
+  }
 
   provider.refresh.origin = luxon.DateTime.fromISO('12:00:00');
   provider.refresh.period = 24 * 3600;
@@ -21,7 +23,7 @@ async function extendRecord(endpoint) {
 
   return {
     [TEMPERATURE_MAX]: averageMax + 8 * this.options.random(),
-    [TEMPERATURE_MIN]: averageMin + 6 * this.options.random(),
+    [TEMPERATURE_MIN]: averageMin + 6 * this.options.random()
   };
 }
 
@@ -41,5 +43,5 @@ module.exports = {
   extendRecord,
   initialize,
   FEATURES,
-  OPTIONS,
+  OPTIONS
 };

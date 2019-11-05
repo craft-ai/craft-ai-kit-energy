@@ -152,7 +152,7 @@ test('configure an agent configuration', (t) => {
       properties: PROPERTIES,
       maxRecords: SEED,
       maxRecordAge: SEED,
-      advancedConfiguration: ADVANCED_CONFIGURATION,
+      advancedConfiguration: ADVANCED_CONFIGURATION
     }
   };
 
@@ -173,7 +173,8 @@ test('configure an agent configuration', (t) => {
 
       const context = configuration.context;
 
-      Object.keys(PROPERTIES).forEach((key) => t.deepEqual(context[key], PROPERTIES[key]));
+      Object.keys(PROPERTIES)
+        .forEach((key) => t.deepEqual(context[key], PROPERTIES[key]));
     });
 });
 
@@ -184,7 +185,7 @@ test('configure an default agent configuration', (t) => {
   // endpoint definition
   const definition = {
     id: context.endpoint.register(),
-    metadata: { zone: 'Europe/Paris' },
+    metadata: { zone: 'Europe/Paris' }
   };
 
   return kit
@@ -199,7 +200,8 @@ test('configure an default agent configuration', (t) => {
       t.is(typeof configuration, 'object');
       t.is(configuration[MIN_SAMPLES_PER_LEAF], undefined);
       // We should only find the default configuration and context in the generated configuration
-      Object.keys(DEFAULT_CONFIGURATION).forEach((key) => t.deepEqual(configuration[key], DEFAULT_CONFIGURATION[key]));
+      Object.keys(DEFAULT_CONFIGURATION)
+        .forEach((key) => t.deepEqual(configuration[key], DEFAULT_CONFIGURATION[key]));
     });
 });
 
@@ -232,10 +234,10 @@ const DEFAULT_PROPERTIES = {
 const MIN_SAMPLES_PER_LEAF = 'min_samples_per_leaf';
 const ADVANCED_CONFIGURATION = { [MIN_SAMPLES_PER_LEAF]: 1234 };
 const DEFAULT_CONFIGURATION = {
-  'context':  DEFAULT_PROPERTIES,
+  'context': DEFAULT_PROPERTIES,
   'output': ['load'],
   'operations_as_events': true,
   'tree_max_depth': 6,
   'tree_max_operations': 50000,
-  'learning_period': 365 * 24 * 60 * 60,
+  'learning_period': 365 * 24 * 60 * 60
 };

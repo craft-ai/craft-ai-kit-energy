@@ -1,7 +1,6 @@
 const lru = require('quick-lru');
 const luxon = require('luxon');
 
-
 async function checkResponse(response) {
   const status = response.status;
 
@@ -15,7 +14,9 @@ async function handleResponse(response) {
 }
 
 function checkZone(zone) {
-  if (ZONE_CACHE.has(zone)) return true;
+  if (ZONE_CACHE.has(zone)) {
+    return true;
+  }
 
   const date = DateTime.fromObject({ zone });
 
@@ -27,7 +28,9 @@ function formatTimezone(offset) {
   const hours = Math.floor(offsetValue / 60);
 
   return (Math.sign(offset) >= 0 ? '+' : '-')
-    + [hours, offsetValue - hours * 60].map((value) => String(value).padStart(2, 0)).join(':');
+    + [hours, offsetValue - hours * 60].map((value) => String(value)
+      .padStart(2, 0))
+      .join(':');
 }
 
 function getDateWindow(date, origin, period) {
@@ -38,11 +41,17 @@ function getDateWindow(date, origin, period) {
   return [rounded, nextDate.minus(timezoneDiff)];
 }
 
-function isNull(value) { return value === null; }
+function isNull(value) {
+  return value === null;
+}
 
-function isNotNull(value) { return value !== null; }
+function isNotNull(value) {
+  return value !== null;
+}
 
-function isNotString(value) { return typeof value !== 'string'; }
+function isNotString(value) {
+  return typeof value !== 'string';
+}
 
 function isPredictiveModel(value) {
   return value !== null
@@ -87,12 +96,15 @@ function parseNumber(value) {
 }
 
 function parseTimestamp(value) {
-  if (value === undefined || value === null) return;
+  if (value === undefined || value === null) {
+    return;
+  }
 
   const date = parseDate(value);
 
-  if (!date.isValid)
+  if (!date.isValid) {
     throw new Error('Invalid date');
+  }
 
   return Math.floor(date.valueOf() / 1000);
 }
@@ -106,9 +118,13 @@ function roundDate(date, origin, period) {
 }
 
 function setZone(date, zone) {
-  if (!zone || !date.isValid) return date;
+  if (!zone || !date.isValid) {
+    return date;
+  }
 
-  if (ZONE_CACHE.has(zone)) return date.setZone(ZONE_CACHE.get(zone));
+  if (ZONE_CACHE.has(zone)) {
+    return date.setZone(ZONE_CACHE.get(zone));
+  }
 
   const result = date.setZone(zone);
 
@@ -117,11 +133,9 @@ function setZone(date, zone) {
   return result;
 }
 
-
 const ZONE_CACHE = new lru({ maxSize: 50 });
 const DateTime = luxon.DateTime;
 const Duration = luxon.Duration;
-
 
 module.exports = {
   checkResponse,
@@ -139,5 +153,5 @@ module.exports = {
   parseNumber,
   parseTimestamp,
   roundDate,
-  setZone,
+  setZone
 };

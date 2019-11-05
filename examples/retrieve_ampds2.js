@@ -1,4 +1,5 @@
-require('dotenv').config();
+require('dotenv')
+  .config();
 
 const csv = require('csv-parse');
 const csvStringify = require('csv-stringify');
@@ -12,7 +13,6 @@ const stream = require('stream');
 const log = debug('craft-ai:kit-energy:examples:retrieve_ampds2');
 log.enabled = true;
 
-
 // This URL was retrieved on 2018/10/18 from https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/FIE0S4/XH3RRJ&version=1.2
 const CLIMATE_DATASET_URL = 'https://dataverse.harvard.edu/api/access/datafile/2701495?format=original&gbrecs=true';
 
@@ -20,7 +20,6 @@ const CLIMATE_DATASET_URL = 'https://dataverse.harvard.edu/api/access/datafile/2
 const ELECTRICITY_DATASET_URL = 'https://dataverse.harvard.edu/api/access/datafile/2741425?format=original&gbrecs=true';
 
 const PREPARED_DATASET_PATH = path.join(__dirname, './data/ampds2.csv');
-
 
 // ----
 // This script prepare original files from "AMPds2: The Almanac of Minutely Power dataset (Version 2)"
@@ -101,7 +100,8 @@ return Promise.all([
                 break;
               }
             }
-            const secondsToCurrentClimateRow = currentClimateRow.date.diff(row.date).as('seconds');
+            const secondsToCurrentClimateRow = currentClimateRow.date.diff(row.date)
+              .as('seconds');
             if (secondsToCurrentClimateRow > 0) {
               // The electricity stream is lagging behind the climate stream.
               // We skip the climate information for this record and keep reading to catch the climate stream.
@@ -119,7 +119,7 @@ return Promise.all([
           this.push({
             ...row,
             date: row.date.toISO(),
-            temperature: matchingClimateRow ? matchingClimateRow.temperature : null,
+            temperature: matchingClimateRow ? matchingClimateRow.temperature : null
           });
           next();
         }

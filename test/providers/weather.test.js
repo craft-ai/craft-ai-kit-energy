@@ -13,11 +13,9 @@ const Provider = require('../../src/provider');
 const Stream = require('../../src/stream');
 const WeatherProvider = require('../../src/providers/weather');
 
-
 test.before(require('dotenv').config);
 test.beforeEach((t) => t.context.token = process.env.DARK_SKY_TOKEN);
 test.afterEach.always(Helpers.destroyProviderContext);
-
 
 test('fails initializing the provider with invalid options', async(t) => {
   const INVALID_TOKENS = [undefined].concat(INVALID_STRINGS, ['']);
@@ -150,9 +148,10 @@ test('closes the provider', (t) => {
     .then((provider) => t.notThrowsAsync(provider.close()));
 });
 
-
 async function saveCache(title, entries) {
-  if (!entries.length) return;
+  if (!entries.length) {
+    return;
+  }
 
   const filepath = path.join(CACHE_DIRECTORY, `${getCacheName(title)}.json`);
 
@@ -162,17 +161,23 @@ async function saveCache(title, entries) {
 function loadCache(title) {
   try {
     return require(`../helpers/cache/${getCacheName(title)}.json`);
-  } catch (error) {
-    if (error.code !== 'MODULE_NOT_FOUND') throw error;
+  }
+  catch (error) {
+    if (error.code !== 'MODULE_NOT_FOUND') {
+      throw error;
+    }
   }
 }
 
 function interceptWeatherRequest(provider, title) {
   const cache = loadCache(title);
 
-  if (!cache || !cache.length) return;
+  if (!cache || !cache.length) {
+    return;
+  }
 
-  const urlParts = provider.context.baseUrl.replace('https://', '').split('/');
+  const urlParts = provider.context.baseUrl.replace('https://', '')
+    .split('/');
   const hostname = `https://${urlParts.shift()}`;
   const basePath = `/${urlParts.join('/')}`;
   const refresh = provider.options.refresh;
@@ -184,14 +189,14 @@ function interceptWeatherRequest(provider, title) {
     return scope
       .get(basePath + resource)
       .query(true)
-      .reply(200, { [refresh]: { data: [{ time: +resource.split(',').slice(-1)[0], ...value }] } });
+      .reply(200, { [refresh]: { data: [{ time: +resource.split(',')
+        .slice(-1)[0], ...value }] } });
   }, nock(hostname, { allowUnmocked: true }));
 }
 
 function getCacheName(title) {
   return uuid(title, uuid.URL);
 }
-
 
 const DATE = Constants.DATE_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;

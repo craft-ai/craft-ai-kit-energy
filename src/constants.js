@@ -8,7 +8,6 @@ const PARSED_RECORD = Symbol('PARSED_RECORD');
 const TIMESTAMP_FEATURE = 'timestamp';
 const TIMEZONE_FEATURE = 'timezone';
 
-
 module.exports = {
   DATE_FEATURE,
   DEBUG_PREFIX,
@@ -18,5 +17,5 @@ module.exports = {
   ORIGINAL_RECORD,
   PARSED_RECORD,
   TIMESTAMP_FEATURE,
-  TIMEZONE_FEATURE,
+  TIMEZONE_FEATURE
 };

@@ -7,10 +7,8 @@ const Helpers = require('../helpers');
 const Provider = require('../../src/provider');
 const PublicHolidayProvider = require('../../src/providers/public_holiday');
 
-
 test.beforeEach((t) => Helpers.createProviderContext(t, PublicHolidayProvider, { country: 'fr' }));
 test.afterEach.always(Helpers.destroyProviderContext);
-
 
 test('fails initializing the provider with invalid options', (t) => {
   return Promise.all(INVALID_OBJECTS
@@ -92,7 +90,6 @@ test('closes the provider', (t) => {
   return t.notThrowsAsync(t.context.provider.close());
 });
 
-
 function isHoliday(record, holidays) {
   const date = record[PARSED_RECORD][DATE];
 
@@ -100,7 +97,6 @@ function isHoliday(record, holidays) {
     && date.month === dateParts[1]
     && date.day === dateParts[2]);
 }
-
 
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const DATE = Constants.DATE_FEATURE;
@@ -130,7 +126,7 @@ const HOLIDAYS = [
   [2019, 7, 14],
   [2019, 8, 15],
   [2019, 11, 1], [2019, 11, 11],
-  [2019, 12, 25],
+  [2019, 12, 25]
 ];
 const MOSELLE_HOLIDAYS = [
   [2017, 4, 14],
@@ -138,15 +134,19 @@ const MOSELLE_HOLIDAYS = [
   [2018, 3, 30],
   [2018, 12, 26],
   [2019, 4, 19],
-  [2019, 12, 26],
+  [2019, 12, 26]
 ].concat(HOLIDAYS);
 const REUNION_HOLIDAYS = [
   [2017, 12, 20],
   [2018, 12, 20],
-  [2019, 12, 20],
+  [2019, 12, 20]
 ].concat(HOLIDAYS);
-const WINDOW_START = luxon.DateTime.local(...HOLIDAYS[0]).startOf('year');
-const WINDOW_END = luxon.DateTime.local(...HOLIDAYS[HOLIDAYS.length - 1]).plus({ years: 1 }).startOf('year');
-const WINDOW = new Array(WINDOW_END.diff(WINDOW_START).as('days'))
+const WINDOW_START = luxon.DateTime.local(...HOLIDAYS[0])
+  .startOf('year');
+const WINDOW_END = luxon.DateTime.local(...HOLIDAYS[HOLIDAYS.length - 1])
+  .plus({ years: 1 })
+  .startOf('year');
+const WINDOW = new Array(WINDOW_END.diff(WINDOW_START)
+  .as('days'))
   .fill(null)
   .map((_, days) => ({ [DATE]: WINDOW_START.plus({ days }), [LOAD]: 0 }));

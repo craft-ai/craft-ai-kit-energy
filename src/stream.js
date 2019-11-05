@@ -3,12 +3,17 @@ const most = require('most');
 const isFunction = require('lodash.isfunction');
 
 function from(value, options) {
-  if (isStream(value)) return fromNativeStream(value);
-  if (typeof value === 'string') return fromCsv(value, options);
+  if (isStream(value)) {
+    return fromNativeStream(value);
+  }
+  if (typeof value === 'string') {
+    return fromCsv(value, options);
+  }
 
   try {
     return most.from(value);
-  } catch (error) {
+  }
+  catch (error) {
     return most.throwError(error);
   }
 }
@@ -36,15 +41,14 @@ function toBuffer(stream) {
     .reduce((_, buffer) => buffer, []);
 }
 
-
 function fromCsv(value, options) {
-  return require('./parsers/csv').stream(value, options);
+  return require('./parsers/csv')
+    .stream(value, options);
 }
-
 
 module.exports = {
   fromNativeStream,
   from,
   isStream,
-  toBuffer,
+  toBuffer
 };

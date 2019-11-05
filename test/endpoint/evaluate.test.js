@@ -7,18 +7,19 @@ const Is = require('../helpers/is');
 test.before(require('dotenv').config);
 
 test.beforeEach((t) =>
-  Helpers.createEndpointContext(t).then(() => {
-    const context = t.context;
-    const kit = context.kit;
+  Helpers.createEndpointContext(t)
+    .then(() => {
+      const context = t.context;
+      const kit = context.kit;
 
-    return kit
-      .loadEndpoint({
-        id: context.endpoint.register(),
-        metadata: { zone: 'Europe/Paris' }
-      })
-      .then((endpoint) => endpoint.update(TRAINING_RECORDS))
-      .then((endpoint) => (t.context.endpoint.current = endpoint));
-  })
+      return kit
+        .loadEndpoint({
+          id: context.endpoint.register(),
+          metadata: { zone: 'Europe/Paris' }
+        })
+        .then((endpoint) => endpoint.update(TRAINING_RECORDS))
+        .then((endpoint) => (t.context.endpoint.current = endpoint));
+    })
 );
 
 test.afterEach.always(Helpers.destroyEndpointContext);
@@ -145,13 +146,14 @@ test('computes rolling evaluation with agent\'s first and last timestamps when n
   const endpoint = context.endpoint.current;
   const length = TRAINING_RECORDS.length;
 
-  return endpoint.evaluate().then((result) => {
-    result.forEach((report) => t.true(Is.report(report)));
+  return endpoint.evaluate()
+    .then((result) => {
+      result.forEach((report) => t.true(Is.report(report)));
 
-    const predictions = getPredictions(result);
-    t.true(Is.predictions(predictions));
-    t.is(predictions.length, length);
-  });
+      const predictions = getPredictions(result);
+      t.true(Is.predictions(predictions));
+      t.is(predictions.length, length);
+    });
 });
 
 function getPredictions(reports) {
