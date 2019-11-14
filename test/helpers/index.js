@@ -100,7 +100,7 @@ function registerEndpoint() {
   return id;
 }
 
-const ZONES = ['local', 'gmt', 'utc', 'utc-3', 'utc+3', 'utc-03:30', 'America/Chihuahua', 'Europe/Paris', 'Asia/Kolkata', 'Antarctica/South_Pole'];
+const ZONES = ['gmt', 'utc', 'utc-3', 'utc+3', 'utc-03:30', 'America/Chihuahua', 'Europe/Paris', 'Asia/Kolkata', 'Antarctica/South_Pole'];
 const INVALID_ARRAYS = [null, 0, true, 'string', Symbol(), new Uint8Array(10), () => {}];
 const INVALID_BOOLEANS = ['true', [1], [0], 'false', {}, new Date(), null];
 const INVALID_DATES = [false, NaN, 'N/A', 'NaN', 'unknown', '123456', 'string', '5151-51-51T51:51:51.515Z', () => {}];
