@@ -169,7 +169,7 @@ test('configure an agent configuration', (t) => {
       t.is(typeof configuration, 'object');
       t.is(configuration.tree_max_operations, SEED);
       t.is(configuration.learning_period, SEED);
-      t.is(configuration[DEACTIVATE_MISSING_VALUES_OPTION], false);
+      t.is(configuration[MIN_SAMPLES_PER_LEAF], 1234);
 
       const context = configuration.context;
 
@@ -197,6 +197,7 @@ test('configure an default agent configuration', (t) => {
       const configuration = agent.configuration;
       t.truthy(configuration);
       t.is(typeof configuration, 'object');
+      t.is(configuration[MIN_SAMPLES_PER_LEAF], undefined);
       // We should only find the default configuration and context in the generated configuration
       Object.keys(DEFAULT_CONFIGURATION).forEach((key) => t.deepEqual(configuration[key], DEFAULT_CONFIGURATION[key]));
     });
@@ -228,8 +229,8 @@ const DEFAULT_PROPERTIES = {
   [LOAD]: { type: 'continuous' }
 };
 // configuration constant
-const DEACTIVATE_MISSING_VALUES_OPTION = 'deactivate_missing_values';
-const ADVANCED_CONFIGURATION = { [DEACTIVATE_MISSING_VALUES_OPTION]: false };
+const MIN_SAMPLES_PER_LEAF = 'min_samples_per_leaf';
+const ADVANCED_CONFIGURATION = { [MIN_SAMPLES_PER_LEAF]: 1234 };
 const DEFAULT_CONFIGURATION = {
   'context':  DEFAULT_PROPERTIES,
   'output': ['load'],

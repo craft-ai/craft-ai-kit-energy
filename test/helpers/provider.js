@@ -31,9 +31,9 @@ async function close() {
 
 const TEMPERATURE_MAX = 'temperatureMax';
 const TEMPERATURE_MIN = 'temperatureMin';
-const DEACTIVATE_MISSING_VALUES_OPTION = 'deactivate_missing_values';
+const MIN_SAMPLES_PER_LEAF = 'min_samples_per_leaf';
 const FEATURES = [TEMPERATURE_MAX, TEMPERATURE_MIN];
-const OPTIONS = [DEACTIVATE_MISSING_VALUES_OPTION];
+const OPTIONS = [MIN_SAMPLES_PER_LEAF];
 
 module.exports = {
   close,
