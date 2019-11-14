@@ -4,7 +4,6 @@ const update = require('./update');
 const retrieve = require('./retrieve');
 const destroy = require('./destroy');
 
-
 module.exports = {
   destroy, update,
   evaluate: evaluate.computeRollingEvaluation,
@@ -12,5 +11,5 @@ module.exports = {
   computePredictions: compute.predictions,
   computeReport: compute.report,
   retrievePredictiveModel: retrieve.predictiveModel,
-  retrieveRecords: retrieve.records,
+  retrieveRecords: retrieve.records
 };

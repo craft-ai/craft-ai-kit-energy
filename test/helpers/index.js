@@ -6,7 +6,6 @@ const EnergyKit = require('../../src/index');
 const Provider = require('../../src/provider');
 const Utils = require('../../src/utils');
 
-
 async function createEndpointContext(t, configuration = {}) {
   return EnergyKit
     .initialize({ ...configuration, recordBulkSize: 1000 })
@@ -20,13 +19,15 @@ async function createEndpointContext(t, configuration = {}) {
       context.random = randomInteger;
       context.shuffle = shuffle;
 
-
-      function randomInteger(upper) { return Math.floor(random() * (upper + 1)); }
+      function randomInteger(upper) {
+        return Math.floor(random() * (upper + 1));
+      }
 
       function shuffle(value) {
         const index = randomInteger(value.length - 2) + 1;
 
-        return value.slice(index).concat(RECORDS.slice(0, index));
+        return value.slice(index)
+          .concat(RECORDS.slice(0, index));
       }
     });
 }
@@ -41,7 +42,9 @@ async function destroyEndpointContext(t) {
   const context = t.context;
   const kit = context.kit;
 
-  if (!kit) return;
+  if (!kit) {
+    return;
+  }
 
   const client = kit.client;
 
@@ -56,10 +59,13 @@ async function destroyProviderContext(t) {
   return provider && provider.close();
 }
 
-function identity(value) { return value; }
+function identity(value) {
+  return value;
+}
 
-function streamify(records) { return new Stream(records); }
-
+function streamify(records) {
+  return new Stream(records);
+}
 
 class Stream extends stream.Readable {
   constructor(records) {
@@ -75,7 +81,6 @@ class Stream extends stream.Readable {
     this.push(this.index === records.length ? null : records[this.index++]);
   }
 }
-
 
 function registerEndpoint() {
   if (!this.seed) {
@@ -95,8 +100,7 @@ function registerEndpoint() {
   return id;
 }
 
-
-const ZONES = ['local', 'gmt', 'utc', 'utc-3', 'utc+3', 'utc-03:30', 'America/Chihuahua', 'Europe/Paris', 'Asia/Kolkata', 'Antarctica/South_Pole'];
+const ZONES = ['gmt', 'utc', 'utc-3', 'utc+3', 'utc-03:30', 'America/Chihuahua', 'Europe/Paris', 'Asia/Kolkata', 'Antarctica/South_Pole'];
 const INVALID_ARRAYS = [null, 0, true, 'string', Symbol(), new Uint8Array(10), () => {}];
 const INVALID_BOOLEANS = ['true', [1], [0], 'false', {}, new Date(), null];
 const INVALID_DATES = [false, NaN, 'N/A', 'NaN', 'unknown', '123456', 'string', '5151-51-51T51:51:51.515Z', () => {}];

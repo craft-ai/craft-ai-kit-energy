@@ -1,4 +1,5 @@
-require('dotenv').config();
+require('dotenv')
+  .config();
 
 const EnergyKit = require('../src');
 
@@ -61,7 +62,9 @@ async function rolling_predictions(definition, providers, records, options) {
             .then((results) => {
               log(`predictions computed for agent ${definition.id}`);
               // Destroy the agents in the short version
-              if (SHORT_TEST === true) endpoint.destroy();
+              if (SHORT_TEST === true) {
+                endpoint.destroy();
+              }
               return results;
             });
         })
@@ -82,17 +85,16 @@ const PublicHolidayProvider = require('../src/providers/public_holiday');
 const SchoolHolidaysProvider = require('../src/providers/school_holidays');
 const WeatherProvider = require('../src/providers/weather');
 
-
 const ampds = {
   definition: {
     id: 'ampds_endpoint',
     learning: {
-      properties: { temperature: { type : 'continuous' } }
+      properties: { temperature: { type: 'continuous' } }
     },
     metadata: {
       latitude: 49.249444,  // We consider a location in Burnaby (Canada)
       longitude: -122.979722,  // Latitude and longitude retrieved from https://www.latlong.net
-      zone : 'Canada/Pacific'
+      zone: 'Canada/Pacific'
     }
   }
 };
@@ -104,7 +106,7 @@ const uci = {
       region: '91',
       latitude: 48.458570,  // We consider a location in Essonne (France), near the dataset authors' workplace
       longitude: 2.156942,   // Latitude and longitude retrieved from https://www.latlong.net
-      zone : 'Europe/Paris'
+      zone: 'Europe/Paris'
     }
   },
   providers: [

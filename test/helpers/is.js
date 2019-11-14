@@ -41,11 +41,10 @@ function report(object) {
     && (isNaN(object.average.absoluteDifference) || object.average.absoluteDifference >= 0);
 }
 
-
 module.exports = {
   anomalies,
   anomaly,
   prediction,
   predictions,
-  report,
+  report
 };

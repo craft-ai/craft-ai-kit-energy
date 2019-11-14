@@ -16,51 +16,63 @@ async function computeRollingEvaluation(states, options) {
   let from, to;
 
   if (states !== undefined) {
-    if (states === null || typeof states != 'object')
+    if (states === null || typeof states != 'object') {
       throw TypeError(`The "states" argument must be an "object". Received "${typeof states}".`);
+    }
 
     if (states.from !== undefined) {
       from = Utils.parseDate(states.from);
 
-      if (!from.isValid)
+      if (!from.isValid) {
         throw RangeError(`The "from" property of the "states" argument must be a valid date. Received: ${states.from}`);
+      }
     }
 
     if (states.to !== undefined) {
       to = Utils.parseDate(states.to);
 
-      if (!to.isValid)
+      if (!to.isValid) {
         throw RangeError(`The "to" property of the "states" argument must be a valid date. Received: ${states.to}`);
+      }
     }
   }
 
   if (from === undefined) {
-    if (this.agent.firstTimestamp === undefined)
+    if (this.agent.firstTimestamp === undefined) {
       throw Error('This agent was not updated. The "from" property of the "states" argument must be defined when the agent was not updated.');
+    }
 
     from = Utils.parseDate(this.agent.firstTimestamp * 1000);
   }
 
   if (to === undefined) {
-    if (this.agent.lastTimestamp === undefined)
+    if (this.agent.lastTimestamp === undefined) {
       throw Error('This agent was not updated. The "to" property of the "states" argument must be defined when the agent was not updated.');
+    }
 
     to = Utils.parseDate(this.agent.lastTimestamp * 1000);
   }
 
-  if (options === null || options === undefined) options = ROLL_PREDICTIONS_DEFAULT;
+  if (options === null || options === undefined) {
+    options = ROLL_PREDICTIONS_DEFAULT;
+  }
   else {
-    if (typeof options !== 'object')
+    if (typeof options !== 'object') {
       throw TypeError(`The "options" argument must be an "object". Received "${typeof options}".`);
-    if (options.period === undefined) options.period = ROLL_PREDICTIONS_DEFAULT.period;
+    }
+    if (options.period === undefined) {
+      options.period = ROLL_PREDICTIONS_DEFAULT.period;
+    }
   }
 
   const period = Utils.parseDuration(options.period);
 
-  if (typeof period !== 'object' || !period.isValid)
+  if (typeof period !== 'object' || !period.isValid) {
     throw TypeError('The "period" option is invalid. Expected an ISO Duration String, a Javascript Object or a number of milliseconds');
-  if (Number(period) === 0)
+  }
+  if (Number(period) === 0) {
     throw TypeError('The "period" option must refer to a non null duration.');
+  }
 
   let chunksCount = 0;
   let currentChunk = 0;
@@ -68,7 +80,9 @@ async function computeRollingEvaluation(states, options) {
   return most.unfold((date) =>  {
     chunksCount += 1;
 
-    if (date === null) return { done: true };
+    if (date === null) {
+      return { done: true };
+    }
 
     const nextDate = date.plus(period);
 
@@ -81,7 +95,7 @@ async function computeRollingEvaluation(states, options) {
       .then((records) => this.computeReport(records, {
         minConfidence: 0,
         minAbsoluteDifference: 0,
-        minSigmaDifference: 0,
+        minSigmaDifference: 0
       }, records.slice(0, 1)[0][DATE]))
       .then((report) => {
         currentChunk += 1;
@@ -105,7 +119,6 @@ async function computeRollingEvaluation(states, options) {
     .reduce((results, report) => results.concat(report), []);
 }
 
-
 function sumConfidences(sum, value) {
   return value.confidence + sum;
 }
@@ -113,7 +126,7 @@ function sumConfidences(sum, value) {
 const DATE = Constants.DATE_FEATURE;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
 const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
-const ROLL_PREDICTIONS_DEFAULT = { period: { days : 7 } };
+const ROLL_PREDICTIONS_DEFAULT = { period: { days: 7 } };
 
 module.exports = {
   computeRollingEvaluation

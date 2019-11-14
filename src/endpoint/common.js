@@ -4,7 +4,6 @@ const Constants = require('../constants');
 const Stream = require('../stream');
 const Utils = require('../utils');
 
-
 function formatRecords(endpoint, records) {
   const context = endpoint.agent.configuration.context;
   const features = endpoint.features;
@@ -13,15 +12,20 @@ function formatRecords(endpoint, records) {
   return records
     // Remove unknown keys
     .tap((record) => {
-      for (const key in record)
-        if (key !== DATE && !features.includes(key)) delete record[key];
+      for (const key in record) {
+        if (key !== DATE && !features.includes(key)) {
+          delete record[key];
+        }
+      }
     })
     // Remove unchanged features
     .loop((previous, record) => {
       features.forEach((key) => {
         const value = record[key];
 
-        if (value && value === previous[key]) delete record[key];
+        if (value && value === previous[key]) {
+          delete record[key];
+        }
       });
 
       return { seed: Object.assign(previous, record), value: record };
@@ -37,7 +41,9 @@ function formatRecords(endpoint, records) {
 function mergeUntilFirstFullRecord(features, records) {
   return records
     .loop((seed, record) => {
-      if (!seed.checked.length) return { seed, value: record };
+      if (!seed.checked.length) {
+        return { seed, value: record };
+      }
 
       const merged = seed.record ? Object.assign(seed.record, record) : record;
 
@@ -57,16 +63,20 @@ function toRecordStream(values, options, onlyRecords, zone) {
     .thru(checkRecordsAreSorted);
 }
 
-
 function checkRecordsAreSorted(records) {
   return records
     .concat(most.of(null))
     .loop((previous, record) => {
-      if (!record) return { value: previous };
-      if (!previous) return { value: null, seed: record };
+      if (!record) {
+        return { value: previous };
+      }
+      if (!previous) {
+        return { value: null, seed: record };
+      }
 
-      if (previous[DATE] > record[DATE])
+      if (previous[DATE] > record[DATE]) {
         throw new Error('The records must be sorted by ascending date.');
+      }
 
       // Merge records on the same date
       return previous[DATE] === record[DATE]
@@ -95,8 +105,9 @@ function toContextOperation(record) {
 }
 
 function toRecord(value, zone) {
-  if (value === null || typeof value !== 'object')
+  if (value === null || typeof value !== 'object') {
     throw new TypeError(`A record must be an "object". Received "${value === null ? 'null' : typeof value}".`);
+  }
 
   const date = Utils.setZone(Utils.parseDate(value[DATE]), value[TIMEZONE] || zone);
   const record = { ...value };
@@ -117,11 +128,13 @@ function toRecord(value, zone) {
 
     Object.defineProperty(record, ORIGINAL_RECORD, { value });
     Object.defineProperty(record, PARSED_RECORD, { value: parsed });
-  } else record[DATE] = NaN;
+  }
+  else {
+    record[DATE] = NaN;
+  }
 
   return record;
 }
-
 
 const DATE = Constants.DATE_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;
@@ -130,10 +143,9 @@ const ORIGINAL_RECORD = Constants.ORIGINAL_RECORD;
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
-
 module.exports = {
   formatRecords,
   isValidRecord,
   mergeUntilFirstFullRecord,
-  toRecordStream,
+  toRecordStream
 };

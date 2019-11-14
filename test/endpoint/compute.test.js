@@ -7,7 +7,6 @@ const Helpers = require('../helpers');
 const Is = require('../helpers/is');
 const Stream = require('../../src/stream');
 
-
 test.before(require('dotenv').config);
 
 test.beforeEach((t) => Helpers
@@ -23,7 +22,6 @@ test.beforeEach((t) => Helpers
   }));
 
 test.afterEach.always(Helpers.destroyEndpointContext);
-
 
 test('fails computing predictions with invalid parameters', (t) => {
   const context = t.context;
@@ -51,7 +49,7 @@ test('computes predictions', (t) => {
     .all([
       [TEST_RECORDS.map((record) => ({ ...record, [LOAD]: undefined }))],
       [Helpers.streamify(TEST_RECORDS)],
-      [path.join(__dirname, '../helpers/data/records.csv'), { import: { from: INDEX } }],
+      [path.join(__dirname, '../helpers/data/records.csv'), { import: { from: INDEX } }]
     ].map((parameters) => endpoint.computePredictions(...parameters)))
     .then((values) => {
       const predictions = values[0];
@@ -59,7 +57,8 @@ test('computes predictions', (t) => {
       t.true(Is.predictions(predictions));
       t.is(predictions.length, TEST_RECORDS.length);
 
-      values.slice(1).forEach((current) => t.deepEqual(predictions, current));
+      values.slice(1)
+        .forEach((current) => t.deepEqual(predictions, current));
       t.snapshot(predictions);
     }));
 });
@@ -88,7 +87,7 @@ test('computes predictions given a model', (t) => {
     .retrievePredictiveModel()
     .then((model) => Promise.all([
       endpoint.computePredictions(TEST_RECORDS),
-      endpoint.computePredictions(TEST_RECORDS, null, model),
+      endpoint.computePredictions(TEST_RECORDS, null, model)
     ]))
     .then((values) => {
       const predictions = values[0];
@@ -96,7 +95,8 @@ test('computes predictions given a model', (t) => {
       t.true(Is.predictions(predictions));
       t.is(predictions.length, TEST_RECORDS.length);
 
-      values.slice(1).forEach((current) => t.deepEqual(predictions, current));
+      values.slice(1)
+        .forEach((current) => t.deepEqual(predictions, current));
       t.snapshot(predictions);
     }));
 });
@@ -131,7 +131,7 @@ test('merges states with the same date', (t) => {
   return t.notThrowsAsync(Promise
     .all([
       endpoint.computePredictions(states),
-      endpoint.computePredictions(TEST_RECORDS),
+      endpoint.computePredictions(TEST_RECORDS)
     ])
     .then((results) => {
       results.forEach((predictions) => t.true(Is.predictions(predictions)));
@@ -189,7 +189,7 @@ test('computes anomalies', (t) => {
     .all([
       [TEST_RECORDS, { minConfidence: undefined, minAbsoluteDifference: undefined, minSigmaDifference: undefined }],
       [Helpers.streamify(TEST_RECORDS)],
-      [path.join(__dirname, '../helpers/data/records.csv'), { import: { from: INDEX } }],
+      [path.join(__dirname, '../helpers/data/records.csv'), { import: { from: INDEX } }]
     ].map((parameters) => endpoint.computeAnomalies(...parameters)))
     .then((values) => {
       const anomalies = values[0];
@@ -197,7 +197,8 @@ test('computes anomalies', (t) => {
       t.true(Is.anomalies(anomalies));
       t.is(anomalies.recordsCount, TEST_RECORDS.length);
 
-      values.slice(1).forEach((current) => t.deepEqual(anomalies, current));
+      values.slice(1)
+        .forEach((current) => t.deepEqual(anomalies, current));
       t.snapshot(anomalies);
     }));
 });
@@ -210,7 +211,7 @@ test('computes anomalies given a model', (t) => {
     .retrievePredictiveModel()
     .then((model) => Promise.all([
       [TEST_RECORDS],
-      [TEST_RECORDS, null, model],
+      [TEST_RECORDS, null, model]
     ].map((parameters) => endpoint.computeAnomalies(...parameters))))
     .then((values) => {
       const anomalies = values[0];
@@ -218,7 +219,8 @@ test('computes anomalies given a model', (t) => {
       t.true(Is.anomalies(anomalies));
       t.is(anomalies.recordsCount, TEST_RECORDS.length);
 
-      values.slice(1).forEach((current) => t.deepEqual(anomalies, current));
+      values.slice(1)
+        .forEach((current) => t.deepEqual(anomalies, current));
       t.snapshot(anomalies);
     }));
 });
@@ -232,7 +234,7 @@ test('computes anomalies from a window', (t) => {
     .then(() => endpoint.retrievePredictiveModel(WINDOW.from))
     .then((model) => Promise.all([
       [WINDOW],
-      [WINDOW_RECORDS, null, model],
+      [WINDOW_RECORDS, null, model]
     ].map((parameters) => endpoint.computeAnomalies(...parameters))))
     .then((values) => {
       const anomalies = values[0];
@@ -240,7 +242,8 @@ test('computes anomalies from a window', (t) => {
       t.true(Is.anomalies(anomalies));
       t.is(anomalies.recordsCount, WINDOW_LENGTH);
 
-      values.slice(1).forEach((current) => t.deepEqual(anomalies, current));
+      values.slice(1)
+        .forEach((current) => t.deepEqual(anomalies, current));
       t.snapshot(anomalies);
     }));
 });
@@ -254,7 +257,7 @@ test('filters out anomalies given custom thresholds', (t) => {
       [[], {}],
       [TEST_RECORDS, { minConfidence: 1 }],
       [TEST_RECORDS, { minAbsoluteDifference: Infinity }],
-      [TEST_RECORDS, { minSigmaDifference: Infinity }],
+      [TEST_RECORDS, { minSigmaDifference: Infinity }]
     ].map((parameters) => endpoint.computeAnomalies(...parameters)))
     .then((values) => values.forEach((anomalies) => {
       t.true(Is.anomalies(anomalies));
@@ -293,7 +296,7 @@ test('computes a report', (t) => {
     .all([
       [TEST_RECORDS],
       [Helpers.streamify(TEST_RECORDS)],
-      [path.join(__dirname, '../helpers/data/records.csv'), { import: { from: INDEX } }],
+      [path.join(__dirname, '../helpers/data/records.csv'), { import: { from: INDEX } }]
     ].map((parameters) => endpoint.computeReport(...parameters)))
     .then((values) => {
       const report = values[0];
@@ -301,7 +304,8 @@ test('computes a report', (t) => {
       t.true(Is.report(report));
       t.is(report.recordsCount, TEST_RECORDS.length);
 
-      values.slice(1).forEach((current) => t.deepEqual(report, current));
+      values.slice(1)
+        .forEach((current) => t.deepEqual(report, current));
       t.snapshot(report);
     }));
 });
@@ -314,7 +318,7 @@ test('computes a report given a model', (t) => {
     .retrievePredictiveModel()
     .then((model) => Promise.all([
       [TEST_RECORDS],
-      [TEST_RECORDS, null, model],
+      [TEST_RECORDS, null, model]
     ].map((parameters) => endpoint.computeReport(...parameters))))
     .then((values) => {
       const report = values[0];
@@ -322,7 +326,8 @@ test('computes a report given a model', (t) => {
       t.true(Is.report(report));
       t.is(report.recordsCount, TEST_RECORDS.length);
 
-      values.slice(1).forEach((current) => t.deepEqual(report, current));
+      values.slice(1)
+        .forEach((current) => t.deepEqual(report, current));
       t.snapshot(report);
     }));
 });
@@ -336,7 +341,7 @@ test('computes a report from a window', (t) => {
     .then(() => endpoint.retrievePredictiveModel(WINDOW.from))
     .then((model) => Promise.all([
       [WINDOW],
-      [WINDOW_RECORDS, null, model],
+      [WINDOW_RECORDS, null, model]
     ].map((parameters) => endpoint.computeReport(...parameters))))
     .then((values) => {
       const report = values[0];
@@ -344,7 +349,8 @@ test('computes a report from a window', (t) => {
       t.true(Is.report(report));
       t.is(report.recordsCount, WINDOW_LENGTH);
 
-      values.slice(1).forEach((current) => t.deepEqual(report, current));
+      values.slice(1)
+        .forEach((current) => t.deepEqual(report, current));
       t.snapshot(report);
     }));
 });
@@ -358,15 +364,15 @@ test('computes a report with no values', (t) => {
       [[], {}],
       [TEST_RECORDS, { minConfidence: 1 }],
       [TEST_RECORDS, { minAbsoluteDifference: Infinity }],
-      [TEST_RECORDS, { minSigmaDifference: Infinity }],
+      [TEST_RECORDS, { minSigmaDifference: Infinity }]
     ].map((parameters) => endpoint.computeReport(...parameters)))
     .then((values) => values.forEach((report) => {
       t.true(Is.report(report));
       t.falsy(report.values.length);
-      t.true(Object.values(report.average).every(isNaN));
+      t.true(Object.values(report.average)
+        .every(isNaN));
     })));
 });
-
 
 const DATE = Constants.DATE_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;

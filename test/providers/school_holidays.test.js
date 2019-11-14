@@ -7,10 +7,8 @@ const Helpers = require('../helpers');
 const Provider = require('../../src/provider');
 const SchoolHolidaysProvider = require('../../src/providers/school_holidays');
 
-
 test.beforeEach((t) => Helpers.createProviderContext(t, SchoolHolidaysProvider, { country: 'fr' }));
 test.afterEach.always(Helpers.destroyProviderContext);
-
 
 test('fails initializing the provider with invalid options', (t) => {
   return Promise.all(INVALID_OBJECTS
@@ -103,14 +101,14 @@ test('closes the provider', (t) => {
   return t.notThrowsAsync(t.context.provider.close());
 });
 
-
 function isHoliday(record, holidays) {
   const date = record[PARSED_RECORD][DATE];
 
-  return holidays.some((holidays) => date > DateTime.local(...holidays[0]).endOf('day')
-    && date < DateTime.local(...holidays[1]).startOf('day'));
+  return holidays.some((holidays) => date > DateTime.local(...holidays[0])
+    .endOf('day')
+    && date < DateTime.local(...holidays[1])
+      .startOf('day'));
 }
-
 
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const DATE = Constants.DATE_FEATURE;
@@ -123,7 +121,7 @@ const PARIS_HOLIDAYS = [
   [[2017, 12, 23], [2018, 1, 8]],
   [[2018, 2, 17], [2018, 3, 5]],
   [[2018, 4, 14], [2018, 4, 30]],
-  [[2018, 7, 7], [2018, 7, 31]],
+  [[2018, 7, 7], [2018, 7, 31]]
 ];
 const CAEN_HOLIDAYS = [
   [[2017, 7, 31], [2017, 9, 4]],
@@ -131,7 +129,7 @@ const CAEN_HOLIDAYS = [
   [[2017, 12, 23], [2018, 1, 8]],
   [[2018, 2, 24], [2018, 3, 12]],
   [[2018, 4, 25], [2018, 5, 14]],
-  [[2018, 7, 7], [2018, 7, 31]],
+  [[2018, 7, 7], [2018, 7, 31]]
 ];
 const LILLE_HOLIDAYS = [
   [[2017, 7, 31], [2017, 9, 4]],
@@ -139,12 +137,14 @@ const LILLE_HOLIDAYS = [
   [[2017, 12, 23], [2018, 1, 8]],
   [[2018, 2, 24], [2018, 3, 12]],
   [[2018, 4, 21], [2018, 5, 7]],
-  [[2018, 7, 7], [2018, 7, 31]],
+  [[2018, 7, 7], [2018, 7, 31]]
 ];
 const DateTime = luxon.DateTime;
 
-const WINDOW_START = DateTime.local(...PARIS_HOLIDAYS[0][0]).plus({ days: 1 });
+const WINDOW_START = DateTime.local(...PARIS_HOLIDAYS[0][0])
+  .plus({ days: 1 });
 const WINDOW_END = DateTime.local(...PARIS_HOLIDAYS[PARIS_HOLIDAYS.length - 1][1]);
-const WINDOW = new Array(WINDOW_END.diff(WINDOW_START).as('days'))
+const WINDOW = new Array(WINDOW_END.diff(WINDOW_START)
+  .as('days'))
   .fill(null)
   .map((_, days) => ({ [DATE]: WINDOW_START.plus({ days }), [LOAD]: 0 }));

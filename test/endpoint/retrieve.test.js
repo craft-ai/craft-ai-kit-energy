@@ -5,11 +5,9 @@ const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
 const Utils = require('../../src/utils');
 
-
 test.before(require('dotenv').config);
 test.beforeEach(Helpers.createEndpointContext);
 test.afterEach.always(Helpers.destroyEndpointContext);
-
 
 test('fails retrieving the records\' history of an endpoint with invalid paramaters', (t) => {
   const context = t.context;
@@ -49,7 +47,7 @@ test('retrieves the records\' history of an endpoint', (t) => {
       endpoint.retrieveRecords(),
       endpoint.retrieveRecords(start),
       endpoint.retrieveRecords(null, end),
-      endpoint.retrieveRecords(start, end),
+      endpoint.retrieveRecords(start, end)
     ]))
     .then((values) => {
       values.forEach((history) => t.true(Array.isArray(history)));
@@ -100,7 +98,7 @@ test('retrieves the predictive model of an endpoint', (t) => {
       .update(RECORDS)
       .then(() => Promise.all([
         endpoint.retrievePredictiveModel(),
-        endpoint.retrievePredictiveModel(RECORDS[RECORDS.length - 1][DATE]),
+        endpoint.retrievePredictiveModel(RECORDS[RECORDS.length - 1][DATE])
       ])))
     .then((values) => {
       values.forEach((predictiveModel) => t.true(Helpers.isPredictiveModel(predictiveModel)));
@@ -108,7 +106,6 @@ test('retrieves the predictive model of an endpoint', (t) => {
       t.snapshot(values[0]);
     }));
 });
-
 
 const DATE = Constants.DATE_FEATURE;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;

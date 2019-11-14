@@ -7,7 +7,6 @@ const Constants = require('../../src/constants');
 const Helpers = require('../helpers');
 const Stream = require('../../src/stream');
 
-
 test('properly formats timezone', (t) => {
   const date = '2017-07-30T02:30:00';
 
@@ -16,9 +15,10 @@ test('properly formats timezone', (t) => {
       // with timezone as a feature
       ZONES.map((zone) => Common.toRecordStream([{ date, [TIMEZONE]: zone }], {}, false)),
       // with timezone as an option
-      ZONES.map((zone) => Common.toRecordStream([{ date }], {}, false, zone)),
+      ZONES.map((zone) => Common.toRecordStream([{ date }], {}, false, zone))
     ])
-    .chain((streams) => most.mergeArray(streams).thru(buffer()))
+    .chain((streams) => most.mergeArray(streams)
+      .thru(buffer()))
     .thru(Stream.toBuffer)
     .then((result) => {
       const records = result[0];

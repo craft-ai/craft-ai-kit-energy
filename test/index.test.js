@@ -3,7 +3,6 @@ const test = require('ava');
 const EnergyKit = require('../src/index');
 const Helpers = require('./helpers');
 
-
 test.before(require('dotenv').config);
 test.afterEach.always((t) => process.env.CRAFT_AI_TOKEN = t.context.token);
 
@@ -11,7 +10,6 @@ test.beforeEach((t) => {
   t.context = { token: process.env.CRAFT_AI_TOKEN || process.env.CRAFT_TOKEN };
   delete process.env.CRAFT_TOKEN;
 });
-
 
 // Must be serial as it has side effects on `process.env`
 test.serial('fails initializing the kit with invalid configurations', async(t) => {
@@ -37,7 +35,6 @@ test.serial('fails initializing the kit with invalid configurations', async(t) =
     .concat(INVALID_SECRETS.map((secret) => EnergyKit.initialize({ token: t.context.token, secret })))
     .concat(INVALID_ZONES.map((zone) => EnergyKit.initialize({ token: t.context.token, zone })))
     .map((promise) => t.throwsAsync(promise)));
-
 });
 
 test('initializes the kit', async(t) => {
@@ -49,7 +46,7 @@ test('initializes the kit', async(t) => {
     t.notThrowsAsync(promise),
     t.notThrowsAsync(EnergyKit.initialize({ secret: SECRET })),
     t.notThrowsAsync(EnergyKit.initialize({ token: t.context.token })),
-    t.notThrowsAsync(EnergyKit.initialize({ token: t.context.token, secret: SECRET })),
+    t.notThrowsAsync(EnergyKit.initialize({ token: t.context.token, secret: SECRET }))
   ]);
 
   const kit = await promise;
@@ -61,7 +58,6 @@ test('initializes the kit', async(t) => {
   t.is(typeof kit.loadEndpoint, 'function');
   t.is(typeof kit.close, 'function');
 });
-
 
 const INVALID_ZONES = Helpers.INVALID_ZONES;
 const INVALID_OBJECTS = Helpers.INVALID_OBJECTS;

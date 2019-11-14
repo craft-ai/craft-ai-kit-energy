@@ -6,7 +6,6 @@ const Constants = require('../constants');
 const Provider = require('../provider');
 const Utils = require('../utils');
 
-
 async function update(records, options) {
   this.debug('updating');
 
@@ -19,9 +18,11 @@ async function update(records, options) {
   let stream = Common.toRecordStream(records, options && options.import, true, this.metadata.zone);
   let failed = false;
 
-  if (energy.period) stream = energy.origin
-    ? stream.thru(convertAccumulatedEnergyToLoad.bind(null, energy))
-    : stream.tap(convertEnergyToLoad.bind(null, energy.hours));
+  if (energy.period) {
+    stream = energy.origin
+      ? stream.thru(convertAccumulatedEnergyToLoad.bind(null, energy))
+      : stream.tap(convertEnergyToLoad.bind(null, energy.hours));
+  }
 
   return stream
     // Extend the record with providers
@@ -46,11 +47,15 @@ async function update(records, options) {
         return history;
       })
       .catch(/* istanbul ignore next */(error) => {
-        if (!failed) throw error;
+        if (!failed) {
+          throw error;
+        }
       })))
     // Update agent's local state
     .reduce((result, history) => {
-      if (!result.start) result.start = history[0].timestamp;
+      if (!result.start) {
+        result.start = history[0].timestamp;
+      }
 
       result.end = history[history.length - 1].timestamp;
 
@@ -66,7 +71,6 @@ async function update(records, options) {
     });
 }
 
-
 function convertAccumulatedEnergyToLoad(energy, records) {
   const period = energy.period;
   const origin = energy.origin;
@@ -80,16 +84,25 @@ function convertAccumulatedEnergyToLoad(energy, records) {
       const previous = seed.record;
       const hours = (record[DATE] - previous[DATE]) / 3600;
 
-      if (record[LOAD] === undefined) record[LOAD] = (record[ENERGY] - previous[ENERGY]) / hours;
-      else record[ENERGY] = previous[ENERGY] + record[LOAD] * hours;
-    } else {
+      if (record[LOAD] === undefined) {
+        record[LOAD] = (record[ENERGY] - previous[ENERGY]) / hours;
+      }
+      else {
+        record[ENERGY] = previous[ENERGY] + record[LOAD] * hours;
+      }
+    }
+    else {
       const interval = Utils.getDateWindow(currentDate, origin, period);
       const hours = currentDate.diff(interval[0], 'hours').hours;
 
       seed.date = interval[1];
 
-      if (record[LOAD] === undefined) record[LOAD] = record[ENERGY] / hours;
-      else record[ENERGY] = record[LOAD] * hours;
+      if (record[LOAD] === undefined) {
+        record[LOAD] = record[ENERGY] / hours;
+      }
+      else {
+        record[ENERGY] = record[LOAD] * hours;
+      }
     }
 
     seed.record = { ...record };
@@ -99,7 +112,9 @@ function convertAccumulatedEnergyToLoad(energy, records) {
 }
 
 function convertEnergyToLoad(hours, record) {
-  if (record[LOAD] !== undefined) return;
+  if (record[LOAD] !== undefined) {
+    return;
+  }
 
   record[LOAD] = record[ENERGY] / hours;
 }
@@ -108,11 +123,9 @@ function ignoreOldRecords(lastSavedRecordDate, records) {
   return records.skipWhile((record) => record[DATE] <= lastSavedRecordDate);
 }
 
-
 const DATE = Constants.DATE_FEATURE;
 const ENERGY = Constants.ENERGY_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;
 const PARSED_RECORD = Constants.PARSED_RECORD;
-
 
 module.exports = update;

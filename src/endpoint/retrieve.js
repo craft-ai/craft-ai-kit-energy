@@ -4,12 +4,12 @@ const luxon = require('luxon');
 const Constants = require('../constants');
 const Utils = require('../utils');
 
-
 async function retrieveRecords(from, to, retrieveTimezone = false) {
   this.debug('retrieving records');
 
-  if (typeof retrieveTimezone !== 'boolean')
+  if (typeof retrieveTimezone !== 'boolean') {
     throw new TypeError(`The "retrieveTimezone" argument must be a "boolean". Received "${typeof retrieveTimezone}".`);
+  }
 
   const client = this.kit.client;
   const generated = this.generated;
@@ -19,10 +19,12 @@ async function retrieveRecords(from, to, retrieveTimezone = false) {
   return client
     .getAgentStateHistory(this.agentId, parsedFrom, parsedTo)
     .then((history) => {
-      if (parsedFrom === undefined && parsedTo === undefined)
+      if (parsedFrom === undefined && parsedTo === undefined) {
         this.debug('retrieved all %d records', history.length);
-      else if (parsedFrom !== undefined && parsedTo !== undefined)
+      }
+      else if (parsedFrom !== undefined && parsedTo !== undefined) {
         this.debug('retrieved %d records from %s to %s', history.length, new Date(parsedFrom * 1000), new Date(parsedTo * 1000));
+      }
       else {
         const date = parsedFrom || parsedTo;
 
@@ -31,11 +33,16 @@ async function retrieveRecords(from, to, retrieveTimezone = false) {
 
       return history.map((operation) => {
         Object.assign(operation, operation.sample);
-        operation[DATE] = DateTime.fromMillis(operation[TIMESTAMP] * 1000).toJSDate();
+        operation[DATE] = DateTime.fromMillis(operation[TIMESTAMP] * 1000)
+          .toJSDate();
         generated.forEach((key) => delete operation[key]);
 
-        if (retrieveTimezone === true) operation[TIMEZONE] = `utc${operation[TIMEZONE]}`;
-        else delete operation[TIMEZONE];
+        if (retrieveTimezone === true) {
+          operation[TIMEZONE] = `utc${operation[TIMEZONE]}`;
+        }
+        else {
+          delete operation[TIMEZONE];
+        }
 
         delete operation[TIMESTAMP];
         delete operation.sample;
@@ -69,15 +76,13 @@ async function retrievePredictiveModel(modelDate) {
     });
 }
 
-
 const DATE = Constants.DATE_FEATURE;
 const TIMESTAMP = Constants.TIMESTAMP_FEATURE;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
 const DateTime = luxon.DateTime;
 
-
 module.exports = {
   records: retrieveRecords,
-  predictiveModel: retrievePredictiveModel,
+  predictiveModel: retrievePredictiveModel
 };

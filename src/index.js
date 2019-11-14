@@ -13,35 +13,45 @@ async function initialize(configuration = {}) {
 
   log('initializing');
 
-  if (configuration === null || typeof configuration !== 'object')
+  if (configuration === null || typeof configuration !== 'object') {
     throw new TypeError(`The kit's configuration must be an "object". Received "${configuration === null ? 'null' : typeof configuration}".`);
+  }
 
   const token = configuration.token || process.env.CRAFT_AI_TOKEN || process.env.CRAFT_TOKEN;
   const secret = configuration.secret;
   const zone = configuration.zone;
 
-  if (!token)
+  if (!token) {
     throw new Error('A craft ai access token is required to initialize the kit. The token must be provided either as part of the kit\'s configuration or through the environment variable "CRAFT_AI_TOKEN", but none was found.');
-  if (typeof token !== 'string')
+  }
+  if (typeof token !== 'string') {
     throw new TypeError(`The "token" property of the kit's configuration must be a "string". Received "${typeof token}".`);
+  }
 
   configuration.token = token;
 
   /* istanbul ignore else */
   if (secret !== undefined) {
-    if (typeof secret !== 'string')
+    if (typeof secret !== 'string') {
       throw new TypeError(`The "secret" property of the kit's configuration must be a "string". Received "${typeof secret}".`);
-    if (!secret)
+    }
+    if (!secret) {
       throw new RangeError('The "secret" property of the kit\'s configuration must be a non-empty "string".');
+    }
 
     configuration.namespace = uuid(secret, ROOT_NAMESPACE);
-  } else if (process.env.NODE_ENV !== 'test') console.warn('WARNING: No secret was defined in the kit\'s configuration.');
+  }
+  else if (process.env.NODE_ENV !== 'test') {
+    console.warn('WARNING: No secret was defined in the kit\'s configuration.');
+  }
 
   if (zone !== undefined) {
-    if (Utils.isNotString(zone))
+    if (Utils.isNotString(zone)) {
       throw new TypeError(`The "zone" property of the kit's configuration must be a "string". Received "${typeof zone}".`);
-    if (!Utils.checkZone(zone))
+    }
+    if (!Utils.checkZone(zone)) {
       throw new RangeError('The "zone" property of the kit\'s configuration must be a valid IANA zone or a fixed-offset name.');
+    }
   }
 
   const providers = configuration.providers;
@@ -49,19 +59,23 @@ async function initialize(configuration = {}) {
   const kit = Object.create(Kit, {
     configuration: { value: configuration },
     debug: { value: log },
-    client: { value: client },
+    client: { value: client }
   });
 
   log('created and linked to the project "%s/%s"', client.cfg.owner, client.cfg.project);
 
   if (providers !== undefined) {
-    if (!Array.isArray(providers))
+    if (!Array.isArray(providers)) {
       throw new TypeError(`The "providers" property of the kit's configuration must be an "array". Received "${typeof providers}".`);
+    }
 
     await Promise
       .all(providers.map(Provider.initialize))
       .then((providers) => configuration.providers = providers);
-  } else configuration.providers = [];
+  }
+  else {
+    configuration.providers = [];
+  }
 
   log('initialized');
 
@@ -72,9 +86,9 @@ function createClient(token, bulkSize) {
   // TODO: proper error handling
   return craftai.createClient({
     token,
-    operationsChunksSize: bulkSize,
+    operationsChunksSize: bulkSize
   });
-} 
+}
 
 const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
 const ROOT_NAMESPACE = uuid.DNS;
@@ -83,6 +97,6 @@ module.exports = {
   craftai,
   initialize,
   import: {
-    csv: CsvParser.stream,
+    csv: CsvParser.stream
   }
 };

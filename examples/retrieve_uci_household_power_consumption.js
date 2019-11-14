@@ -1,4 +1,5 @@
-require('dotenv').config();
+require('dotenv')
+  .config();
 
 const csv = require('csv-parse');
 const csvStringify = require('csv-stringify');
@@ -16,7 +17,6 @@ log.enabled = true;
 const DATASET_URL = 'https://archive.ics.uci.edu/ml/machine-learning-databases/00235/household_power_consumption.zip';
 const DATASET_FILENAME = 'household_power_consumption.txt';
 const PREPARED_DATASET_PATH = path.join(__dirname, './data/uci_household_power_consumption.csv');
-
 
 // ----
 // This script downloads and format the UCI "Individual household electric power consumption Data Set"
@@ -39,7 +39,8 @@ https.get(DATASET_URL, (response) => {
           entry
             .on('data', (chunk) => this.push(chunk))
             .on('finish', next);
-        } else {
+        }
+        else {
           entry.autodrain();
           next();
         }

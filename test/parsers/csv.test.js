@@ -5,7 +5,6 @@ const CsvHelper = require('../../src/parsers/csv');
 const Helpers = require('../helpers');
 const Stream = require('../../src/stream');
 
-
 test('fails streaming a CSV file with invalid parameters', (t) => {
   return Promise
     .all([
@@ -24,8 +23,9 @@ test('fails streaming a CSV file with invalid parameters', (t) => {
       [[FILEPATH, { escape: 'string' }], RangeError],
       [[FILEPATH, { columns: 'not_an_array' }], TypeError],
       [[FILEPATH, { columns: ['not_only_strings', []] }], TypeError],
-      [[FILEPATH, { columns: ['not_matching_column_number'] }], Error],
-    ].map((parameters) => t.throwsAsync(CsvHelper.stream(...parameters[0]).drain(), parameters[1])))
+      [[FILEPATH, { columns: ['not_matching_column_number'] }], Error]
+    ].map((parameters) => t.throwsAsync(CsvHelper.stream(...parameters[0])
+      .drain(), parameters[1])))
     .then((errors) => t.snapshot(errors));
 });
 
@@ -49,21 +49,20 @@ test('streams a CSV file written in a custom format', (t) => {
       delimiter: ';',
       quote: '.',
       escape: '\\',
-      columns: ['date', 'index'],
+      columns: ['date', 'index']
     })
     .thru(Stream.toBuffer)
     .then((records) => t.snapshot(records));
 });
 
-
 function parseRecords(records) {
-  return records.filter((record) => record.load).map((record) => {
-    record.load = Number(record.load.replace(',', '.'));
+  return records.filter((record) => record.load)
+    .map((record) => {
+      record.load = Number(record.load.replace(',', '.'));
 
-    return record;
-  });
+      return record;
+    });
 }
-
 
 const DATA_DIRECTORY = path.join(__dirname, '../helpers/data');
 const FILEPATH = path.join(DATA_DIRECTORY, './records.csv');

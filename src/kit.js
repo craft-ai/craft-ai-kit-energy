@@ -32,31 +32,38 @@ async function loadEndpoint(definition, resetAgent = false) {
   **********
   An object endpoint
   */
-  if (definition === null || typeof definition !== 'object')
+  if (definition === null || typeof definition !== 'object') {
     throw new TypeError(`The endpoint's definition must be an "object". Received "${definition === null ? 'null' : typeof definition}".`);
+  }
 
   const id = definition.id;
   const log = debug(`${DEBUG_PREFIX}:endpoint:${id}`);
 
   log('loading');
 
-  if (typeof id !== 'string')
+  if (typeof id !== 'string') {
     throw new TypeError(`The "id" property of the endpoint's definition must be a "string". Received "${id === null ? 'null' : typeof id}".`);
+  }
 
   const metadata = definition.metadata;
 
   if (metadata !== undefined) {
-    if (metadata === null || typeof metadata !== 'object')
+    if (metadata === null || typeof metadata !== 'object') {
       throw new TypeError(`The "metadata" property of the endpoint's definition must be an "object". Received "${metadata === null ? 'null' : typeof metadata}"`);
+    }
 
     const zone = metadata.zone;
 
-    if (zone === undefined) metadata.zone = this.configuration.zone;
+    if (zone === undefined) {
+      metadata.zone = this.configuration.zone;
+    }
     else {
-      if (Utils.isNotString(zone))
+      if (Utils.isNotString(zone)) {
         throw new TypeError(`The "zone" property of the endpoint's configuration must be a "string". Received "${typeof zone}".`);
-      if (!Utils.checkZone(zone))
+      }
+      if (!Utils.checkZone(zone)) {
         throw new RangeError('The "zone" property of the endpoint\'s configuration must be a valid IANA zone or a fixed-offset name.');
+      }
     }
   }
 
@@ -83,7 +90,7 @@ async function loadEndpoint(definition, resetAgent = false) {
         kit: { value: this },
         agentId: { value: agentId, enumerable: true },
         id: { value: id, enumerable: true },
-        metadata: { value: metadata || { zone: this.configuration.zone }, enumerable: true },
+        metadata: { value: metadata || { zone: this.configuration.zone }, enumerable: true }
       });
     });
 }
@@ -121,32 +128,38 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
   */
   log('generating the agent\'s configuration');
 
-  if (learning === null || typeof learning !== 'object')
+  if (learning === null || typeof learning !== 'object') {
     throw new TypeError(`The "learning" property of the endpoint's definition must be an "object". Received "${ learning === null ? 'null' : typeof learning }".`);
+  }
 
   const maxTreeDepth = learning.maxTreeDepth;
-  if (maxTreeDepth !== undefined && typeof maxTreeDepth !== 'number')
+  if (maxTreeDepth !== undefined && typeof maxTreeDepth !== 'number') {
     throw new TypeError(`The "maxTreeDepth" property of the endpoint's learning definition must be a "number". Received "${maxTreeDepth === null ? 'null' : typeof maxTreeDepth}".`);
+  }
 
   const maxRecords = learning.maxRecords;
 
-  if (maxRecords !== undefined && typeof maxRecords !== 'number')
+  if (maxRecords !== undefined && typeof maxRecords !== 'number') {
     throw new TypeError(`The "maxRecords" property of the endpoint's learning definition must be a "number". Received "${maxRecords === null ? 'null' : typeof maxRecords}".`);
+  }
 
   const maxRecordAge = learning.maxRecordAge;
 
-  if (maxRecordAge !== undefined && typeof maxRecordAge !== 'number')
+  if (maxRecordAge !== undefined && typeof maxRecordAge !== 'number') {
     throw new TypeError(`The "maxRecordAge" property of the endpoint's learning definition must be a "number". Received "${maxRecordAge === null ? 'null' : typeof maxRecordAge}".`);
+  }
 
   const properties = learning.properties;
 
-  if (properties !== undefined && (properties === null || typeof properties !== 'object'))
+  if (properties !== undefined && (properties === null || typeof properties !== 'object')) {
     throw new TypeError(`The "properties" property of the endpoint's learning definition must be an "object". Received "${properties === null ? 'null' : typeof properties}".`);
+  }
 
   const advancedConfiguration = learning.advancedConfiguration;
 
-  if (advancedConfiguration !== undefined && (advancedConfiguration === null || typeof advancedConfiguration !== 'object'))
+  if (advancedConfiguration !== undefined && (advancedConfiguration === null || typeof advancedConfiguration !== 'object')) {
     throw new TypeError(`The "options" property of the endpoint's learning definition must be an "object". Received "${advancedConfiguration === null ? 'null' : typeof advancedConfiguration}".`);
+  }
 
   return Provider.extendConfiguration(providers, {
     time: { type: 'time_of_day' },
@@ -155,17 +168,18 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
     ...properties,
     [TIMEZONE]: { type: 'timezone' },
     [LOAD]: { type: 'continuous' }
-  }).then((context) => {
-    return {
-      context,
-      output: ['load'],
-      operations_as_events: true,
-      tree_max_depth: maxTreeDepth || 6,
-      tree_max_operations: maxRecords || 50000,
-      learning_period: maxRecordAge || 365 * 24 * 60 * 60,
-      ...advancedConfiguration
-    };
-  });
+  })
+    .then((context) => {
+      return {
+        context,
+        output: ['load'],
+        operations_as_events: true,
+        tree_max_depth: maxTreeDepth || 6,
+        tree_max_operations: maxRecords || 50000,
+        learning_period: maxRecordAge || 365 * 24 * 60 * 60,
+        ...advancedConfiguration
+      };
+    });
 }
 
 async function retrieveAgent(log, client, agentId, agentConfiguration, resetAgent) {
@@ -189,8 +203,9 @@ async function retrieveAgent(log, client, agentId, agentConfiguration, resetAgen
   */
   if (resetAgent) {
     /* istanbul ignore if */
-    if (process.env.NODE_ENV === 'production')
+    if (process.env.NODE_ENV === 'production') {
       console.warn('WARNING: The endpoint\'s agent is being forced to be resetted.');
+    }
 
     return client
       .deleteAgent(agentId)
@@ -278,16 +293,21 @@ function parseEnergyConfiguration(value) {
   */
   const energy = {};
 
-  if (value === undefined) return energy;
-  if (value === null || typeof value !== 'object')
+  if (value === undefined) {
+    return energy;
+  }
+  if (value === null || typeof value !== 'object') {
     throw new TypeError(`The "energy" property of the endpoint's definition must be an "object". Received "${value === null ? 'null' : typeof value}".`);
+  }
 
   if (value.period !== undefined) {
-    if (typeof value.period !== 'number')
+    if (typeof value.period !== 'number') {
       throw new TypeError(`The "period" property of the endpoint's energy definition must be an "number". Received "${typeof value.period}".`);
+    }
 
-    if (value.period <= 0)
+    if (value.period <= 0) {
       throw new RangeError(`The "period" property of the endpoint's energy definition must represent a strictly positive duration. Received "${value.period}".`);
+    }
 
     energy.period = value.period * 1000;
     energy.hours = value.period / 3600;
@@ -296,11 +316,13 @@ function parseEnergyConfiguration(value) {
   if (value.origin !== undefined) {
     const origin = Utils.parseDate(value.origin);
 
-    if (!origin.isValid)
+    if (!origin.isValid) {
       throw new RangeError(`The "origin" property of the endpoint's energy definition must be a valid date definition. Received "${JSON.stringify(value.origin)}". Reason: ${origin.invalidReason}.`);
+    }
 
-    if (value.period === undefined)
+    if (value.period === undefined) {
       throw new Error('The "origin" property of the endpoint\'s energy definition cannot be defined without a "period" property.');
+    }
 
     energy.origin = origin;
   }
@@ -314,5 +336,5 @@ const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
 module.exports = {
   loadEndpoint,
-  close,
+  close
 };

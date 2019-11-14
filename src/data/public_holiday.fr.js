@@ -22,7 +22,7 @@ const fixed = [
   // Novembre : La Toussaint, Armistice
   [1, 11],
   // Decembre : Noël
-  [25],
+  [25]
 ];
 
 // Pâques, Lundi de Pâques, Ascension, Pentecôte, Lundi de Pentecôte
@@ -95,7 +95,7 @@ const regions = [
     {
       fixed: {
         // Abolition de l'esclavage
-        5: [27],
+        5: [27]
       }
     }
   ],
@@ -132,12 +132,11 @@ const regions = [
         9: [24]
       }
     }
-  ],
+  ]
 ];
-
 
 module.exports = {
   fixed,
   easterOffseted,
-  regions,
+  regions
 };
