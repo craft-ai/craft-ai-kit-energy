@@ -57,7 +57,7 @@
     "ava": "latest",
     "csv-stringify": "latest",
     "dotenv": "latest",
-    "eslint": "latest",
+    "eslint": "5.16.0",
     "eslint-config-craft-ai": "^3.0.3",
     "nock": "latest",
     "nyc": "latest",
