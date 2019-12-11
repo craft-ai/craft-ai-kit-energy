@@ -6,39 +6,44 @@ const isFunction = require('lodash.isfunction');
 const Constants = require('./constants');
 const Utils = require('./utils');
 
-async function close(providers) {
-  /*
-  Close a list of providers.
+/**
+ * @typedef Provider
+ * @type {object}
+ * @property {function} initialize
+ * @property {function} extendConfiguration Add new feature in the context configuration
+ * @property {function} extendRecord Add new feature in current context ops
+ * @property {function} close
+ */
 
-  *************
-  **Arguments**
-  *************
-  providers: Array of providers.
-  */
+/**
+ * @typedef Instance
+ * @type {object}
+ * @property {string} [name] name of the provider. Default is the string version of index
+ * @property {object} [options] Object optional: contain the options for the provider
+ * @property {Provider} provider Object that is a provider (isProvider is true).
+ */
+
+/**
+ * Close a list of providers
+ *
+ * @param {Array<Provider>} providers
+ */
+async function close(providers) {
   return Promise.all(providers.map(async(provider) => {
     await provider.close();
     provider.log('closed');
   }));
 }
 
+/**
+ * Initialize a provider.
+ *
+ * @param {Instance} instance
+ * @param {Number} index positive integer, index of the particular provider
+ *
+ * @returns {Object} An object Provider
+ */
 async function initialize(instance, index) {
-  /*
-  Initialize a provider.
-
-  *************
-  **Arguments**
-  *************
-  instance: Object
-    - name: String optional, name of the provider. Default is the string version of index
-    - options: Object optional: contain the options for the provider
-    - provider: Object that is a provider (isProvider is true).
-  index: positive integer, index of the particular provider
-
-  **********
-  **Return**
-  **********
-  An object Provider
-  */
   if (instance === null || typeof instance !== 'object') {
     throw new TypeError(`The provider at index "${index}" of the kit's configuration is not valid. Received "${instance === null ? 'null' : typeof instance}".`);
   }
@@ -78,22 +83,16 @@ async function initialize(instance, index) {
   return provider;
 }
 
+/**
+ * Extend the craft ai context of an agent using providers.
+ *
+ * @param {Array<Provider>} providers Array of Provider that have the function extendConfiguration
+ * that return an object with the context properties to add.
+ * @param {Object} context context properties object to add to the agent's context.
+ *
+ * @returns craft ai agent's context
+ */
 async function extendConfiguration(providers, context) {
-  /*
-  Extend the craft ai context of an agent using providers.
-
-  *************
-  **Arguments**
-  *************
-  providers: Array of Provider that have the function extendConfiguration
-  that return an object with the context properties to add.
-  context: Object, context properties to add to the agent's context.
-
-  **********
-  **Return**
-  **********
-  craft ai agent's context
-  */
   if (!providers.length) {
     return context;
   }
@@ -106,23 +105,17 @@ async function extendConfiguration(providers, context) {
     .then((extensions) => Object.assign(context, ...extensions));
 }
 
+/**
+ * Extend the data/records using providers.
+ *
+ * @param {Endpoint} endpoint Endpoint (Object). It should contains:
+ *  - kit.configuration.providers: Array of Providers that have the function
+ *  extendRecords
+ * @param {Object} records Object, data to extend
+ *
+ * @returns Extended record
+ */
 function extendRecords(endpoint, records) {
-  /*
-  Extend the data/records using providers.
-
-  *************
-  **Arguments**
-  *************
-  endpoint: Endpoint (Object). It should contains:
-    - kit.configuration.providers: Array of Providers that have the function
-    extendRecords
-  records: Object, data to extend
-
-  **********
-  **Return**
-  **********
-  Extended record
-  */
   const providers = endpoint.kit.configuration.providers;
 
   if (!providers.length) {
@@ -159,20 +152,13 @@ function extendRecords(endpoint, records) {
       .then((extensions) => Object.assign(data[0], ...extensions, data[0]))));
 }
 
+/**
+ * Check if the value parsed is a provider
+ *
+ * @param {*} value value to test
+ * @returns Boolean
+ */
 function isProvider(value) {
-  /*
-  Check if the value parsed is a provider
-
-  *************
-  **Arguments**
-  *************
-  value: value to test.
-
-  **********
-  **Return**
-  **********
-  Boolean
-  */
   return value !== null
     && typeof value === 'object'
     && typeof value.initialize === 'function'

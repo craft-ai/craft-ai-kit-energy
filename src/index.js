@@ -8,6 +8,28 @@ const Kit = require('./kit');
 const Provider = require('./provider');
 const Utils = require('./utils');
 
+const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
+const ROOT_NAMESPACE = uuid.DNS;
+
+/**
+ * @typedef Configuration
+ * @type {object}
+ * @property {String} token [REQUIRED] craft ai token
+ * @property {String} [secret] [RECOMMENDED] used to derive and anonymise the unique identifiers of
+ * an endpoint when creating the related craft ai agents. If not specified,
+ * each agent will use the same identifier as the endpoint's identifier.
+ * @property {String} [zone] [OPTIONAL] IANA zone or a fixed-offset name.
+ * @property {Number} [recordBulkSize] [OPTIONAL] number of bulk operations to send with the craft ai client
+ * @property {Array<Provider>} [providers] [OPTIONAL] providers to load by default
+ * @property {String} [namespace] [OPTIONAL] used with the secret to anonymise the agents name
+ */
+
+/**
+ * Initialize the energy kit
+ *
+ * @param {Configuration} [configuration={}] Configuration of the energy kit. Token must be set and secret is recommended.
+ * @returns
+ */
 async function initialize(configuration = {}) {
   const log = debug(DEBUG_PREFIX);
 
@@ -89,9 +111,6 @@ function createClient(token, bulkSize) {
     operationsChunksSize: bulkSize
   });
 }
-
-const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
-const ROOT_NAMESPACE = uuid.DNS;
 
 module.exports = {
   craftai,
