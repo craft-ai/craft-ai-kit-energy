@@ -6,6 +6,11 @@ const Constants = require('../constants');
 const Provider = require('../provider');
 const Utils = require('../utils');
 
+const DATE = Constants.DATE_FEATURE;
+const ENERGY = Constants.ENERGY_FEATURE;
+const LOAD = Constants.LOAD_FEATURE;
+const PARSED_RECORD = Constants.PARSED_RECORD;
+
 async function update(records, options) {
   this.debug('updating');
 
@@ -17,6 +22,8 @@ async function update(records, options) {
 
   let stream = Common.toRecordStream(records, options && options.import, true, this.metadata.zone);
   let failed = false;
+
+  console.log('energy', energy);
 
   if (energy.period) {
     stream = energy.origin
@@ -122,10 +129,5 @@ function convertEnergyToLoad(hours, record) {
 function ignoreOldRecords(lastSavedRecordDate, records) {
   return records.skipWhile((record) => record[DATE] <= lastSavedRecordDate);
 }
-
-const DATE = Constants.DATE_FEATURE;
-const ENERGY = Constants.ENERGY_FEATURE;
-const LOAD = Constants.LOAD_FEATURE;
-const PARSED_RECORD = Constants.PARSED_RECORD;
 
 module.exports = update;
