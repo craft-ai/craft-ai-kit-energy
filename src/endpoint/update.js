@@ -23,9 +23,7 @@ async function update(records, options) {
   let stream = Common.toRecordStream(records, options && options.import, true, this.metadata.zone);
   let failed = false;
 
-  console.log('energy', energy);
-
-  if (energy.period) {
+  if (energy && energy.period) {
     stream = energy.origin
       ? stream.thru(convertAccumulatedEnergyToLoad.bind(null, energy))
       : stream.tap(convertEnergyToLoad.bind(null, energy.hours));
