@@ -67,10 +67,11 @@ test('fails computing rolling evaluations with invalid parameters', (t) => {
       )
       .concat(
         INVALID_PERIODS.map((period) =>
-          t.throwsAsync(
-            endpoint.evaluate(interval, { period }),
-            Error,
-            `'${JSON.stringify(period)}' should not be supported.`
+          t.throwsAsync(() => endpoint.evaluate(interval, { period }),
+            {
+              instanceOf: Error,
+              message: `'${JSON.stringify(period)}' should not be supported.`
+            }
           )
         )
       )
