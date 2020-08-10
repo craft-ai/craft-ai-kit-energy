@@ -65,7 +65,13 @@ async function computeRollingEvaluation(states, options) {
     }
   }
 
-  const period = Utils.parseDuration(options.period);
+  let period;
+  try {
+    period = Utils.parseDuration(options.period);
+  }
+  catch (error) {
+    throw TypeError(`The "period" option is invalid. ${error.message}`);
+  }
 
   if (typeof period !== 'object' || !period.isValid) {
     throw TypeError('The "period" option is invalid. Expected an ISO Duration String, a Javascript Object or a number of milliseconds');
