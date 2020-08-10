@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.3...HEAD) ##
 
+### Added
+
+- Add js doc
+
+### Fixed
+
+- Update versions of packages
+
 ## [0.4.3](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.2...v0.4.3) - 2019-11-14 ##
 
 ### Fixed
