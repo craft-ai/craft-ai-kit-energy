@@ -6,6 +6,22 @@ const EnergyKit = require('../../src/index');
 const Provider = require('../../src/provider');
 const Utils = require('../../src/utils');
 
+const ZONES = ['gmt', 'utc', 'utc-3', 'utc+3', 'utc-03:30', 'America/Chihuahua', 'Europe/Paris', 'Asia/Kolkata', 'Antarctica/South_Pole'];
+const INVALID_ARRAYS = [null, 0, true, 'string', Symbol(), new Uint8Array(10), () => {}];
+const INVALID_BOOLEANS = ['true', [1], [0], 'false', {}, new Date(), null];
+const INVALID_DATES = [false, NaN, 'N/A', 'NaN', 'unknown', '123456', 'string', '5151-51-51T51:51:51.515Z', () => {}];
+const INVALID_FUNCTIONS = [null, {}, 'abc', Boolean(), Array.from(2), new Date(2018)];
+const INVALID_ZONES = [null, false, 2, 'Europe/Taipei', 'America/Madrid'];
+const INVALID_NUMBERS = [null, {}, '12', true, new Date(2018), () => {}];
+const INVALID_OBJECTS = [null, 0, true, 'string', Symbol(), () => {}];
+const INVALID_STRINGS = [null, {}, [false], true, new Date(2018), Promise.resolve('string'), () => {}];
+const PERIOD_ORIGINS = ['2018-01-01', '00:00:00', '2020-12-31T00:00:00.000Z', '2016-W05-4', new Date('Fri Jan 01 2016 00:00:00 GMT+0100 (Central European Standard Time)'), 1543446000000];
+const RECORDS = require('./data/records');
+const RECORDS_AS_ENERGY = require('./data/records_energy');
+const RECORDS_AS_ACCUMULATED_ENERGY = require('./data/records_accumulated_energy');
+const RECORDS_AS_ACCUMULATED_ENERGY_DST = require('./data/records_accumulated_energy_dst');
+const RECORDS_DST = require('./data/records_dst');
+
 async function createEndpointContext(t, configuration = {}) {
   return EnergyKit
     .initialize({ ...configuration, recordBulkSize: 1000 })
@@ -99,22 +115,6 @@ function registerEndpoint() {
 
   return id;
 }
-
-const ZONES = ['gmt', 'utc', 'utc-3', 'utc+3', 'utc-03:30', 'America/Chihuahua', 'Europe/Paris', 'Asia/Kolkata', 'Antarctica/South_Pole'];
-const INVALID_ARRAYS = [null, 0, true, 'string', Symbol(), new Uint8Array(10), () => {}];
-const INVALID_BOOLEANS = ['true', [1], [0], 'false', {}, new Date(), null];
-const INVALID_DATES = [false, NaN, 'N/A', 'NaN', 'unknown', '123456', 'string', '5151-51-51T51:51:51.515Z', () => {}];
-const INVALID_FUNCTIONS = [null, {}, 'abc', Boolean(), Array.from(2), new Date(2018)];
-const INVALID_ZONES = [null, false, 2, 'Europe/Taipei', 'America/Madrid'];
-const INVALID_NUMBERS = [null, {}, '12', true, new Date(2018), () => {}];
-const INVALID_OBJECTS = [null, 0, true, 'string', Symbol(), () => {}];
-const INVALID_STRINGS = [null, {}, [false], true, new Date(2018), Promise.resolve('string'), () => {}];
-const PERIOD_ORIGINS = ['2018-01-01', '00:00:00', '2020-12-31T00:00:00.000Z', '2016-W05-4', new Date('Fri Jan 01 2016 00:00:00 GMT+0100 (Central European Standard Time)'), 1543446000000];
-const RECORDS = require('./data/records');
-const RECORDS_AS_ENERGY = require('./data/records_energy');
-const RECORDS_AS_ACCUMULATED_ENERGY = require('./data/records_accumulated_energy');
-const RECORDS_AS_ACCUMULATED_ENERGY_DST = require('./data/records_accumulated_energy_dst');
-const RECORDS_DST = require('./data/records_dst');
 
 module.exports = {
   ...Utils,
