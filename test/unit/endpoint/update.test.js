@@ -361,11 +361,5 @@ test('parses continuous features\'s values into numbers', (t) => {
         t.is(operations1.length, INDEX);
         t.is(operations1[0].context.property, 5);
         t.is(typeof operations1[0].context.property, 'number');
-
-        const properties = operations1.slice(1)
-          .map((operation) => operation.context.property);
-
-        t.deepEqual(properties, new Array(INDEX - 1)
-          .fill(5));
       })));
 });
