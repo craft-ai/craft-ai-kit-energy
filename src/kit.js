@@ -7,31 +7,42 @@ const Endpoint = require('./endpoint');
 const Provider = require('./provider');
 const Utils = require('./utils');
 
+const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
+const LOAD = Constants.LOAD_FEATURE;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
+
+/**
+ * @typedef Energy
+ * @type {object}
+ * @property {Number} period positive number (in seconds)
+ * @property {Number} hours positive numver
+ * @property {String} origin date which is the origin.
+ * @property {Provider} providers
+ */
+
+/**
+ * @typedef Endpoint
+ * @type {object}
+ * @property {String} id name of the endpoint
+ * @property {Energy} [energy] [OPTIONAL] energy configuration
+ * @property {Object} [metadata] [OPTIONAL]
+ * @property {String} [agentId] [OPTIONAL] identifiant of the craft ai agent, Default is id.
+ * @property {String} [agent] [OPTIONAL]
+ * @property {Object} [learning] [OPTIONAL] as described in generateAgentConfiguration
+ * @property {Object} [kit] [OPTIONAL]
+ * @property {Object} [feature] [OPTIONAL]
+ * @property {Object} generated
+ */
+
+/**
+ * Get the craft ai agent endpoint
+ *
+ * @param {Endpoint} definition
+ * @param {boolean} [resetAgent=false] [OPTIONAL], if true the agent is deleted and (re-)created
+ *
+ * @returns {Object} An object endpoint
+ */
 async function loadEndpoint(definition, resetAgent = false) {
-  /*
-  Get the craft ai agent
-
-  *************
-  **Arguments**
-  *************
-  definition: Object that define the endpoint/craft ai agent.
-    It should contains:
-      - id: String, identifiant of the endpoint
-    It can contains:
-      - energy: Object optional, energy configuration that contains:
-        - period: positive integer, duration
-        - origin: String, date which is the origin.
-      - metadata: Object, that contains the metadata:
-        - zone: String, IANA zone
-      - agentId: String, identifiant of the craft ai agent, Default is id.
-      - learning: Object, as described in generateAgentConfiguration
-  resetAgent: boolean optional, if true the agent is deleted and (re-)created
-
-  **********
-  **Return**
-  **********
-  An object endpoint
-  */
   if (definition === null || typeof definition !== 'object') {
     throw new TypeError(`The endpoint's definition must be an "object". Received "${definition === null ? 'null' : typeof definition}".`);
   }
@@ -95,37 +106,30 @@ async function loadEndpoint(definition, resetAgent = false) {
     });
 }
 
+/**
+ * Close the kit and all of its providers
+ */
 async function close() {
-  /*
-  Close the kit
-  */
   return Provider
     .close(this.configuration.providers)
     .then(() => this.debug('closed'));
 }
 
+/**
+ * Generate a craft ai agent configuration
+ *
+ * @param {String} log
+ * @param {Array<Provider>} providers Array of providers that have as function extendConfiguration
+ * @param {Object} [learning={}] [OPTIONAL] Object that contains parameters of the configuration. Can contain:
+ *  - maxTreeDepth: positive integer, define the max depth of the decision tree. Default is 6.
+ *  - maxRecords: positive integer, maximum number of events on which a single decision tree can be based. Default is 50000.
+ *  - maxRecordAge: positive integer, the maximum amount of time, in seconds, that matters for an agent. Default is one year.
+ *  - properties: object, context properties to add to {time: { type: 'time_of_day' }, day: { type: 'day_of_week' },
+ *    month: { type: 'month_of_year' }, timezone: { type: 'timezone' }, load: { type: 'continuous' }}
+ *  - advancedConfiguration: Object, advanced configuration options. Default is {}
+ * @returns {Object} craft ai agent configuration
+ */
 async function generateAgentConfiguration(log, providers, learning = {}) {
-  /*
-  Generate a craft ai configuration
-
-  *************
-  **Arguments**
-  *************
-  log: String
-  providers: Array of providers that have as function extendConfiguration
-  learning: Object optional, parameters of the configuration. Can contain:
-    - maxTreeDepth: positive integer, define the max depth of the decision tree. Default is 6.
-    - maxRecords: positive integer, maximum number of events on which a single decision tree can be based. Default is 50000.
-    - maxRecordAge: positive integer, the maximum amount of time, in seconds, that matters for an agent. Default is one year.
-    - properties: object, context properties to add to {time: { type: 'time_of_day' }, day: { type: 'day_of_week' },
-      month: { type: 'month_of_year' }, timezone: { type: 'timezone' }, load: { type: 'continuous' }}
-    - advancedConfiguration: Object, advanced configuration options. Default is {}
-
-  **********
-  **Return**
-  **********
-  craft ai configuration
-  */
   log('generating the agent\'s configuration');
 
   if (learning === null || typeof learning !== 'object') {
@@ -182,25 +186,19 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
     });
 }
 
+/**
+ * Get the craft ai agent
+ *
+ * @param {String} log
+ * @param {Object} client craft ai client
+ * @param {String} agentId id given to the agent to get
+ * @param {Object} agentConfiguration craft ai agent configuration, it is needed if the agent
+ *  is reseted or doesn't exist and needs to be created
+ * @param {boolean} [resetAgent] [OPTIONAL] if true the agent is deleted and created
+ *
+ * @returns {Object} craft ai agent configuration
+ */
 async function retrieveAgent(log, client, agentId, agentConfiguration, resetAgent) {
-  /*
-  Get the craft ai agent
-
-  *************
-  **Arguments**
-  *************
-  log: String
-  client: craft ai client
-  agentId: String, id given to the agent to get
-  agentConfiguration: Object, craft ai agent configuration, it is needed if the agent
-  is reseted or doesn't exist and needs to be created
-  resetAgent: boolean optional, if true the agent is deleted and created
-
-  **********
-  **Return**
-  **********
-  craft ai configuration
-  */
   if (resetAgent) {
     /* istanbul ignore if */
     if (process.env.NODE_ENV === 'production') {
@@ -236,24 +234,17 @@ async function retrieveAgent(log, client, agentId, agentConfiguration, resetAgen
     });
 }
 
+/**
+ * Create a craft ai agent
+ *
+ * @param {String} log
+ * @param {Object} client craft ai client
+ * @param {String} agentId id to give to the agent
+ * @param {Object} agentConfiguration craft ai agent configuration
+ *
+ * @returns {Object} craft ai agent configuration
+ */
 async function createAgent(log, client, agentId, agentConfiguration) {
-  /*
-  Create a craft ai agent
-
-  *************
-  **Arguments**
-  *************
-  log: String
-  client: craft ai client
-  agentId: String, id to give to the agent
-  agentConfiguration: Object, craft ai agent configuration
-
-  **********
-  **Return**
-  **********
-  craft ai configuration
-  */
-
   log('creating the agent');
 
   return client
@@ -275,64 +266,52 @@ async function createAgent(log, client, agentId, agentConfiguration) {
     });
 }
 
-function parseEnergyConfiguration(value) {
-  /*
-  Parse the energy configuration
+/**
+ * Parse the energy configuration
+ *
+ * @param {Energy} energy
+ *
+ * @returns {{ period: Number, hours: Number, origin: String }} Contains the parsed energy configuration
+ */
+function parseEnergyConfiguration(energy) {
+  const parsedEnergy = {};
 
-  *************
-  **Arguments**
-  *************
-  value: Object optional, it contains:
-    - period: positive integer, duration
-    - origin: String, date which is the origin
-
-  **********
-  **Return**
-  **********
-  Object that contains the parsed energy configuration
-  */
-  const energy = {};
-
-  if (value === undefined) {
+  if (energy === undefined) {
     return energy;
   }
-  if (value === null || typeof value !== 'object') {
-    throw new TypeError(`The "energy" property of the endpoint's definition must be an "object". Received "${value === null ? 'null' : typeof value}".`);
+  if (energy === null || typeof energy !== 'object') {
+    throw new TypeError(`The "energy" property of the endpoint's definition must be an "object". Received "${energy === null ? 'null' : typeof energy}".`);
   }
 
-  if (value.period !== undefined) {
-    if (typeof value.period !== 'number') {
-      throw new TypeError(`The "period" property of the endpoint's energy definition must be an "number". Received "${typeof value.period}".`);
+  if (energy.period !== undefined) {
+    if (typeof energy.period !== 'number') {
+      throw new TypeError(`The "period" property of the endpoint's energy definition must be an "number". Received "${typeof energy.period}".`);
     }
 
-    if (value.period <= 0) {
-      throw new RangeError(`The "period" property of the endpoint's energy definition must represent a strictly positive duration. Received "${value.period}".`);
+    if (energy.period <= 0) {
+      throw new RangeError(`The "period" property of the endpoint's energy definition must represent a strictly positive duration. Received "${energy.period}".`);
     }
 
-    energy.period = value.period * 1000;
-    energy.hours = value.period / 3600;
+    parsedEnergy.period = energy.period * 1000;
+    parsedEnergy.hours = energy.period / 3600;
   }
 
-  if (value.origin !== undefined) {
-    const origin = Utils.parseDate(value.origin);
+  if (energy.origin !== undefined) {
+    const origin = Utils.parseDate(energy.origin);
 
     if (!origin.isValid) {
-      throw new RangeError(`The "origin" property of the endpoint's energy definition must be a valid date definition. Received "${JSON.stringify(value.origin)}". Reason: ${origin.invalidReason}.`);
+      throw new RangeError(`The "origin" property of the endpoint's energy definition must be a valid date definition. Received "${JSON.stringify(energy.origin)}". Reason: ${origin.invalidReason}.`);
     }
 
-    if (value.period === undefined) {
+    if (energy.period === undefined) {
       throw new Error('The "origin" property of the endpoint\'s energy definition cannot be defined without a "period" property.');
     }
 
-    energy.origin = origin;
+    parsedEnergy.origin = origin;
   }
 
-  return energy;
+  return parsedEnergy;
 }
-
-const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
-const LOAD = Constants.LOAD_FEATURE;
-const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
 module.exports = {
   loadEndpoint,
