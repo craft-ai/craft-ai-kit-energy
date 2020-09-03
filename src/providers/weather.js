@@ -6,6 +6,12 @@ const isFunction = require('lodash.isfunction');
 const Constants = require('../constants');
 const Utils = require('../utils');
 
+const DATE = Constants.DATE_FEATURE;
+const PARSED_RECORD = Constants.PARSED_RECORD;
+const POSSIBLE_REFRESH_VALUES = ['hourly', 'daily'];
+const RETRY_OPTIONS = { retries: 5, minTimeout: 100 };
+const ENUM_PROPERTIES = ['icon', 'precipType'];
+
 async function initialize(provider) {
   const options = provider.options;
   const token = options.token;
@@ -181,12 +187,6 @@ function generateConfiguration(extension, property) {
 
   return extension;
 }
-
-const DATE = Constants.DATE_FEATURE;
-const PARSED_RECORD = Constants.PARSED_RECORD;
-const POSSIBLE_REFRESH_VALUES = ['hourly', 'daily'];
-const RETRY_OPTIONS = { retries: 5, minTimeout: 100 };
-const ENUM_PROPERTIES = ['icon', 'precipType'];
 
 module.exports = {
   close,

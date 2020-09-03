@@ -6,6 +6,12 @@ const isFunction = require('lodash.isfunction');
 const Constants = require('./constants');
 const Utils = require('./utils');
 
+const DATE = Constants.DATE_FEATURE;
+const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
+const PARSED_RECORD = Constants.PARSED_RECORD;
+
+const DateTime = luxon.DateTime;
+
 /**
  * @typedef Provider
  * @type {object}
@@ -166,12 +172,6 @@ function isProvider(value) {
     && typeof value.extendRecord === 'function'
     && typeof value.close === 'function';
 }
-
-const DATE = Constants.DATE_FEATURE;
-const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
-const PARSED_RECORD = Constants.PARSED_RECORD;
-
-const DateTime = luxon.DateTime;
 
 module.exports = {
   close,

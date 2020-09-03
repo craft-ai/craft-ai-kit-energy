@@ -4,6 +4,12 @@ const luxon = require('luxon');
 const Constants = require('../constants');
 const Utils = require('../utils');
 
+const DATE = Constants.DATE_FEATURE;
+const TIMESTAMP = Constants.TIMESTAMP_FEATURE;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
+
+const DateTime = luxon.DateTime;
+
 async function retrieveRecords(from, to, retrieveTimezone = false) {
   this.debug('retrieving records');
 
@@ -75,12 +81,6 @@ async function retrievePredictiveModel(modelDate) {
       throw error;
     });
 }
-
-const DATE = Constants.DATE_FEATURE;
-const TIMESTAMP = Constants.TIMESTAMP_FEATURE;
-const TIMEZONE = Constants.TIMEZONE_FEATURE;
-
-const DateTime = luxon.DateTime;
 
 module.exports = {
   records: retrieveRecords,

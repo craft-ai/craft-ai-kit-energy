@@ -4,6 +4,13 @@ const Constants = require('../constants');
 const Stream = require('../stream');
 const Utils = require('../utils');
 
+const DATE = Constants.DATE_FEATURE;
+const LOAD = Constants.LOAD_FEATURE;
+const ENERGY = Constants.ENERGY_FEATURE;
+const ORIGINAL_RECORD = Constants.ORIGINAL_RECORD;
+const PARSED_RECORD = Constants.PARSED_RECORD;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
+
 function formatRecords(endpoint, records) {
   const context = endpoint.agent.configuration.context;
   const features = endpoint.features;
@@ -135,13 +142,6 @@ function toRecord(value, zone) {
 
   return record;
 }
-
-const DATE = Constants.DATE_FEATURE;
-const LOAD = Constants.LOAD_FEATURE;
-const ENERGY = Constants.ENERGY_FEATURE;
-const ORIGINAL_RECORD = Constants.ORIGINAL_RECORD;
-const PARSED_RECORD = Constants.PARSED_RECORD;
-const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
 module.exports = {
   formatRecords,

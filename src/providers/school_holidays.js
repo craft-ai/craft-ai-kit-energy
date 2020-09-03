@@ -1,5 +1,11 @@
 const Constants = require('../constants');
 
+const PARSED_RECORD = Constants.PARSED_RECORD;
+const DATE = Constants.DATE_FEATURE;
+// TODO: Accept custom context property name and labels
+const HOLIDAY = 'school_holiday';
+const UNKNOWN = { [HOLIDAY]: 'UNKNOWN' };
+
 async function initialize(provider) {
   const options = provider.options;
   const country = options.country;
@@ -52,12 +58,6 @@ async function close() {
 function formatExtension(isHolidays) {
   return { [HOLIDAY]: isHolidays ? 'YES' : 'NO' };
 }
-
-const PARSED_RECORD = Constants.PARSED_RECORD;
-const DATE = Constants.DATE_FEATURE;
-// TODO: Accept custom context property name and labels
-const HOLIDAY = 'school_holiday';
-const UNKNOWN = { [HOLIDAY]: 'UNKNOWN' };
 
 module.exports = {
   HOLIDAY,
