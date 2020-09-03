@@ -198,7 +198,7 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
  *
  * @returns {Object} craft ai agent configuration
  */
-function retrieveAgent(log, client, agentId, agentConfiguration, resetAgent) {
+async function retrieveAgent(log, client, agentId, agentConfiguration, resetAgent) {
   if (resetAgent) {
     /* istanbul ignore if */
     if (process.env.NODE_ENV === 'production') {
