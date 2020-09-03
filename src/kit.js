@@ -249,16 +249,9 @@ async function createAgent(log, client, agentId, agentConfiguration) {
 
   return client
     .createAgent(agentConfiguration, agentId)
-    .then((agent) => {
+    .then(() => {
       log('the agent has been created');
-
-      const date = Date.now();
-
-      agent.creationDate = date;
-      agent.lastTreeUpdate = date;
-      agent.lastContextUpdate = date;
-
-      return agent;
+      return client.getAgent(agentId);
     })
     .catch(/* istanbul ignore next */(error) => {
       // Agent has been already created during our creation so we just get the info from it

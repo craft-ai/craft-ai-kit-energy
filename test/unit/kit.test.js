@@ -152,6 +152,8 @@ test('load endpoint twice at the same time', async(t) => {
   const kit = context.kit;
   const id = context.endpoint.register();
 
+  t.plan(2);
+
   // Load a first endpoint
   return Promise.all([
     kit.loadEndpoint({ id }),
