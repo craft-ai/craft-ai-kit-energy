@@ -198,7 +198,7 @@ async function generateAgentConfiguration(log, providers, learning = {}) {
  *
  * @returns {Object} craft ai agent configuration
  */
-async function retrieveAgent(log, client, agentId, agentConfiguration, resetAgent) {
+function retrieveAgent(log, client, agentId, agentConfiguration, resetAgent) {
   if (resetAgent) {
     /* istanbul ignore if */
     if (process.env.NODE_ENV === 'production') {
@@ -261,7 +261,19 @@ async function createAgent(log, client, agentId, agentConfiguration) {
       return agent;
     })
     .catch(/* istanbul ignore next */(error) => {
-      // TODO: proper error handling
+      // Agent has been already created during our creation so we just get the info from it
+      if (error.message.includes('because one already exists.')) {
+        return client.getAgent(agentId)
+          .then((agent) => {
+            const date = Date.now();
+
+            agent.creationDate = date;
+            agent.lastTreeUpdate = date;
+            agent.lastContextUpdate = date;
+
+            return agent;
+          });
+      }
       throw error;
     });
 }
