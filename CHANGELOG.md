@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.4...HEAD) ##
 
+### Added
+
+- Handle concurrence when loading endpoint
+
+### Fixed
+
+- Fix the version of the craft ai package
+
 ## [0.4.4](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.3...v0.4.4) - 2020-08-25 ##
 
 ### Added

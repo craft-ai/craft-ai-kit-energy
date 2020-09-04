@@ -4,6 +4,11 @@ const most = require('most');
 const Constants = require('../constants');
 const Utils = require('../utils');
 
+const DATE = Constants.DATE_FEATURE;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
+const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
+const ROLL_PREDICTIONS_DEFAULT = { period: { days: 7 } };
+
 /**
  * @param {{ from: Date, to: Date }} states
  * @param {{ period: { [duration: string]: number } }} options
@@ -128,11 +133,6 @@ async function computeRollingEvaluation(states, options) {
 function sumConfidences(sum, value) {
   return value.confidence + sum;
 }
-
-const DATE = Constants.DATE_FEATURE;
-const TIMEZONE = Constants.TIMEZONE_FEATURE;
-const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
-const ROLL_PREDICTIONS_DEFAULT = { period: { days: 7 } };
 
 module.exports = {
   computeRollingEvaluation

@@ -4,6 +4,15 @@ const memoize = require('mem');
 
 const Constants = require('../constants');
 
+const PARSED_RECORD = Constants.PARSED_RECORD;
+const DATE = Constants.DATE_FEATURE;
+const KEEP_LOCAL_TIME = { keepLocalTime: true };
+const UTC_ZONE = new luxon.IANAZone('utc');
+// TODO: Accept custom context property name and labels
+const HOLIDAY = 'public_holiday';
+const DateTime = luxon.DateTime;
+const Indexer = indexWith(true);
+
 async function initialize(provider) {
   const options = provider.options;
   const country = options.country;
@@ -114,15 +123,6 @@ function isHoliday(date, region) {
 
   return holidays.easterOffseted[easterOffset];
 }
-
-const PARSED_RECORD = Constants.PARSED_RECORD;
-const DATE = Constants.DATE_FEATURE;
-const KEEP_LOCAL_TIME = { keepLocalTime: true };
-const UTC_ZONE = new luxon.IANAZone('utc');
-// TODO: Accept custom context property name and labels
-const HOLIDAY = 'public_holiday';
-const DateTime = luxon.DateTime;
-const Indexer = indexWith(true);
 
 module.exports = {
   HOLIDAY,

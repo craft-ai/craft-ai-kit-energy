@@ -147,6 +147,24 @@ test('loads an endpoint by forcing the recreation of the agent', async(t) => {
   t.deepEqual(existingAgent.configuration, recreatedAgent.configuration);
 });
 
+test('load endpoint twice at the same time', async(t) => {
+  const context = t.context;
+  const kit = context.kit;
+  const id = context.endpoint.register();
+
+  t.plan(2);
+
+  // Load a first endpoint
+  return Promise.all([
+    kit.loadEndpoint({ id }),
+    kit.loadEndpoint({ id })
+  ])
+    .then(([endpoint1, endpoint2]) => {
+      t.is(endpoint1.agent.id, endpoint2.agent.id);
+      t.deepEqual(endpoint1.agent.configuration, endpoint2.agent.configuration);
+    });
+});
+
 test('derives the agent\'s identifier when a secret is specified', async(t) => {
   await Helpers.createEndpointContext(t, { secret: 'a very strong secret' });
 

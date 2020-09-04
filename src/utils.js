@@ -1,6 +1,10 @@
 const lru = require('quick-lru');
 const luxon = require('luxon');
 
+const ZONE_CACHE = new lru({ maxSize: 50 });
+const DateTime = luxon.DateTime;
+const Duration = luxon.Duration;
+
 async function checkResponse(response) {
   const status = response.status;
 
@@ -132,10 +136,6 @@ function setZone(date, zone) {
 
   return result;
 }
-
-const ZONE_CACHE = new lru({ maxSize: 50 });
-const DateTime = luxon.DateTime;
-const Duration = luxon.Duration;
 
 module.exports = {
   checkResponse,

@@ -6,6 +6,23 @@ const Provider = require('../provider');
 const Stream = require('../stream');
 const Utils = require('../utils');
 
+const DATE = Constants.DATE_FEATURE;
+const LOAD = Constants.LOAD_FEATURE;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
+const ORIGINAL_CONTEXT = Constants.ORIGINAL_CONTEXT;
+const PARSED_RECORD = Constants.PARSED_RECORD;
+const TIMESTAMP = Constants.TIMESTAMP_FEATURE;
+const COMPUTE_ANOMALIES_DEFAULTS = {
+  minConfidence: .4,
+  minAbsoluteDifference: 0,
+  minSigmaDifference: 2
+};
+const COMPUTE_REPORT_DEFAULTS = {
+  minSigmaDifference: 0
+};
+
+const interpreter = craftai.interpreter;
+
 async function computeAnomalies(records, options, model) {
   this.debug('computing anomalies');
 
@@ -189,23 +206,6 @@ function setActualLoad(prediction) {
 function isNotLoadFeature(feature) {
   return feature !== LOAD;
 }
-
-const DATE = Constants.DATE_FEATURE;
-const LOAD = Constants.LOAD_FEATURE;
-const TIMEZONE = Constants.TIMEZONE_FEATURE;
-const ORIGINAL_CONTEXT = Constants.ORIGINAL_CONTEXT;
-const PARSED_RECORD = Constants.PARSED_RECORD;
-const TIMESTAMP = Constants.TIMESTAMP_FEATURE;
-const COMPUTE_ANOMALIES_DEFAULTS = {
-  minConfidence: .4,
-  minAbsoluteDifference: 0,
-  minSigmaDifference: 2
-};
-const COMPUTE_REPORT_DEFAULTS = {
-  minSigmaDifference: 0
-};
-
-const interpreter = craftai.interpreter;
 
 module.exports = {
   anomalies: computeAnomalies,
