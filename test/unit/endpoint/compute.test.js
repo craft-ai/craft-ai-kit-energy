@@ -117,6 +117,67 @@ test('computes predictions given a model', (t) => {
     }));
 });
 
+test('computes predictions from no samples', (t) => {
+  const context = t.context;
+  const endpoint = context.endpoint.current;
+
+  const model = {
+    _version: '2.0.0',
+    configuration: {
+      context: {
+        day: {
+          is_generated: true,
+          type: 'day_of_week'
+        },
+        load: {
+          type: 'continuous'
+        },
+        month: {
+          is_generated: true,
+          type: 'month_of_year'
+        },
+        time: {
+          is_generated: true,
+          type: 'time_of_day'
+        },
+        timezone: {
+          type: 'timezone'
+        }
+      },
+      learning_period: 31536000,
+      operations_as_events: true,
+      output: [
+        'load'
+      ],
+      tree_max_depth: 6,
+      tree_max_operations: 50000
+    },
+    trees: {
+      load:
+       {
+         prediction: {
+           confidence: 0,
+           nb_samples: 0
+         }
+       }
+    }
+  };
+
+  const states = [...TEST_RECORDS];
+  return endpoint.computePredictions(states, null, model)
+    .then((values) => {
+      t.is(values.length, TEST_RECORDS.length);
+
+      values.forEach((value) => {
+        t.is(value.context, null);
+        t.is(value.predictedLoad, null);
+        t.is(value.confidence, null);
+        t.is(value.standardDeviation, null);
+        t.is(value.decisionRules, null);
+      });
+    });
+});
+
 test('filters out states with invalid date formats', (t) => {
   const context = t.context;
   const endpoint = context.endpoint.current;
