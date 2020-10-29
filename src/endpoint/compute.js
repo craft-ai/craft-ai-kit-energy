@@ -139,8 +139,8 @@ async function predict(endpoint, values, model, options, onlyRecords) {
           if (!(e.name == 'CraftAiNullDecisionError')) {
             throw e;
           }
-          console.log("erreur:", e);
         }
+
         if (!result) {
           return {
             seed: current,
