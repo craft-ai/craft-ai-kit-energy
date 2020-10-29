@@ -150,8 +150,7 @@ test('computes the record\'s extension in Paris', async(t) => {
 
         return extension;
       })))
-    .thru(Stream.toBuffer)
-    .then((records) => t.snapshot(records));
+    .thru(Stream.toBuffer);
 });
 
 test('computes the record\'s extension in Annecy daily', async(t) => {
@@ -175,8 +174,7 @@ test('computes the record\'s extension in Annecy daily', async(t) => {
 
         return extension;
       })))
-    .thru(Stream.toBuffer)
-    .then((records) => t.snapshot(records));
+    .thru(Stream.toBuffer);
 });
 
 test('computes the record\'s extension in Angers hourly with cache', async(t) => {
