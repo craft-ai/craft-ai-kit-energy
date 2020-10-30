@@ -6,7 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) a
 
 ## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.6...HEAD) ##
 
+### Fixed
+
+- Minor changelog fix
+
 ## [0.4.6](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.5...v0.4.6) - 2020-10-30 ##
+
+### Changed
+
+- Predictions on models which are not based on any data point return `null` results instead of throwing an error.
 
 ## [0.4.5](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.4...v0.4.5) - 2020-09-04 ##
 
