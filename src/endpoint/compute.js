@@ -130,9 +130,32 @@ async function predict(endpoint, values, model, options, onlyRecords) {
       .loop((previous, state) => {
         const context = state.context;
         const current = Object.assign(previous, context);
-        const result = interpreter.decide(model, current, new craftai.Time(state[TIMESTAMP], current[TIMEZONE]));
-        const output = result.output[LOAD];
+        let result = undefined;
 
+        try {
+          result = interpreter.decide(model, current, new craftai.Time(state[TIMESTAMP], current[TIMEZONE]));
+        }
+        catch (e) {
+          if (!(e.name == 'CraftAiNullDecisionError')) {
+            throw e;
+          }
+        }
+
+        if (!result) {
+          return {
+            seed: current,
+            value: Object.defineProperty({
+              date: context[PARSED_RECORD][DATE].toJSDate(),
+              context: null,
+              predictedLoad: null,
+              confidence: null,
+              standardDeviation: null,
+              decisionRules: null
+            }, ORIGINAL_CONTEXT, { value: context })
+          };
+        }
+
+        const output = result.output[LOAD];
         return {
           seed: current,
           value: Object.defineProperty({
