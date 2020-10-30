@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.5...HEAD) ##
+## [Unreleased](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.6...HEAD) ##
+
+## [0.4.6](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.5...v0.4.6) - 2020-10-30 ##
 
 ## [0.4.5](https://github.com/craft-ai/craft-ai-kit-energy/compare/v0.4.4...v0.4.5) - 2020-09-04 ##
 
