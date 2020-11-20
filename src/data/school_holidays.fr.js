@@ -1,10 +1,15 @@
 const fetch = require('node-fetch');
-const luxon = require('luxon');
 const memoize = require('mem');
 const retry = require('p-retry');
 const xml = require('fast-xml-parser');
 
 const Utils = require('../utils');
+
+const MEMOIZE_OPTIONS = { maxAge: 2 * 24 * 3600 * 1000 };
+const RETRY_OPTIONS = { retries: 5, minTimeout: 100 };
+const PARSER_OPTIONS = { attributeNamePrefix: '', ignoreAttributes: false, parseNodeValue: false };
+const getHolidays = memoize(() => retry(fetchHolidays, RETRY_OPTIONS), MEMOIZE_OPTIONS);
+const oneDay = 1;
 
 function close() {
   // Clear the cache
@@ -50,9 +55,8 @@ function formatHolidays(data) {
 }
 
 function indexHolidays(years, current) {
-  const start = parseDate(current.debut)
-    .plus(oneDay);
-  const year = start.month <= 7 ? start.year - 1 : start.year;
+  const start = parseDate(current.debut + oneDay);
+  const year = start.getMonth() <= 8 ? start.getYear() - 1 : start.year;
   const value = { start, end: parseDate(current.fin) };
 
   if (year in years) {
@@ -104,8 +108,13 @@ function parse(text) {
   return regions;
 }
 
+/**
+ * Parse the date from format yyyy/MM/dd
+ * @param {String} value
+ */
 function parseDate(value) {
-  return DateTime.fromFormat(value, 'yyyy/MM/dd');
+  const [year, month, day] = value.split('/');
+  return new Date(year, month, day);
 }
 
 function patch(data) {
@@ -192,13 +201,6 @@ async function handleResponse(response) {
 function toArray(value) {
   return Array.isArray(value) ? value : [value];
 }
-
-const MEMOIZE_OPTIONS = { maxAge: 2 * 24 * 3600 * 1000 };
-const RETRY_OPTIONS = { retries: 5, minTimeout: 100 };
-const PARSER_OPTIONS = { attributeNamePrefix: '', ignoreAttributes: false, parseNodeValue: false };
-const DateTime = luxon.DateTime;
-const getHolidays = memoize(() => retry(fetchHolidays, RETRY_OPTIONS), MEMOIZE_OPTIONS);
-const oneDay = { day: 1 };
 
 module.exports = {
   close,

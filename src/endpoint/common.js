@@ -3,6 +3,7 @@ const most = require('most');
 const Constants = require('../constants');
 const Stream = require('../stream');
 const Utils = require('../utils');
+const dateFns = require('date-fns-tz');
 
 const DATE = Constants.DATE_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;
@@ -49,7 +50,10 @@ function mergeUntilFirstFullRecord(features, records) {
   return records
     .loop((seed, record) => {
       if (!seed.checked.length) {
-        return { seed, value: record };
+        return {
+          seed,
+          value: record
+        };
       }
 
       const merged = seed.record ? Object.assign(seed.record, record) : record;
@@ -115,20 +119,24 @@ function toRecord(value, zone) {
   if (value === null || typeof value !== 'object') {
     throw new TypeError(`A record must be an "object". Received "${value === null ? 'null' : typeof value}".`);
   }
-
-  const date = Utils.setZone(Utils.parseDate(value[DATE]), value[TIMEZONE] || zone);
   const record = { ...value };
 
-  if (date.isValid) {
-    const parsed = {};
-    const timezone = Utils.formatTimezone(date.offset);
+  try {
+    const tz = value[TIMEZONE] || zone;
+    const dateInTz = dateFns.toDate(value[DATE], { timeZone: tz });
 
-    record[DATE] = Math.floor(date.valueOf() / 1000);
+    const parsed = {};
+    let timezone = dateFns.format(dateInTz, 'XXX', { timeZone: tz });
+    if (timezone == 'Z') {
+      timezone =  '+00:00';
+    }
+
+    record[DATE] = Math.floor(dateInTz.valueOf() / 1000);
     record[TIMEZONE] = timezone;
     record[LOAD] = Utils.parseNumber(record[LOAD]);
     record[ENERGY] = Utils.parseNumber(record[ENERGY]);
 
-    parsed[DATE] = date;
+    parsed[DATE] = dateInTz;
     parsed[TIMEZONE] = timezone;
     parsed[LOAD] = record[LOAD];
     parsed[ENERGY] = record[ENERGY];
@@ -136,7 +144,7 @@ function toRecord(value, zone) {
     Object.defineProperty(record, ORIGINAL_RECORD, { value });
     Object.defineProperty(record, PARSED_RECORD, { value: parsed });
   }
-  else {
+  catch (err) {
     record[DATE] = NaN;
   }
 

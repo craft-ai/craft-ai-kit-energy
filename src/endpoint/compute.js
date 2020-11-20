@@ -145,7 +145,7 @@ async function predict(endpoint, values, model, options, onlyRecords) {
           return {
             seed: current,
             value: Object.defineProperty({
-              date: context[PARSED_RECORD][DATE].toJSDate(),
+              date: context[PARSED_RECORD][DATE],
               context: null,
               predictedLoad: null,
               confidence: null,
@@ -159,7 +159,7 @@ async function predict(endpoint, values, model, options, onlyRecords) {
         return {
           seed: current,
           value: Object.defineProperty({
-            date: context[PARSED_RECORD][DATE].toJSDate(),
+            date: context[PARSED_RECORD][DATE],
             context: result.context,
             predictedLoad: output.predicted_value,
             confidence: output.confidence,

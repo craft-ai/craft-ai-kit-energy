@@ -293,10 +293,12 @@ function parseEnergyConfiguration(energy) {
   }
 
   if (energy.origin !== undefined) {
-    const origin = Utils.parseDate(energy.origin);
-
-    if (!origin.isValid) {
-      throw new RangeError(`The "origin" property of the endpoint's energy definition must be a valid date definition. Received "${JSON.stringify(energy.origin)}". Reason: ${origin.invalidReason}.`);
+    let origin = undefined;
+    try {
+      origin = Utils.parseDate(energy.origin);
+    }
+    catch (err) {
+      throw new RangeError(`The "origin" property of the endpoint's energy definition must be a valid date definition. Received "${JSON.stringify(energy.origin)}". Reason: ${err}.`);
     }
 
     if (energy.period === undefined) {

@@ -1,5 +1,4 @@
 const debug = require('debug');
-const luxon = require('luxon');
 const most = require('most');
 const isFunction = require('lodash.isfunction');
 
@@ -9,8 +8,6 @@ const Utils = require('./utils');
 const DATE = Constants.DATE_FEATURE;
 const DEBUG_PREFIX = Constants.DEBUG_PREFIX;
 const PARSED_RECORD = Constants.PARSED_RECORD;
-
-const DateTime = luxon.DateTime;
 
 /**
  * @typedef Provider
@@ -71,7 +68,7 @@ async function initialize(instance, index) {
   delete prototype.initialize;
 
   const refresh = {
-    origin: DateTime.utc(2018),
+    origin: new Date(Date.UTC(2018, 0)),
     period: 1
   };
 
