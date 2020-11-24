@@ -58,15 +58,11 @@ const REUNION_HOLIDAYS = [
   [2018, 12, 20],
   [2019, 12, 20]
 ].concat(HOLIDAYS);
-const WINDOW_START = luxon.DateTime.local(...HOLIDAYS[0])
-  .startOf('year');
-const WINDOW_END = luxon.DateTime.local(...HOLIDAYS[HOLIDAYS.length - 1])
-  .plus({ years: 1 })
-  .startOf('year');
-const WINDOW = new Array(WINDOW_END.diff(WINDOW_START)
-  .as('days'))
+const WINDOW_START = new Date(Date.UTC(HOLIDAYS[0][0], 0));
+const WINDOW_END = new Date(Date.UTC(HOLIDAYS[HOLIDAYS.length - 1][0] + 1, 0));
+const WINDOW = new Array(new Date(WINDOW_END - WINDOW_START) / 24 / 60 / 60 / 1000)
   .fill(null)
-  .map((_, days) => ({ [DATE]: WINDOW_START.plus({ days }), [LOAD]: 0 }));
+  .map((_, days) => ({ [DATE]: new Date(WINDOW_START + (days * 24 * 60 * 60 * 1000)), [LOAD]: 0 }));
 
 test.beforeEach((t) => Helpers.createProviderContext(t, PublicHolidayProvider, { country: 'fr' }));
 test.afterEach.always(Helpers.destroyProviderContext);
@@ -92,6 +88,7 @@ test('computes the configuration\'s extension', (t) => {
 });
 
 test('computes the record\'s extension', (t) => {
+  console.log('t.context.provider', t.context.provider);
   return Common
     .toRecordStream(WINDOW)
     .map((record) => t.context.provider

@@ -1,16 +1,13 @@
+const dateFns = require('date-fns-tz');
 const lru = require('quick-lru');
-const luxon = require('luxon');
 const memoize = require('mem');
-
 const Constants = require('../constants');
 
 const PARSED_RECORD = Constants.PARSED_RECORD;
 const DATE = Constants.DATE_FEATURE;
-const KEEP_LOCAL_TIME = { keepLocalTime: true };
-const UTC_ZONE = new luxon.IANAZone('utc');
+
 // TODO: Accept custom context property name and labels
 const HOLIDAY = 'public_holiday';
-const DateTime = luxon.DateTime;
 const Indexer = indexWith(true);
 
 async function initialize(provider) {
@@ -25,8 +22,7 @@ async function initialize(provider) {
 
   try {
     const holidays = require(`../data/public_holiday.${country}`);
-    // Add an empty element to make array indexes match month
-    const fixed = [null].concat(holidays.fixed.map(indexArray));
+    const fixed = holidays.fixed.map(indexArray);
     const easterOffseted = indexArray(holidays.easterOffseted);
 
     context.fixed = fixed;
@@ -51,7 +47,7 @@ async function initialize(provider) {
   function getEasterDate(year) {
     const date = easter(year);
 
-    return DateTime.utc(year, date.month, date.day);
+    return new Date(Date.UTC(year, date.month - 1, date.day));
   }
 }
 
@@ -93,7 +89,6 @@ function formatRegions(regions, fixed, easterOffseted) {
 
 function getRegionalHolidays(index) {
   const context = this.context;
-
   return index === undefined || index === null ? context : context.regions[index] || context;
 }
 
@@ -112,14 +107,13 @@ function indexWith(value) {
 function isHoliday(date, region) {
   const holidays = getRegionalHolidays.call(this, region);
 
-  if (holidays.fixed[date.month][date.day]) {
+  if (holidays.fixed[date.getMonth()][date.getDay()]) {
     return true;
   }
 
-  const easterDate = this.context.easter(date.year);
+  const easterDate = this.context.easter(date.getFullYear());
   // Comparison between easter and the current date needs to be done in the same timezone
-  const easterOffset = Math.floor(date.setZone(UTC_ZONE, KEEP_LOCAL_TIME)
-    .diff(easterDate, 'days').days);
+  const easterOffset = (dateFns.zonedTimeToUtc(date) - easterDate) / 24 / 60 / 60 / 1000;
 
   return holidays.easterOffseted[easterOffset];
 }
