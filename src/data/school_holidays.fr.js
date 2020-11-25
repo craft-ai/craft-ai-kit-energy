@@ -9,7 +9,6 @@ const MEMOIZE_OPTIONS = { maxAge: 2 * 24 * 3600 * 1000 };
 const RETRY_OPTIONS = { retries: 5, minTimeout: 100 };
 const PARSER_OPTIONS = { attributeNamePrefix: '', ignoreAttributes: false, parseNodeValue: false };
 const getHolidays = memoize(() => retry(fetchHolidays, RETRY_OPTIONS), MEMOIZE_OPTIONS);
-const oneDay = 1;
 
 function close() {
   // Clear the cache
@@ -30,15 +29,15 @@ function isHolidays(date, region) {
         throw new RangeError(`No school holidays information for the region "${region}".`);
       }
 
-      const months = years[date.year];
+      const months = years[date.getFullYear()];
 
       if (!months) {
-        throw new RangeError(`No school holidays information for the region "${region}" in ${date.year}.`);
+        throw new RangeError(`No school holidays information for the region "${region}" in ${date.getFullYear()}.`);
       }
 
-      const month = months[date.month];
+      const month = months[date.getMonth()];
 
-      return month && month[date.day];
+      return month && month[date.getDate()];
     });
 }
 
@@ -55,9 +54,11 @@ function formatHolidays(data) {
 }
 
 function indexHolidays(years, current) {
-  const start = parseDate(current.debut + oneDay);
-  const year = start.getMonth() <= 8 ? start.getYear() - 1 : start.year;
-  const value = { start, end: parseDate(current.fin) };
+  const oneDay = 24 * 60 * 60 * 1000;
+  const start = new Date(Date.parse(current.debut) + oneDay);
+  const end = new Date(Date.parse(current.fin));
+  const year = start.getMonth() <= 8 ? start.getFullYear() - 1 : start.getFullYear();
+  const value = { start, end };
 
   if (year in years) {
     years[year].push(value);
@@ -106,15 +107,6 @@ function parse(text) {
   }, {});
 
   return regions;
-}
-
-/**
- * Parse the date from format yyyy/MM/dd
- * @param {String} value
- */
-function parseDate(value) {
-  const [year, month, day] = value.split('/');
-  return new Date(year, month, day);
 }
 
 function patch(data) {
@@ -166,15 +158,14 @@ function patch(data) {
 }
 
 function reduceHolidays(years, holidays) {
-  const start = holidays.start;
-  const days = Math.floor(holidays.end.diff(start)
-    .as('days'));
-
+  const start = new Date(holidays.start);
+  const end = new Date(holidays.end);
+  const days = Math.floor((end - start) / 24 / 60 / 60 / 1000);
   for (let i = 0; i < days; i++) {
-    const date = start.plus({ days: i });
-    const year = date.year;
-    const month = date.month;
-    const day = date.day;
+    const date = new Date(start.setDate(start.getDate() + 1));
+    const year = date.getFullYear();
+    const month = date.getUTCMonth();
+    const day = date.getUTCDate();
 
     if (year in years) {
       const months = years[year];
@@ -187,7 +178,9 @@ function reduceHolidays(years, holidays) {
       }
     }
     else {
-      years[year] = { [month]: { [day]: true } };
+      years[year] = {
+        [month]: { [day]: true }
+      };
     }
   }
 

@@ -1,4 +1,3 @@
-const luxon = require('luxon');
 const test = require('ava');
 
 const Common = require('../../../src/endpoint/common');
@@ -10,10 +9,8 @@ const SchoolHolidaysProvider = require('../../../src/providers/school_holidays')
 function isHoliday(record, holidays) {
   const date = record[PARSED_RECORD][DATE];
 
-  return holidays.some((holidays) => date > DateTime.local(...holidays[0])
-    .endOf('day')
-    && date < DateTime.local(...holidays[1])
-      .startOf('day'));
+  return holidays.some((holidays) => date > new Date(Date.UTC(...holidays[0]))
+    && date < new Date(Date.UTC(...holidays[1])));
 }
 
 const PARSED_RECORD = Constants.PARSED_RECORD;
@@ -45,15 +42,13 @@ const LILLE_HOLIDAYS = [
   [[2018, 4, 21], [2018, 5, 7]],
   [[2018, 7, 7], [2018, 7, 31]]
 ];
-const DateTime = luxon.DateTime;
 
-const WINDOW_START = DateTime.local(...PARIS_HOLIDAYS[0][0])
-  .plus({ days: 1 });
-const WINDOW_END = DateTime.local(...PARIS_HOLIDAYS[PARIS_HOLIDAYS.length - 1][1]);
-const WINDOW = new Array(WINDOW_END.diff(WINDOW_START)
-  .as('days'))
+const oneDay = 24 * 60 * 60 * 1000;
+const WINDOW_START = new Date(Date.UTC(...PARIS_HOLIDAYS[0][0]) + oneDay);
+const WINDOW_END = new Date(Date.UTC(...PARIS_HOLIDAYS[PARIS_HOLIDAYS.length - 1][1]));
+const WINDOW = new Array((WINDOW_END - WINDOW_START) / 24 / 60 / 60 / 1000)
   .fill(null)
-  .map((_, days) => ({ [DATE]: WINDOW_START.plus({ days }), [LOAD]: 0 }));
+  .map((_, days) => ({ [DATE]: new Date(WINDOW_START + (days * 24 * 60 * 60 * 1000)), [LOAD]: 0 }));
 
 test.beforeEach((t) => Helpers.createProviderContext(t, SchoolHolidaysProvider, { country: 'fr' }));
 test.afterEach.always(Helpers.destroyProviderContext);
@@ -135,7 +130,11 @@ test('handles computing the record\'s extension for an unknown region', (t) => {
 test('handles computing the record\'s extension with no school holidays information', (t) => {
   return Common
     .toRecordStream(WINDOW)
-    .map((record) => ({ [PARSED_RECORD]: { [DATE]: record[PARSED_RECORD][DATE].minus({ year: 200 }) } }))
+    .map((record) => ({
+      [PARSED_RECORD]: {
+        [DATE]: record[PARSED_RECORD][DATE].setFullYear(record[PARSED_RECORD][DATE].getFullYear() - 200)
+      }
+    }))
     .map((record) => t.context.provider.extendRecord({ metadata: { region: '75' } }, record))
     .awaitPromises()
     .observe((extension) => {

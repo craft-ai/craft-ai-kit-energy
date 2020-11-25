@@ -1,4 +1,3 @@
-const luxon = require('luxon');
 const test = require('ava');
 
 const Common = require('../../../src/endpoint/common');
@@ -88,7 +87,6 @@ test('computes the configuration\'s extension', (t) => {
 });
 
 test('computes the record\'s extension', (t) => {
-  console.log('t.context.provider', t.context.provider);
   return Common
     .toRecordStream(WINDOW)
     .map((record) => t.context.provider
