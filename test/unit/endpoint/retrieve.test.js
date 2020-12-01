@@ -1,17 +1,14 @@
-const luxon = require('luxon');
+const dateFns = require('date-fns-tz');
 const test = require('ava');
 
 const Constants = require('../../../src/constants');
 const Helpers = require('../../helpers');
-const Utils = require('../../../src/utils');
 
 const DATE = Constants.DATE_FEATURE;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
 const INVALID_BOOLEANS = Helpers.INVALID_BOOLEANS;
 const INVALID_DATES = Helpers.INVALID_DATES;
 const RECORDS = Helpers.RECORDS;
-
-const DateTime = luxon.DateTime;
 
 test.before(require('dotenv').config);
 
@@ -76,7 +73,7 @@ test('retrieves the records\' history of an endpoint', (t) => {
 test('retrieves the records\' history of an endpoint with the timezones', (t) => {
   const context = t.context;
   const kit = context.kit;
-  const offsets = RECORDS.map((record) => Utils.parseDate(record[DATE]).offset);
+  const offsets = RECORDS.map((record) => dateFns.format(Date.parse(record[DATE]), 'XXX'));
 
   return t.notThrowsAsync(kit
     .loadEndpoint({ id: context.endpoint.register() })
@@ -85,7 +82,7 @@ test('retrieves the records\' history of an endpoint with the timezones', (t) =>
     .then((history) => {
       t.true(Array.isArray(history));
       t.is(history.length, RECORDS.length);
-      t.deepEqual(history.map((record) => DateTime.fromObject({ zone: record[TIMEZONE] }).offset), offsets);
+      t.deepEqual(history.map((record) => dateFns.format(Date.now, 'XXX', { timeZone: record[TIMEZONE] })), offsets);
     }));
 });
 

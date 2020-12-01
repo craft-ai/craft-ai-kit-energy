@@ -1,9 +1,7 @@
 const lru = require('quick-lru');
-const luxon = require('luxon');
+const dateFns = require('date-fns-tz');
 
 const ZONE_CACHE = new lru({ maxSize: 50 });
-const DateTime = luxon.DateTime;
-const Duration = luxon.Duration;
 
 async function checkResponse(response) {
   const status = response.status;
@@ -22,9 +20,14 @@ function checkZone(zone) {
     return true;
   }
 
-  const date = DateTime.fromObject({ zone });
-
-  return date.isValid && Boolean(ZONE_CACHE.set(zone, date.zone));
+  try {
+    dateFns.toDate(Date.now(), { timeZone: zone });
+    ZONE_CACHE.set(zone, zone);
+    return true;
+  }
+  catch (err) {
+    return false;
+  }
 }
 
 function formatTimezone(offset) {
@@ -37,12 +40,25 @@ function formatTimezone(offset) {
       .join(':');
 }
 
+/**
+ * Get the previous and next period dates for the actual date
+ *
+ * @param {Date} date actual date
+ * @param {Date} origin origin date
+ * @param {Number} period period in ms
+ *
+ * @returns {[
+ *  previousPeriodDate: Date,
+ *  nextPeriodDate: Date
+ * ]} Date align with the period and the date of the new period
+ */
 function getDateWindow(date, origin, period) {
   const rounded = roundDate(date, origin, period);
-  const nextDate = Number.isFinite(period) ? rounded.plus(period) : rounded;
-  const timezoneDiff = (nextDate.offset - rounded.offset) * 60 * 1000;
+  const nextDate = Number.isFinite(period) ? rounded + period : rounded;
+  // Timezone difference in ms
+  const timezoneDiff = (nextDate.getTimezoneOffset() - rounded.getTimezoneOffset()) * 60 * 1000;
 
-  return [rounded, nextDate.minus(timezoneDiff)];
+  return [rounded, nextDate - timezoneDiff];
 }
 
 function isNull(value) {
@@ -73,24 +89,34 @@ function modulo(a, b) {
   return mod < 0 ? mod + b : mod;
 }
 
-function parseDate(value) {
-  return value === null || value === undefined || typeof value === 'boolean'
-    ? DateTime.invalid('wrong type')
-    : typeof value === 'string'
-      ? DateTime.fromISO(value, { setZone: true })
-      : value instanceof Date
-        ? DateTime.fromJSDate(value)
-        : typeof value === 'number' ? DateTime.fromMillis(value) : value;
+function isValidDate(d) {
+  return d instanceof Date && !isNaN(d);
 }
 
-function parseDuration(value) {
-  return value === null || value === undefined || typeof value === 'boolean'
-    ? Duration.invalid('wrong type')
-    : typeof value === 'string'
-      ? Duration.fromISO(value)
-      : typeof value === 'object'
-        ? Duration.fromObject(value)
-        : typeof value === 'number' ? Duration.fromMillis(value) : value;
+function parseDate(value) {
+  if (value === null
+    || value === undefined
+    || typeof value === 'boolean'
+    || value instanceof Function) {
+    throw new Error(`InvalidDate. Given ${value}.`);
+  }
+  else if (typeof value === 'string') {
+    const date = new Date(value);
+
+    if (!isValidDate(date)) {
+      throw new Error(`InvalidDate. Given ${value}.`);
+    }
+    return date;
+  }
+  else if (typeof value === 'number') {
+    const date = new Date(value);
+
+    if (!isValidDate(date)) {
+      throw new Error(`InvalidDate. Given ${value}.`);
+    }
+    return date;
+  }
+  return  value;
 }
 
 function parseNumber(value) {
@@ -104,37 +130,44 @@ function parseTimestamp(value) {
     return;
   }
 
-  const date = parseDate(value);
-
-  if (!date.isValid) {
-    throw new Error('Invalid date');
+  try {
+    const date = parseDate(value);
+    return Math.floor(date.valueOf() / 1000);
   }
-
-  return Math.floor(date.valueOf() / 1000);
+  catch (err) {
+    throw err;
+  }
 }
 
+/**
+ * Put the actual date on the period
+ *
+ * @param {Date} date actual date
+ * @param {Date} origin origin date
+ * @param {Number} period period in seconds
+ *
+ * @returns {Date} date aligned the period
+ */
 function roundDate(date, origin, period) {
   // Timezone offset is in minutes
-  const timeDifference = date - origin + (date.offset - origin.offset) * 60 * 1000;
+  const timeDifference = date - origin + (date.getTimezoneOffset() - origin.getTimezoneOffset()) * 60 * 1000;
   // Returned date is inferior or equal to "date" by design (positive modulo)
   const remainder = modulo(timeDifference, period);
-  return Number.isFinite(remainder) ? date.minus(remainder) : date;
+  return Number.isFinite(remainder) ? date - remainder : date;
 }
 
 function setZone(date, zone) {
-  if (!zone || !date.isValid) {
+  if (!zone) {
     return date;
   }
 
   if (ZONE_CACHE.has(zone)) {
-    return date.setZone(ZONE_CACHE.get(zone));
+    return dateFns.utcToZonedTime(date, ZONE_CACHE.get(zone));
   }
 
-  const result = date.setZone(zone);
+  ZONE_CACHE.set(zone, zone);
 
-  ZONE_CACHE.set(zone, result.zone);
-
-  return result;
+  return dateFns.utcToZonedTime(date, zone);
 }
 
 module.exports = {

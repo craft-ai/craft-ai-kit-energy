@@ -1,5 +1,4 @@
 const craftaiErrors = require('craft-ai/lib/errors');
-const luxon = require('luxon');
 
 const Constants = require('../constants');
 const Utils = require('../utils');
@@ -8,19 +7,24 @@ const DATE = Constants.DATE_FEATURE;
 const TIMESTAMP = Constants.TIMESTAMP_FEATURE;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
 
-const DateTime = luxon.DateTime;
-
 async function retrieveRecords(from, to, retrieveTimezone = false) {
   this.debug('retrieving records');
 
   if (typeof retrieveTimezone !== 'boolean') {
-    throw new TypeError(`The "retrieveTimezone" argument must be a "boolean". Received "${typeof retrieveTimezone}".`);
+    return Promise.reject(new TypeError(`The "retrieveTimezone" argument must be a "boolean". Received "${typeof retrieveTimezone}".`));
   }
 
   const client = this.kit.client;
   const generated = this.generated;
-  const parsedFrom = Utils.parseTimestamp(from);
-  const parsedTo = Utils.parseTimestamp(to);
+  let parsedFrom = undefined;
+  let parsedTo = undefined;
+  try {
+    parsedFrom = Utils.parseTimestamp(from);
+    parsedTo = Utils.parseTimestamp(to);
+  }
+  catch (err) {
+    return Promise.reject(err);
+  }
 
   return client
     .getAgentStateHistory(this.agentId, parsedFrom, parsedTo)
@@ -39,8 +43,7 @@ async function retrieveRecords(from, to, retrieveTimezone = false) {
 
       return history.map((operation) => {
         Object.assign(operation, operation.sample);
-        operation[DATE] = DateTime.fromMillis(operation[TIMESTAMP] * 1000)
-          .toJSDate();
+        operation[DATE] = new Date(operation[TIMESTAMP] * 1000);
         generated.forEach((key) => delete operation[key]);
 
         if (retrieveTimezone === true) {

@@ -77,7 +77,10 @@ async function computeAnomalies(records, options, model) {
 
           this.debug('found %d anomalies among %d records', values.length, records.length);
 
-          return { values, recordsCount: records.length };
+          return {
+            values,
+            recordsCount: records.length
+          };
         });
     });
 }
