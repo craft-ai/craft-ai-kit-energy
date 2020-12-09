@@ -50,23 +50,28 @@ async function rolling_predictions(definition, providers, records, options) {
             .update(records, options);
         })
         .then((endpoint) => {
-          log('Evaluating the endpoint ...');
-          return endpoint.evaluate()
-            .then((results) => {
-              kit.close();
-              return results.map((report) => {
-                delete report.values;
-                return report;
-              });
-            })
-            .then((results) => {
-              log(`predictions computed for agent ${definition.id}`);
-              // Destroy the agents in the short version
-              if (SHORT_TEST === true) {
-                endpoint.destroy();
-              }
-              return results;
-            });
+          // log('Evaluating the endpoint ...');
+          // return endpoint.evaluate()
+          //   .then((results) => {
+          //     kit.close();
+          //     return results.map((report) => {
+          //       delete report.values;
+          //       return report;
+          //     });
+          //   })
+          //   .then((results) => {
+          //     log(`predictions computed for agent ${definition.id}`);
+          //     // Destroy the agents in the short version
+          //     if (SHORT_TEST === true) {
+          //       endpoint.destroy();
+          //     }
+          //     return results;
+          //   });
+          // Destroy the agents in the short version
+          if (SHORT_TEST === true) {
+            endpoint.destroy();
+          }
+          // return results;
         })
         .catch((error) => {
           log('Computation failed, closing the kit');

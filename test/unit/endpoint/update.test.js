@@ -290,7 +290,6 @@ test('converts accumulated energy values to mean electrical loads', (t) => {
       // Avoid rounding issue when comparing to the source
       const records = toRecords(history)
         .map((record) => ({ ...record, [LOAD]: Math.round(record[LOAD] * 10) / 10 }));
-
       t.deepEqual(records, RECORDS);
       histories.slice(1)
         .forEach((currentHistory) => t.deepEqual(currentHistory, history));

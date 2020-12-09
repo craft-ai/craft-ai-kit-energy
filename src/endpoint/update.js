@@ -1,4 +1,5 @@
 const buffer = require('most-buffer');
+const dateFns = require('date-fns-tz');
 const most = require('most');
 
 const Common = require('./common');
@@ -8,6 +9,7 @@ const Utils = require('../utils');
 
 const DATE = Constants.DATE_FEATURE;
 const ENERGY = Constants.ENERGY_FEATURE;
+const TIMEZONE = Constants.TIMEZONE_FEATURE;
 const LOAD = Constants.LOAD_FEATURE;
 const PARSED_RECORD = Constants.PARSED_RECORD;
 
@@ -82,10 +84,11 @@ function convertAccumulatedEnergyToLoad(energy, records) {
   // TODO: - check that 'period' works without 'origin', and that 'origin' requires 'period'.
   // - send a warning "load computation defaults to the delta between two consecutive records" when no period as been defined and 'energy' data is sent.
   return records.loop((seed, record) => {
-    const previousDate = seed.date;
-    const currentDate = record[PARSED_RECORD][DATE];
+    const previousDate = new Date(seed.date * 1000);
+    const currentDate = dateFns.toDate(record[PARSED_RECORD][DATE], { timeZone: record[TIMEZONE] });
 
     if (previousDate && previousDate >= currentDate) {
+      // Here previous[DATE] and record[DATE] are timestamp in seconds
       const previous = seed.record;
       const hours = (record[DATE] - previous[DATE]) / 3600;
 
@@ -97,10 +100,10 @@ function convertAccumulatedEnergyToLoad(energy, records) {
       }
     }
     else {
-      const interval = Utils.getDateWindow(currentDate, origin, period);
-      const hours = currentDate.diff(interval[0], 'hours').hours;
+      const [firstTimestampInSec, lastTimestampInSec] = Utils.getDateWindow(currentDate / 1000, origin, period, record[TIMEZONE]);
+      const hours = ((currentDate / 1000) - firstTimestampInSec) / 60 / 60;
 
-      seed.date = interval[1];
+      seed.date = lastTimestampInSec;
 
       if (record[LOAD] === undefined) {
         record[LOAD] = record[ENERGY] / hours;

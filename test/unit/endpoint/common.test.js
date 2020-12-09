@@ -7,8 +7,6 @@ const Constants = require('../../../src/constants');
 const Helpers = require('../../helpers');
 const Stream = require('../../../src/stream');
 
-const DATE = Constants.DATE_FEATURE;
-const PARSED_RECORD = Constants.PARSED_RECORD;
 const TIMEZONE = Constants.TIMEZONE_FEATURE;
 const ZONES = Helpers.ZONES;
 
@@ -29,9 +27,11 @@ test('properly formats timezone', (t) => {
       const records = result[0];
 
       t.deepEqual(records, result[1]);
-      t.snapshot(records.map((record) => ({
-        formatted: record[TIMEZONE],
-        raw: record[PARSED_RECORD][DATE].zone.name
-      })));
+      t.snapshot(records.map((record, i) => {
+        return {
+          formatted: record[TIMEZONE],
+          raw: ZONES[i]
+        };
+      }));
     });
 });

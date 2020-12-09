@@ -43,22 +43,27 @@ function formatTimezone(offset) {
 /**
  * Get the previous and next period dates for the actual date
  *
- * @param {Date} date actual date
- * @param {Date} origin origin date
+ * @param {Date} date actual date in TZ
+ * @param {Date} origin origin date in UTC
  * @param {Number} period period in ms
+ * @param {Date} tzOfDate timezone for the date
  *
  * @returns {[
- *  previousPeriodDate: Date,
- *  nextPeriodDate: Date
- * ]} Date align with the period and the date of the new period
+ *  previousPeriodTimestampInMs: Number,
+ *  nextPeriodTimestampInMs: Number
+ * ]} Timestamp align with the period and the date of the new period. Timestamp are return in the TZ
  */
-function getDateWindow(date, origin, period) {
-  const rounded = roundDate(date, origin, period);
-  const nextDate = Number.isFinite(period) ? rounded + period : rounded;
-  // Timezone difference in ms
-  const timezoneDiff = (nextDate.getTimezoneOffset() - rounded.getTimezoneOffset()) * 60 * 1000;
+function getDateWindow(date, origin, period, tzOfDate) {
+  const periodInSec = period / 1000;
+  const originInTz = dateFns.toDate(origin, { timeZone: tzOfDate });
+  const rounded = roundDate(date, originInTz.getTime() / 1000, periodInSec);
+  const nextDate = Number.isFinite(periodInSec) ?
+    dateFns
+      .toDate(rounded + periodInSec, { timeZone: tzOfDate })
+      .getTime()
+    : rounded;
 
-  return [rounded, nextDate - timezoneDiff];
+  return [rounded, nextDate];
 }
 
 function isNull(value) {
@@ -119,6 +124,16 @@ function parseDate(value) {
   return  value;
 }
 
+// function parseDuration(value) {
+//   return value === null || value === undefined || typeof value === 'boolean'
+//     ? Duration.invalid('wrong type')
+//     : typeof value === 'string'
+//       ? Duration.fromISO(value)
+//       : typeof value === 'object'
+//         ? Duration.fromObject(value)
+//         : typeof value === 'number' ? Duration.fromMillis(value) : value;
+// }
+
 function parseNumber(value) {
   const result = value && typeof value === 'string' ? Number(value.replace(',', '.')) : value;
 
@@ -150,7 +165,7 @@ function parseTimestamp(value) {
  */
 function roundDate(date, origin, period) {
   // Timezone offset is in minutes
-  const timeDifference = date - origin + (date.getTimezoneOffset() - origin.getTimezoneOffset()) * 60 * 1000;
+  const timeDifference = date - origin;
   // Returned date is inferior or equal to "date" by design (positive modulo)
   const remainder = modulo(timeDifference, period);
   return Number.isFinite(remainder) ? date - remainder : date;
@@ -182,7 +197,7 @@ module.exports = {
   isPredictiveModel,
   modulo,
   parseDate,
-  parseDuration,
+  // parseDuration,
   parseNumber,
   parseTimestamp,
   roundDate,

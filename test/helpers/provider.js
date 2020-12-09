@@ -1,4 +1,3 @@
-const luxon = require('luxon');
 const seedrandom = require('seedrandom');
 
 async function initialize(provider) {
@@ -6,7 +5,8 @@ async function initialize(provider) {
     provider.options.random = seedrandom('weather');
   }
 
-  provider.refresh.origin = luxon.DateTime.fromISO('12:00:00');
+  provider.refresh.origin = new Date(Date.now());
+  provider.refresh.origin.setUTCHours(12, 0, 0);
   provider.refresh.period = 24 * 3600;
 }
 
