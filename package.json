@@ -66,9 +66,6 @@
     "seedrandom": "latest",
     "unzipper": "latest"
   },
-  "files": [
-    "lib"
-  ],
   "ava": {
     "serial": true,
     "verbose": true,
