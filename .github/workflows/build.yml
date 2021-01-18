@@ -1,0 +1,39 @@
+name: test js client
+on: [push]
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    steps:
+      # Preparing test/build environment 
+      - name: Checkout scm
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.com'
+      - name: Install packages
+        run: npm install
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+          registry-url: 'https://registry.npmjs.com'
+      - name: Install packages
+        run: npm install
+      - name: Packaging & release
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.CRAFT_AI_NPM_TOKEN }}
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: general
+          SLACK_COLOR: '#3278BD'
+          SLACK_ICON: https://github.com/rtCamp.png?size=48
+          SLACK_MESSAGE: 'Post Content :rocket:'
+          SLACK_TITLE: Post Title
+          SLACK_USERNAME: rtCamp
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
