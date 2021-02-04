@@ -28,8 +28,6 @@ jobs:
           else
               echo "::set-output name=tag::latest"
           fi
-        env:
-          REF: ${{ github.ref }}
       - name: Packaging & release
         uses: JS-DevTools/npm-publish@v1
         with:
