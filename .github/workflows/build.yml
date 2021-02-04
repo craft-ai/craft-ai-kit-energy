@@ -1,5 +1,8 @@
 name: test js client
-on: [push]
+on:
+  push:
+    tags:
+      - '^v[0-9]'
 jobs:
   run_tests:
     runs-on: ubuntu-latest
@@ -10,30 +13,32 @@ jobs:
         with:
           submodules: true
       - name: Set up Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: "10.x"
           registry-url: 'https://registry.npmjs.com'
       - name: Install packages
-        run: npm install
-      - name: Set up Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: "12.x"
-          registry-url: 'https://registry.npmjs.com'
-      - name: Install packages
-        run: npm install
+        run: yarn install
+      - name: Tag or latest
+        id: tag_or_latest
+        run: |
+          if [[ ${{ github.event.ref }} ~= *-* ]]
+          then
+              echo "::set-output name=tag::next"
+          else
+              echo "::set-output name=tag::latest"
+          fi
+        env:
+          REF: ${{ github.ref }}
       - name: Packaging & release
         uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.CRAFT_AI_NPM_TOKEN }}
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_CHANNEL: general
-          SLACK_COLOR: '#3278BD'
-          SLACK_ICON: https://github.com/rtCamp.png?size=48
-          SLACK_MESSAGE: 'Post Content :rocket:'
-          SLACK_TITLE: Post Title
-          SLACK_USERNAME: rtCamp
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          tag: ${{ steps.tag_or_latest.outputs.tag }}
+      - name: Send message to Slack API
+        uses: archive/github-actions-slack@v1.0.3
+        id: notify
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel: ci
+          slack-text: Success! Github Actions for ${{ github.head_ref }} ("https://github.com/${{ github.repository }}/actions")
