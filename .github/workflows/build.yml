@@ -61,3 +61,4 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_TOKEN }}
           slack-channel: ci
           slack-text: Success! Github Actions for ${{ github.head_ref }} ("https://github.com/${{ github.repository }}/actions")
+
