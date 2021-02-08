@@ -1,4 +1,4 @@
-name: test js client
+name: test kit energy
 on:
   push:
     tags:
