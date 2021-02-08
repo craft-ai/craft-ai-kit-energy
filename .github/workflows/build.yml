@@ -17,6 +17,8 @@ jobs:
       - name: Install packages
         run: npm install
       - name: Run test
+        env:
+         CRAFT_AI_TOKEN: ${{ secrets.STANLEY_CRAFT_AI_TOKEN }} 
         run: npm test
   publish:
     runs-on: ubuntu-latest
